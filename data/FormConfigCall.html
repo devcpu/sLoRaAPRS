@@ -1,0 +1,41 @@
+<div id='error' name='error'></div>
+ <form action="/cc">
+  <fieldset>
+    <legend>Configure Call:</legend>
+    <label>
+      Call:
+    <input type="text" maxlength="12" name="call" value="%CALL%" required><br />
+  </label><br />
+  <label>
+    APRS Symbol:
+    <input type="text" maxlength="1" name="aprs_symbol" value="%APRS_SYMBOL%"><br />
+  </label><br />
+  <label>
+    APRS extension (%CALL%-%APRS_SELECT%):
+    <input name="aprs_call_ext" type="number" min="0" max="15" step="1" value="%APRS_SELECT%">
+  </label><br />
+  <label>
+    WX extension (%CALL%-%WX_SELECT%):<br>
+    <input name="wx_call_ext" type="number" min="0" max="15" step="1" value="%WX_SELECT%">
+  </label><br /><br />
+    <input type="submit" value="Submit">
+  </fieldset>
+</form> 
+
+<hr />
+
+<div id='error' name='error'></div>
+ <form action="/cc">
+  <fieldset>
+    <legend>Configure Fix Position:</legend>
+    <label>
+      Latitude:
+    <input type="text" maxlength="12" name="lat" value="%LAT%" required><br />
+  </label><br />
+  <label>
+    Longtitude:
+    <input type="text" maxlength="12" name="lng" value="%LNG%"><br />
+  </label><br />
+    <input type="submit" value="Submit">
+  </fieldset>
+</form> 
