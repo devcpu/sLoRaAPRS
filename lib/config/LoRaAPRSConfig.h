@@ -18,7 +18,7 @@
 #define WX_BMC280_SENSOR
 
 #ifdef WX_BMC280_SENSOR
-#define WX_BMC280_SENSOR_ADDR 
+#define WX_BMC280_SENSOR_ADDR 0x76
 #endif
 
 /********** LoRa params **********/
@@ -30,7 +30,7 @@
 
 
 #define LoRaTXFREQ  433775000      // Transmit frequency in MHz
-#define LoRaTXdbmW  18           // Transmit power in dBm
+#define LoRaTXdbmW  18           // Transmit power in dBm PA needs 23
 #define LoRaTXenablePA  0        // switch internal power amplifier on (1) or off (0)
 
 #define LoRaRXFREQ  433900000     // Transmit frequency in MHz

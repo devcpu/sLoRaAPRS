@@ -7,6 +7,8 @@
 #include <iostream>
 #endif
 
+#include <main.h>
+#include <Wire.h>
 #include <APRSWebServer.h>
 #include <APRSWiFi.h>
 #include <APRS_MSG.h>
@@ -15,11 +17,8 @@
 #include <LoRaAPRSConfig.h>
 #include <LoRaHandler.h>
 #include <OneButtonHandler.h>
-#include <Registry.h>
 #include <SPI.h>
 #include <TrackerDisplay.h>
-#include <Wire.h>
-#include <main.h>
 
 #include <fap.h>
 #include <iGate.h>
@@ -28,6 +27,12 @@
 
 // extern AsyncWebServer *WebServer;
 // extern AsyncWebSocket *ws;
+
+
+
+// @TODO APRS_MSG deprecated?
+APRS_MSG tx_msg;  // converts all data to APRS messages
+TinyGPSPlus gps;  // driver fot GPS
 
 // // @TODO APRS_MSG deprecated?
 // APRS_MSG tx_msg;  // converts all data to APRS messages
@@ -43,6 +48,8 @@
 // OneButton button(BUTTON, true);
 
 void setup() {
+  Wire.begin(SDA, SCL);
+  //Wire.begin();
   delay(500);
   // ESP.deepSleep(1, WAKE_RF_DISABLED);
   Serial.begin(115200);
@@ -209,7 +216,6 @@ uint8_t setAllGPSData(void) {
 };
 
 void initAXP() {
-  Wire.begin(21, 22);
   if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) {
     Serial.println("AXP192 Begin PASS");
   } else {
@@ -262,4 +268,28 @@ void restart(void) {
   WifiDisconnect();
   delay(300);
   ESP.restart();
+}
+
+
+void Scanner() {
+  Serial.println();
+  Serial.println("I2C scanner. Scanning ...");
+  byte count = 0;
+
+  Wire.begin();
+  for (byte i = 8; i < 120; i++) {
+    Wire.beginTransmission(i);        // Begin I2C transmission Address (i)
+    if (Wire.endTransmission() == 0)  // Receive 0 = success (ACK response)
+    {
+      Serial.print("Found address: ");
+      Serial.print(i, DEC);
+      Serial.print(" (0x");
+      Serial.print(i, HEX);  // PCF8574 7 bit address
+      Serial.println(")");
+      count++;
+    }
+  }
+  Serial.print("Found ");
+  Serial.print(count, DEC);  // numbers of devices
+  Serial.println(" device(s).");
 }

@@ -18,10 +18,13 @@ uint16_t tracker_display_time = 3000;
 
 
 void initDisplay(void){
+  Serial.println("Init Display SSD1306!");
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
      Serial.println("Dsiplay SSD1306 on 0x3c not ready!");
   }
   display.display();
+  write2Display(String("SystemInit"), String("Display +OK"), String(""), String(""));
+
   delay(2000);
 
 };

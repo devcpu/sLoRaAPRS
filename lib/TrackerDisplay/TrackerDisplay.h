@@ -33,6 +33,6 @@ void writeHead(char* head);
 void write_no_vaild_data(void);
 
 void write2Display(String head, String line1, String line2, String line3);
-void write2Display(String head, String line1, String line2, String line3, String line4);
+//void write2Display(String head, String line1, String line2, String line3, String line4);
 
 #endif
