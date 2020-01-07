@@ -21,23 +21,26 @@
 #include <Wire.h>
 #include <main.h>
 
-extern Registry reg;  // config & system status
+#include <fap.h>
+#include <iGate.h>
 
-extern AsyncWebServer *WebServer;
-extern AsyncWebSocket *ws;
+// extern Registry reg;  // config & system status
 
-// @TODO APRS_MSG deprecated?
-APRS_MSG tx_msg;  // converts all data to APRS messages
-TinyGPSPlus gps;  // driver fot GPS
+// extern AsyncWebServer *WebServer;
+// extern AsyncWebSocket *ws;
 
-uint32_t lastTx = 0L, nextTx = 10000L;  // ticker for APRS messages
-uint8_t gps_error = 0;
-char txmsg[254];
+// // @TODO APRS_MSG deprecated?
+// APRS_MSG tx_msg;  // converts all data to APRS messages
+// TinyGPSPlus gps;  // driver fot GPS
 
-uint8_t odd = 0;
-char satbuf[24] = "";
+// uint32_t lastTx = 0L, nextTx = 10000L;  // ticker for APRS messages
+// uint8_t gps_error = 0;
+// char txmsg[254];
 
-OneButton button(BUTTON, true);
+// uint8_t odd = 0;
+// char satbuf[24] = "";
+
+// OneButton button(BUTTON, true);
 
 void setup() {
   delay(500);
@@ -46,76 +49,80 @@ void setup() {
   delay(200);
   Serial.println("sLoRaAPRS system starting ...");
 
-  // #ifdef T_BEAM_V1_0
-  //   initAXP();
-  // #endif
+  // // #ifdef T_BEAM_V1_0
+  // //   initAXP();
+  // // #endif
 
-  if (wxSensor.begin() ==
-      false)  // Begin communication over I2C and Address 0x77
-  {
-    Serial.println("The sensor did not respond. Please check wiring.");
+  // if (wxSensor.begin() ==
+  //     false)  // Begin communication over I2C and Address 0x77
+  // {
+  //   Serial.println("The sensor did not respond. Please check wiring.");
 
-  } else {
-    Serial.println(wxSensor.readFixedTempC() / 100.0);
-    Serial.println(wxSensor.readFixedHumidity() / 1000.0);
-    Serial.println(wxSensor.readFixedPressure() / 100.0);
-  }
-  delay(2000);
+  // } else {
+  //   Serial.println(wxSensor.readFixedTempC() / 100.0);
+  //   Serial.println(wxSensor.readFixedHumidity() / 1000.0);
+  //   Serial.println(wxSensor.readFixedPressure() / 100.0);
+  // }
+  // delay(2000);
 
-  initDisplay();
+  // initDisplay();
 
-  ESPFSInit();
+  // ESPFSInit();
 
-  RegistryInit();
-  // dumpEEPROM();
+  // RegistryInit();
+  // // dumpEEPROM();
 
-  // @TOTO UART for ESP8266 GPS
-  // #ifdef ESP32
-  //   Serial.println("GPS UART setup ...");
-  //   ss.begin(GPS_BAUD, SERIAL_8N1, TXPin, RXPin);
-  // #elif defined(ESP8266)
-  // #endif
+  // // @TOTO UART for ESP8266 GPS
+  // // #ifdef ESP32
+  // //   Serial.println("GPS UART setup ...");
+  // //   ss.begin(GPS_BAUD, SERIAL_8N1, TXPin, RXPin);
+  // // #elif defined(ESP8266)
+  // // #endif
 
-  //  tx_msg.reset();
+  // //  tx_msg.reset();
 
-  // initLoRa();
+  // // initLoRa();
 
-  // pinMode(TXLED, OUTPUT);
+  // // pinMode(TXLED, OUTPUT);
 
-  // initOneButton();
+  // // initOneButton();
 
-  Serial.printf("system run mode %d\n", reg.current_system_mode);
-  Serial.printf("wifi mode %d\n", reg.current_wifi_mode);
+  // Serial.printf("system run mode %d\n", reg.current_system_mode);
+  // Serial.printf("wifi mode %d\n", reg.current_wifi_mode);
 
-  Serial.printf("system run mode %d\n", reg.current_system_mode);
-  Serial.printf("wifi mode %d\n", reg.current_wifi_mode);
+  // Serial.printf("system run mode %d\n", reg.current_system_mode);
+  // Serial.printf("wifi mode %d\n", reg.current_wifi_mode);
 
-  if (reg.current_wifi_mode == wifi_ap) {
-    Serial.println("start wifi_ap");
-    WifiAPInit();
-  }
-  if (reg.current_wifi_mode == wifi_client) {
+  // if (reg.current_wifi_mode == wifi_ap) {
+  //   Serial.println("start wifi_ap");
+  //   WifiAPInit();
+  // }
+  // if (reg.current_wifi_mode == wifi_client) {
     Serial.println(" start wifi_client");
     WifiConnect();
-  }
-  if (reg.current_wifi_mode != wifi_off) {
-    Serial.println(" start WebServer");
-    WebserverStart();
-  }
+  // }
+  // if (reg.current_wifi_mode != wifi_off) {
+  //   Serial.println(" start WebServer");
+  //   WebserverStart();
+  // }
 
-  // SPIFFS.esp_partition_find();
-  // SPIFFSConfig
-  // ESP8266
-  // dumpEEPROM();
+  // // SPIFFS.esp_partition_find();
+  // // SPIFFSConfig
+  // // ESP8266
+  // // dumpEEPROM();
 
-  Serial.println("sLoRaAPRS up & running");
-  // Serial.print("sLoRaAPRS up & running");
-  Serial.println("enjoy\n");
+  // Serial.println("sLoRaAPRS up & running");
+  // // Serial.print("sLoRaAPRS up & running");
+  // Serial.println("enjoy\n");
+
+  iGate_udp_connect();
+
 }
 
 void loop() {
   // watchdog();
   APRSWebServerTick();
+  iGate_process_udp();
   // if (reg.TxMsg.newmessage) {
   //   Serial.println("########################");
   //   Serial.println("to: " + reg.TxMsg.to);
@@ -126,7 +133,7 @@ void loop() {
   //   Serial.println("########################");
   // }
 
-  button.tick();
+  //button.tick();
   // tracker_display_tick();
   // odd++;
   // // Serial.printf("++++++++++   Starte neue Loop-Runde  Zeit: %s-%s-%d

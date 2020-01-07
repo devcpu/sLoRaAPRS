@@ -1,5 +1,9 @@
-#include <APRS_MSG.h>
+#ifndef ARDUINO
+#ifdef UNIT_TEST
+
 #include <unity.h>
+#include <APRS_MSG.h>
+
 
 
 APRS_MSG amsg;
