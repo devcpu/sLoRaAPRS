@@ -23,7 +23,7 @@ void initDisplay(void){
      Serial.println("Dsiplay SSD1306 on 0x3c not ready!");
   }
   display.display();
-  write2Display(String("SystemInit"), String("Display +OK"), String(""), String(""));
+  //write2Display(String("SystemInit"), String("Display +OK"), String(""), String(""));
 
   delay(2000);
 

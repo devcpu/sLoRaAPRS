@@ -10,8 +10,8 @@ AsyncClient aTCPClient;
 void iGate_udp_connect(void) {
   Serial.printf("Try to connect udp ...\n");
   IPAddress ip = IPAddress(18,197,125,125);
-  while ((udp.connect(ip, 8080)) != 0) {
-    Serial.printf("ERROR: can't connected (UDP) to %s\n", ip.toString());
+  while ((udp.connect(ip, 8080)) == 0) {
+    Serial.printf("ERROR: can't connected (UDP)\n");
     delay(1000);
   }
 }

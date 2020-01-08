@@ -22,12 +22,9 @@
   DHTesp dht;
 #endif
 
-//#define WX_BME280_SENSOR
+#define WX_BME280_SENSOR
 
-//#ifdef WX_BME280_SENSOR
-//#define TINY_BME280_I2C
-//#include <TinyBME280.h>
-//#endif
+
 
 
 extern void WifiDisconnect(void);

@@ -3,10 +3,6 @@
 #include <Registry.h>
 
 
-const char *ssid = "sLoRaAPRS";
-const char *password = "letmein4711";
-
-
 extern Registry reg; 
 
 #ifdef ESP32
@@ -18,9 +14,9 @@ void WifiAPInit(void) {
   /* You can remove the password parameter if you want the AP to be open. */
   Serial.println("Configuring access point...");
 #ifdef ESP32
-// WiFi.softAP(reg.APCredentials[0].c_str(), reg.APCredentials[1].c_str());
-WiFi.softAP(ssid, password);
+WiFi.softAP(reg.APCredentials[0].c_str(), reg.APCredentials[1].c_str());
 Serial.println("WiFi.softAP");
+// @TODO sollte hier nicht nötig sein!
 #elif defined(ESP8266)
 WiFi.softAP(reg.APCredentials[0], reg.APCredentials[1]);
 #endif
@@ -53,10 +49,10 @@ void WifiConnect(void) {
   // WiFi.mode(WIFI_STA);
   delay(1000);
   Serial.println("Trying Connecting to WiFi ..");
-  //
-
   WiFi.begin(reg.WifiCrendentials[0][0].c_str(), reg.WifiCrendentials[0][1].c_str());
 
+
+// @TODO
   uint8_t count = 0;
   while (WiFi.status() != WL_CONNECTED) {
     count++;

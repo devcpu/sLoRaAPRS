@@ -21,62 +21,81 @@
 #include <TrackerDisplay.h>
 
 #include <fap.h>
-#include <iGate.h>
+//#include <iGate.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
 
-// extern Registry reg;  // config & system status
+// 1013.25 ^= -50.96m
+// 1100.00 ^= 634.93m
+// 1033.25 ^= 116.89m
+// 1029.57 ^= 83.80 m
+#define SEALEVELPRESSURE_HPA (1029.57)
+Adafruit_BME280 bme;
 
-// extern AsyncWebServer *WebServer;
-// extern AsyncWebSocket *ws;
 
+extern Registry reg;  // config & system status
 
 
 // @TODO APRS_MSG deprecated?
 APRS_MSG tx_msg;  // converts all data to APRS messages
 TinyGPSPlus gps;  // driver fot GPS
 
-// // @TODO APRS_MSG deprecated?
-// APRS_MSG tx_msg;  // converts all data to APRS messages
-// TinyGPSPlus gps;  // driver fot GPS
+uint32_t lastTx = 0L, nextTx = 10000L;  // ticker for APRS messages
+uint8_t gps_error = 0;
+char txmsg[254];
 
-// uint32_t lastTx = 0L, nextTx = 10000L;  // ticker for APRS messages
-// uint8_t gps_error = 0;
-// char txmsg[254];
+uint8_t odd = 0;
+char satbuf[24] = "";
 
-// uint8_t odd = 0;
-// char satbuf[24] = "";
+OneButton button(BUTTON, true);
 
-// OneButton button(BUTTON, true);
 
 void setup() {
-  Wire.begin(SDA, SCL);
-  //Wire.begin();
-  delay(500);
   // ESP.deepSleep(1, WAKE_RF_DISABLED);
   Serial.begin(115200);
-  delay(200);
+  delay(1000);
   Serial.println("sLoRaAPRS system starting ...");
+  Wire.begin(SDA, SCL);
+  delay(500);
 
-  // // #ifdef T_BEAM_V1_0
-  // //   initAXP();
-  // // #endif
+  #ifdef T_BEAM_V1_0
+    initAXP();
+  #endif
 
-  // if (wxSensor.begin() ==
-  //     false)  // Begin communication over I2C and Address 0x77
-  // {
-  //   Serial.println("The sensor did not respond. Please check wiring.");
 
-  // } else {
-  //   Serial.println(wxSensor.readFixedTempC() / 100.0);
-  //   Serial.println(wxSensor.readFixedHumidity() / 1000.0);
-  //   Serial.println(wxSensor.readFixedPressure() / 100.0);
-  // }
-  // delay(2000);
+unsigned status;
+status = bme.begin(0x76);
 
-  // initDisplay();
+    bme.setSampling(Adafruit_BME280::MODE_FORCED,
+                    Adafruit_BME280::SAMPLING_X1, // temperature
+                    Adafruit_BME280::SAMPLING_X1, // pressure
+                    Adafruit_BME280::SAMPLING_X1, // humidity
+                    Adafruit_BME280::FILTER_OFF   );
+                      
+    // suggested rate is 1/60Hz (1m)
 
-  // ESPFSInit();
+    bme.takeForcedMeasurement();
+    Serial.print("Temperature = ");
+    Serial.print(bme.readTemperature());
+    Serial.println(" *C");
+    Serial.print("Pressure = ");
+    Serial.print(bme.readPressure() / 100.0F);
+    Serial.println(" hPa");
+    Serial.print("Approx. Altitude = ");
+    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
+    Serial.println(" m");
+    Serial.print("Humidity = ");
+    Serial.print(bme.readHumidity());
+    Serial.println(" %");
+    Serial.println();
 
-  // RegistryInit();
+  delay(2000);
+
+  initDisplay();
+
+  ESPFSInit();
+
+  RegistryInit();
   // // dumpEEPROM();
 
   // // @TOTO UART for ESP8266 GPS
@@ -92,44 +111,43 @@ void setup() {
 
   // // pinMode(TXLED, OUTPUT);
 
-  // // initOneButton();
+  initOneButton();
 
-  // Serial.printf("system run mode %d\n", reg.current_system_mode);
-  // Serial.printf("wifi mode %d\n", reg.current_wifi_mode);
+  Serial.printf("system run mode %d\n", reg.current_system_mode);
+  Serial.printf("wifi mode %d\n", reg.current_wifi_mode);
 
-  // Serial.printf("system run mode %d\n", reg.current_system_mode);
-  // Serial.printf("wifi mode %d\n", reg.current_wifi_mode);
+  Serial.printf("system run mode %d\n", reg.current_system_mode);
+  Serial.printf("wifi mode %d\n", reg.current_wifi_mode);
 
-  // if (reg.current_wifi_mode == wifi_ap) {
-  //   Serial.println("start wifi_ap");
-  //   WifiAPInit();
-  // }
-  // if (reg.current_wifi_mode == wifi_client) {
+  if (reg.current_wifi_mode == wifi_ap) {
+    Serial.println("start wifi_ap");
+    WifiAPInit();
+  }
+  if (reg.current_wifi_mode == wifi_client) {
     Serial.println(" start wifi_client");
     WifiConnect();
-  // }
-  // if (reg.current_wifi_mode != wifi_off) {
-  //   Serial.println(" start WebServer");
-  //   WebserverStart();
-  // }
+  }
+  if (reg.current_wifi_mode != wifi_off) {
+    Serial.println(" start WebServer");
+    WebserverStart();
+  }
 
-  // // SPIFFS.esp_partition_find();
-  // // SPIFFSConfig
-  // // ESP8266
-  // // dumpEEPROM();
+  // SPIFFS.esp_partition_find();
+  // SPIFFSConfig
+  // ESP8266
+  // dumpEEPROM();
 
-  // Serial.println("sLoRaAPRS up & running");
-  // // Serial.print("sLoRaAPRS up & running");
-  // Serial.println("enjoy\n");
+  Serial.println("sLoRaAPRS up & running");
+  Serial.println("enjoy\n");
 
-  iGate_udp_connect();
+ //iGate_udp_connect();
 
 }
 
 void loop() {
   // watchdog();
   APRSWebServerTick();
-  iGate_process_udp();
+  //iGate_process_udp();
   // if (reg.TxMsg.newmessage) {
   //   Serial.println("########################");
   //   Serial.println("to: " + reg.TxMsg.to);
@@ -276,7 +294,6 @@ void Scanner() {
   Serial.println("I2C scanner. Scanning ...");
   byte count = 0;
 
-  Wire.begin();
   for (byte i = 8; i < 120; i++) {
     Wire.beginTransmission(i);        // Begin I2C transmission Address (i)
     if (Wire.endTransmission() == 0)  // Receive 0 = success (ACK response)
