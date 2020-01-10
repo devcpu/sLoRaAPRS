@@ -3,57 +3,39 @@
 
 #include <Arduino.h>
 
-#define EEPROM_USER_LENGTH 16
-#define EEPROM_PASSWORD_LENGTH 32
-#define EEPROM_SIZE 640
-
-#define EEPROM_ADDR_SYSTEM 0
-#define EEPROM_ADDR_VERSION 10
-#define EEPROM_ADDR_BOOT_COUNT EEPROM_ADDR_VERSION + 25
-#define EEPROM_ADDR_CALL EEPROM_ADDR_BOOT_COUNT + 6
-#define EEPROM_ADDR_WX_EXT EEPROM_ADDR_CALL + 12
-#define EEPROM_ADDR_APRS_EXT EEPROM_ADDR_WX_EXT + 3
-#define EEPROM_ADDR_APRS_SYMBOL EEPROM_ADDR_APRS_EXT + 3
-#define EEPROM_ADDR_APRS_PASSWORD EEPROM_ADDR_APRS_SYMBOL + 2
-
-#define EEPROM_ADDR_APRS_SERVER EEPROM_ADDR_APRS_PASSWORD + 16  
-
-#define EEPROM_ADDR_LAT_FIX EEPROM_ADDR_APRS_SERVER + 100 // IPv6!
-#define EEPROM_ADDR_LNG_FIX EEPROM_ADDR_LAT_FIX + 10
-
-#define EEPROM_ADDR_CURRENT_WIFI_MODE  EEPROM_ADDR_LNG_FIX + 10
-#define EEPROM_ADDR_CURRENT_SYSTEM_MODE EEPROM_ADDR_CURRENT_WIFI_MODE + 2
-
-#define EEPROM_ADDR_WEB_CREDENTIAL00 EEPROM_ADDR_CURRENT_SYSTEM_MODE + 2
-#define EEPROM_ADDR_WEB_CREDENTIAL01 \
-  EEPROM_ADDR_WEB_CREDENTIAL00 + EEPROM_USER_LENGTH
-
-#define EEPROM_ADDR_AP_CREDENTIAL00 \
-  EEPROM_ADDR_WEB_CREDENTIAL01 + EEPROM_PASSWORD_LENGTH
-#define EEPROM_ADDR_AP_CREDENTIAL01 \
-  EEPROM_ADDR_AP_CREDENTIAL00 + EEPROM_USER_LENGTH
-
-#define EEPROM_ADDR_WIFI_CREDENTIAL00 \
-  EEPROM_ADDR_AP_CREDENTIAL01 + EEPROM_PASSWORD_LENGTH
-#define EEPROM_ADDR_WIFI_CREDENTIAL01 \
-  EEPROM_ADDR_WIFI_CREDENTIAL00 + EEPROM_USER_LENGTH
-
-#define EEPROM_ADDR_WIFI_CREDENTIAL10 \
-  EEPROM_ADDR_WIFI_CREDENTIAL01 + EEPROM_PASSWORD_LENGTH
-#define EEPROM_ADDR_WIFI_CREDENTIAL11 \
-  EEPROM_ADDR_WIFI_CREDENTIAL10 + EEPROM_USER_LENGTH
-
-#define EEPROM_ADDR_WIFI_CREDENTIAL20 \
-  EEPROM_ADDR_WIFI_CREDENTIAL11 + EEPROM_PASSWORD_LENGTH
-#define EEPROM_ADDR_WIFI_CREDENTIAL21 \
-  EEPROM_ADDR_WIFI_CREDENTIAL20 + EEPROM_USER_LENGTH
-
-#define EEPROM_ADDR_WIFI_CREDENTIAL30 \
-  EEPROM_ADDR_WIFI_CREDENTIAL21 + EEPROM_PASSWORD_LENGTH
-#define EEPROM_ADDR_WIFI_CREDENTIAL31 \
-  EEPROM_ADDR_WIFI_CREDENTIAL30 + EEPROM_USER_LENGTH
-
+#define NVS_APP_NAME_SPACE "sLA"
 #define SYSTEM_STRING "sLoRaAPRS"
+#define DEFAULT_PASSWORD "letmein42"
+#define CHANGE_ME "CHANGEME"
+
+
+#define PREFS_VERSION "Version"
+#define PREFS_RELASE "Release"
+#define PREFS_BOOT_COUNT "boot_count"
+#define PREFS_CURRENT_WIFI_MODE "current_wifi_mode"
+#define PREFS_CURRENT_SYSTEM_MODE "current_system_mode"
+#define PREFS_CALL "call"
+#define PREFS_APRS_SYMBOL "aprs_symbol"
+#define PREFS_APRS_CALL_EX "aprs_call_ext"
+#define PREFS_WX_CALL_EX "wx_call_ext"
+#define PREFS_WEB_ADMIN "web_admin"
+#define PREFS_WEB_PASS "web_pass"
+#define PREFS_AP_SSID "ap_ssid"
+#define PREFS_AP_PASS "ap_pass"
+#define PREFS_APRS_PASSWORD "aprs_pass"
+#define PREFS_APRS_SERVER0 "aprs_server0"
+#define PREFS_APRS_SERVER1 "aprs_server1"
+#define PREFS_LAN0_SSID "lan0_ssid"
+#define PREFS_LAN0_AUTH "lan0_auth"
+#define PREFS_LAN1_SSID "lan0_ssid"
+#define PREFS_LAN1_AUTH "lan0_auth"
+#define PREFS_LAN2_SSID "lan0_ssid"
+#define PREFS_LAN2_AUTH "lan0_auth"
+#define PREFS_LAN3_SSID "lan0_ssid"
+#define PREFS_LAN3_AUTH "lan0_auth"
+#define PREFS_POS_LAT_FIX "LatFIX"
+#define PREFS_POS_LNG_FIX "LNGFIX"
+#define PREFS_POS_ALT_FIX "ALTFIX"
 
 
 enum wifi_mode { 
@@ -85,17 +67,31 @@ struct WXData {
   float humidity = 0;
 };
 
-typedef struct {
+struct PositionData {
+  double latitude;
+  double longitude;
+  double altitude;
+};
+
+struct Credentials {
+  String auth_name;
+  String auth_tocken;
+};
+
+struct Registry {
+  String Version = "";
   boolean newTxMesg = false;
   boolean newRxMesg = false;
-  String Call = "CHANGEME";
+  
+  String call = "CHANGEME";
   String wx_call_ext = "3";
   String aprs_call_ext = "9";
-  String wxCall(void) { return Call + "-" + wx_call_ext; };
-  String aprsCall(void) { return Call + "-" + aprs_call_ext; };
-  String WifiCrendentials[4][2];
-  String APCredentials[2];
-  String WebCredentials[2];
+  String wxCall(void) { return call + "-" + wx_call_ext; };
+  String aprsCall(void) { return call + "-" + aprs_call_ext; };
+
+  Credentials WifiCrendentials[4];
+  Credentials APCredentials;
+  Credentials WebCredentials;
   char aprs_symbol = '[';
   String APRSPassword;
   String APRSServer[2];
@@ -107,21 +103,43 @@ typedef struct {
   boolean wx_sensor_dht = false;
   boolean gps = false;
   boolean oled = false;
-  String LngFIX = "01357.56E";
-  String LatFIX = "5248.47N";
+  PositionData pos;
+  PositionData posfix;
   String SERVER_IP;
   APRSMessage TxMsg;
   APRSMessage RxMsg;
   WXData WXdata;
-} Registry;
+};
+
+  // String LngFIX = "01357.56E";
+  // String LatFIX = "5248.47N";
+
 
 void RegistryInit(void);
 
-void EEPROMwriteString(uint16_t addr, String data);
-String EEPROMreadString(uint16_t addr);
-String EEPROMrestoreString(uint16_t addr, const char* def,
-                               const char* name);
-void EEPROMClear(void);
-void dumpEEPROM(void);
+void registryWriteInit(void);
+
+String getPrefsString(String key);
+uint16_t getPrefsInt(String key);
+char getPrefsChar(String key);
+
+void setPrefsString(const char* key, char*  value);
+void setPrefsString(const char* key, String value);
+void setPrefsString(String key, String value);
+
+void setPrefsUInt(const char* key, uint16_t value);
+void setPrefsUInt(String key, uint16_t value);
+void setPrefsUInt(const char* key, uint16_t value);
+void setPrefsUInt(String key, String value);
+
+
+double getPrefsDouble(const char *key);
+double getPrefsDouble(String key);
+void setPrefsDouble(const char *key, double value);
+void setPrefsDouble(const char *key, String value);
+void setPrefsDouble(String key, String value);
+
+void setPrefsChar(const char* key, char value);
+void setPrefsChar(String key, String value);
 
 #endif

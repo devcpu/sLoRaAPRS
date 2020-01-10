@@ -170,7 +170,9 @@ class APRS_MSG {
      * @see https://www.gpskoordinaten.de/gps-koordinaten-konverter
      * @see https://www.giga.de/extra/gps/tipps/gps-koordinaten-umrechnen-online-oder-mit-formel/
      */
-    static void dc2gms(char* retvar, float gpsdata, bool lng);
+    static void dc2gms(char* retvar, double gpsdata, bool lng);
+
+    static String dc2gms(double gpsdata, boolean lng);
 
     static uint32_t feed2meter(uint32_t feed);
     static uint32_t meter2feed(uint32_t meter);

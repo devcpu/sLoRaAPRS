@@ -14,7 +14,7 @@ void WifiAPInit(void) {
   /* You can remove the password parameter if you want the AP to be open. */
   Serial.println("Configuring access point...");
 #ifdef ESP32
-WiFi.softAP(reg.APCredentials[0].c_str(), reg.APCredentials[1].c_str());
+WiFi.softAP(reg.APCredentials.auth_name.c_str(), reg.APCredentials.auth_tocken.c_str());
 Serial.println("WiFi.softAP");
 // @TODO sollte hier nicht nötig sein!
 #elif defined(ESP8266)
@@ -25,21 +25,21 @@ WiFi.softAP(reg.APCredentials[0], reg.APCredentials[1]);
   IPAddress myIP = WiFi.softAPIP();
   reg.SERVER_IP = myIP.toString();
   Serial.println("got IP");
-  if (reg.Call == "CHANGEME") {
+  if (reg.call == "CHANGEME") {
     // //@FIXME print to OLED to!
     Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
     Serial.print("++++++++++   AP IP address: ");
     Serial.print(myIP);
     Serial.println("    ++++++++++");
-    Serial.println("++++++++++   SSID: " + reg.APCredentials[0] +
+    Serial.println("++++++++++   SSID: " + reg.APCredentials.auth_name +
                    "               ++++++++++");
-    Serial.println("++++++++++   Password: " + reg.APCredentials[1] +
+    Serial.println("++++++++++   Password: " + reg.APCredentials.auth_tocken +
                    "         ++++++++++");
     Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
   } else {
     Serial.print("AP IP address: ");
     Serial.println(myIP);
-    Serial.println("SSID: " + reg.APCredentials[0]);
+    Serial.println("SSID: " + reg.APCredentials.auth_name);
   }
 }
 
@@ -49,7 +49,7 @@ void WifiConnect(void) {
   // WiFi.mode(WIFI_STA);
   delay(1000);
   Serial.println("Trying Connecting to WiFi ..");
-  WiFi.begin(reg.WifiCrendentials[0][0].c_str(), reg.WifiCrendentials[0][1].c_str());
+  WiFi.begin(reg.WifiCrendentials[0].auth_name.c_str(), reg.WifiCrendentials[0].auth_tocken.c_str());
 
 
 // @TODO

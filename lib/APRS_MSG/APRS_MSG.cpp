@@ -330,7 +330,7 @@ int16_t APRS_MSG::c2f(int16_t temp){
     return round(temp*9/5+32);
 };
 
-void APRS_MSG::dc2gms(char* retvar, float gpsdata, bool lng) {
+void APRS_MSG::dc2gms(char* retvar, double gpsdata, boolean lng) {
     char fstr[16] = "";
     char ew;
 
@@ -358,4 +358,10 @@ void APRS_MSG::dc2gms(char* retvar, float gpsdata, bool lng) {
         secunde,
         ew
     );
+};
+
+String dc2gms(double gpsdata, boolean lng){
+    char buf[12] = {0};
+    APRS_MSG::dc2gms(buf, gpsdata, lng);  
+    return String(buf);
 };

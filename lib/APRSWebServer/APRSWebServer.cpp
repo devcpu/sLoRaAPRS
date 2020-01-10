@@ -1,16 +1,19 @@
 #define MODDEBUG
 #ifdef MODDEBUG
-#define DDD(x) Serial.printf("DDD>: %s::%d %s\n", __FILE__, __LINE__, String(x).c_str());
+#define DDD(x) \
+  Serial.printf("DDD>: %s::%d %s\n", __FILE__, __LINE__, String(x).c_str());
 #else
 #define DDD(x) ;
 #endif
 
+#include <debug.h>
+
 #include <APRSWebServer.h>
 #include <APRSWiFi.h>
+#include <APRS_MSG.h>
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
 #include <AsyncJson.h>
-#include <EEPROM.h>
 #include <Registry.h>
 #include <TinyGPS++.h>
 
@@ -18,7 +21,6 @@
 
 #include <Ticker.h>
 //#include "CallBackList.h"
-
 
 // @TODO remove together with restart()
 
@@ -31,15 +33,26 @@ AsyncWebSocketClient *globalClient = NULL;
 String mainmenue(
     "<form action='.' method='get'><button>Main Menue</button></form><br />");
 
+typedef struct HTML_Error {
+  String ErrorMsg;
+  boolean isSended;
 
-
-struct HTML_Error {
-  String ErrorMsg = "";
-  boolean isSended = true;
+  public: 
+    void setErrorMsg(String msg) {
+      if (ErrorMsg == "") {
+        ErrorMsg = msg;
+      } else {
+        ErrorMsg += msg;
+      }
+      isSended = false;
+      }
+    String getErrorMsg(void) {
+      isSended = true;
+      return ErrorMsg;
+    }
 };
 
 HTML_Error html_error;
-
 
 struct SendMsgForm {
   String to = "";
@@ -96,6 +109,10 @@ void WebserverStart(void) {
 
   WebServer->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("/");
+    // first run wizard
+    if (reg.call == "CHANGEME") {
+      request->redirect("/cc");
+    }
     request->send(SPIFFS, "/main.html", "text/html", false, ProcessorDefault);
   });
 
@@ -113,6 +130,9 @@ void WebserverStart(void) {
     if (request->params() > 0) {
       DDD("/cc");
       handleRequestConfigCall(request);
+      if (reg.APCredentials.auth_tocken == "letmein42") {
+        request->redirect("/ca");
+      }
       request->redirect("/");
     } else {
       request->send(SPIFFS, "/main.html", "text/html", false,
@@ -123,9 +143,6 @@ void WebserverStart(void) {
   // Send Message
   WebServer->on("/sm", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("/sm");
-    if (html_error.isSended) {
-      resetHTMLError();
-    }
     showRequest(request);
     if (request->params() > 0) {
       handleRequestSendMessage(request);
@@ -139,9 +156,6 @@ void WebserverStart(void) {
   // Change Mode
   WebServer->on("/cm", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("/cm");
-    if (html_error.isSended) {
-      resetHTMLError();
-    }
     showRequest(request);
     DDD("Change Mode");
     if (request->params() == 2) {
@@ -188,9 +202,6 @@ void WebserverStart(void) {
   // Config Gateway
   WebServer->on("/cg", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("/cg");
-    if (html_error.isSended) {
-      resetHTMLError();
-    }
     showRequest(request);
     if (request->params()) {
       handleRequestConfigGateway(request);
@@ -200,7 +211,7 @@ void WebserverStart(void) {
                   ProcessorConfigGateway);
   });
 
-  // Config Gateway
+  // reboot
   WebServer->on("/reboot", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("/reboot");
     reboot(request);
@@ -266,7 +277,7 @@ String ProcessorDefault(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.Call;
+    return String("sLoRaAPRS for ") + reg.call;
   }
 
   if (var == "H2TITLE") {
@@ -274,8 +285,7 @@ String ProcessorDefault(const String &var) {
   }
 
   if (var == "ERRORMSG") {
-    html_error.isSended = true;
-    return html_error.ErrorMsg;
+    return html_error.getErrorMsg();
   }
 
   if (var == "BODY") {
@@ -284,13 +294,14 @@ String ProcessorDefault(const String &var) {
   return String("wrong placeholder " + var);
 }
 
+
 String systemInfoProcessor(const String &var) {
   if (var == "HTMLTILE") {
     return String("simple LoRaAPRS system by DL7UXA");
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.Call;
+    return String("sLoRaAPRS for ") + reg.call;
   }
 
   if (var == "H2TITLE") {
@@ -298,10 +309,8 @@ String systemInfoProcessor(const String &var) {
   }
 
   if (var == "ERRORMSG") {
-    html_error.isSended = true;
-    return html_error.ErrorMsg;
+    return html_error.getErrorMsg();
   }
-
 
   if (var == "BODY") {
     return getSystemInfoTable();
@@ -311,41 +320,41 @@ String systemInfoProcessor(const String &var) {
 }
 
 String getSystemInfoTable(void) {
+  // #ifdef ESP32
+  //   uint64_t chipid = chipid=ESP.getEfuseMac();//The chip ID is essentially
+  //   its MAC address(length: 6 bytes).
+  // #endif
 
-// #ifdef ESP32
-//   uint64_t chipid = chipid=ESP.getEfuseMac();//The chip ID is essentially its MAC address(length: 6 bytes).
-// #endif
-
-
-//  (ideSize != realSize) ? ""
+  //  (ideSize != realSize) ? ""
   FlashMode_t ideMode = ESP.getFlashChipMode();
 
   String systemdata[][2] = {
-      {"Build DateTime:", GetBuildDateAndTime()},
-      {"SDKVersion", String(ESP.getSdkVersion())},
-      {"BootCount:", String(reg.boot_count)},
-      {"Uptime", String(millis() / 1000, DEC)}, 
+      {"Build DateTime: ", GetBuildDateAndTime()},
+      {"SDKVersion: ", String(ESP.getSdkVersion())},
+      {"BootCount: ", String(reg.boot_count)},
+      {"Uptime: ", String(millis() / 1000/60, DEC) + "min"},
 #ifdef ESP32
       {"Chip Revision:", String(ESP.getChipRevision())},
-      // {"ESP32 Chip ID:", String((uint16_t)chipid>>32, HEX) + String((uint32_t)chipid, HEX)},
-      {"Reset Reason CPU0", getResetReason(rtc_get_reset_reason(0))},
-      {"Reset Reason CPU1", getResetReason(rtc_get_reset_reason(1))},
-      {"CpuFreqMHz", String(ESP.getCpuFreqMHz())},
-      {"CycleCount", String(ESP.getCycleCount())},
-      {"FlashChipMode", String(ESP.getFlashChipMode())},
-      {"FlashChipSize", String(ESP.getFlashChipSize())},
-      {"FlashChipSpeed", String(ESP.getFlashChipSpeed())},
-      {"SketchSize", String(ESP.getSketchSize())},
-      {"FreeSketchSpace", String(ESP.getFreeSketchSpace())},
-      {"SketchMD5", String(ESP.getSketchMD5())},
-      {"HeapSize", String(ESP.getHeapSize())},
-      {"FreeHeap", String(ESP.getFreeHeap())},
-      {"MaxAllocHeap", String(ESP.getMaxAllocHeap())},
-      {"MinFreeHeap", String(ESP.getMinFreeHeap())},
-      {"PsramSize", String(ESP.getPsramSize())},
-      {"FreePsram", String(ESP.getFreePsram())},
-      {"MaxAllocPsram", String(ESP.getMaxAllocPsram())},
-      {"MinFreePsram", String(ESP.getMinFreePsram())},
+      {"ESP32 Chip ID:", String((uint16_t)chipid>>32, HEX) +
+        String((uint32_t)chipid, HEX)},
+      {"Reset Reason CPU0: ", getResetReason(rtc_get_reset_reason(0))},
+      {"Reset Reason CPU1: ", getResetReason(rtc_get_reset_reason(1))},
+      {"CpuFreqMHz: ", String(ESP.getCpuFreqMHz()) + "MHz"},
+      {"CycleCount: ", String(ESP.getCycleCount())},
+      {"FlashChipMode: ", String(ESP.getFlashChipMode())},
+      {"FlashChipSize: ", String(ESP.getFlashChipSize()/1024/1024) + "MB"},
+      {"FlashChipSpeed: ", String(ESP.getFlashChipSpeed()) + "MHz"},
+      {"SketchSize: ", String(ESP.getSketchSize()/1024) + "kB"}, 
+      {"FreeSketchSpace: ", String(ESP.getFreeSketchSpace()/1024) + "kB"},
+      {"SketchMD5: ", String(ESP.getSketchMD5())},
+      {"HeapSize: ", String(ESP.getHeapSize()/1024) + "kB"},
+      {"FreeHeap: ", String(ESP.getFreeHeap()/1024) + "kB"},
+      {"MaxAllocHeap: ", String(ESP.getMaxAllocHeap()/1024) + "kB"},
+      {"MinFreeHeap: ", String(ESP.getMinFreeHeap()/1024) + "kB"},
+      {"PsramSize: ", String(ESP.getPsramSize()/1024) + "kB"},
+      {"FreePsram", String(ESP.getFreePsram()/1024) + "kB"},
+      {"MaxAllocPsram: ", String(ESP.getMaxAllocPsram()/1024) + "kB"},
+      {"MinFreePsram", String(ESP.getMinFreePsram()/1024) + "kB"},
 #elif defined(ESP8266)
       {"Flash real id:", String(ESP.getFlashChipId(), HEX)},
       {"Flash real size:", String(ESP.getFlashChipRealSize() / 1024) + "kB"},
@@ -371,7 +380,7 @@ String getSystemInfoTable(void) {
       {"ResetReason", String(ESP.getResetReason())},
 //      {"Chip Config Status:", String()},
 #endif
-      // 
+      //
       // {"", String()},
   };
 
@@ -382,7 +391,7 @@ String getSystemInfoTable(void) {
       {"BME280", String(reg.wx_sensor_bme280)},
   };
 
-  return table2DGenerator(systemdata, 30, true) +
+  return table2DGenerator(systemdata, 32, true) +
          table2DGenerator(hwdata, 4, true) + "<br /><br />" + mainmenue;
 
   //   //     if (ideSize != realSize)
@@ -400,33 +409,60 @@ String getSystemInfoTable(void) {
 }
 
 #ifdef ESP32
-String getResetReason(RESET_REASON reason)
-{
+String getResetReason(RESET_REASON reason) {
   String retvar;
-  switch ( reason)
-  {
-    case 1 :  retvar =  "POWERON_RESET";break;          /**<1, Vbat power on reset*/
-    case 3 :  retvar =  "SW_RESET";break;               /**<3, Software reset digital core*/
-    case 4 :  retvar =  "OWDT_RESET";break;             /**<4, Legacy watch dog reset digital core*/
-    case 5 :  retvar =  "DEEPSLEEP_RESET";break;        /**<5, Deep Sleep reset digital core*/
-    case 6 :  retvar =  "SDIO_RESET";break;             /**<6, Reset by SLC module, reset digital core*/
-    case 7 :  retvar =  "TG0WDT_SYS_RESET";break;       /**<7, Timer Group0 Watch dog reset digital core*/
-    case 8 :  retvar =  "TG1WDT_SYS_RESET";break;       /**<8, Timer Group1 Watch dog reset digital core*/
-    case 9 :  retvar =  "RTCWDT_SYS_RESET";break;       /**<9, RTC Watch dog Reset digital core*/
-    case 10 : retvar =  "INTRUSION_RESET";break;       /**<10, Instrusion tested to reset CPU*/
-    case 11 : retvar =  "TGWDT_CPU_RESET";break;       /**<11, Time Group reset CPU*/
-    case 12 : retvar =  "SW_CPU_RESET";break;          /**<12, Software reset CPU*/
-    case 13 : retvar =  "RTCWDT_CPU_RESET";break;      /**<13, RTC Watch dog Reset CPU*/
-    case 14 : retvar =  "EXT_CPU_RESET";break;         /**<14, for APP CPU, reseted by PRO CPU*/
-    case 15 : retvar =  "RTCWDT_BROWN_OUT_RESET";break;/**<15, Reset when the vdd voltage is not stable*/
-    case 16 : retvar =  "RTCWDT_RTC_RESET";break;      /**<16, RTC Watch dog reset digital core and rtc module*/
-    default : retvar =  "NO_MEAN";
+  switch (reason) {
+    case 1:
+      retvar = "POWERON_RESET";
+      break; /**<1, Vbat power on reset*/
+    case 3:
+      retvar = "SW_RESET";
+      break; /**<3, Software reset digital core*/
+    case 4:
+      retvar = "OWDT_RESET";
+      break; /**<4, Legacy watch dog reset digital core*/
+    case 5:
+      retvar = "DEEPSLEEP_RESET";
+      break; /**<5, Deep Sleep reset digital core*/
+    case 6:
+      retvar = "SDIO_RESET";
+      break; /**<6, Reset by SLC module, reset digital core*/
+    case 7:
+      retvar = "TG0WDT_SYS_RESET";
+      break; /**<7, Timer Group0 Watch dog reset digital core*/
+    case 8:
+      retvar = "TG1WDT_SYS_RESET";
+      break; /**<8, Timer Group1 Watch dog reset digital core*/
+    case 9:
+      retvar = "RTCWDT_SYS_RESET";
+      break; /**<9, RTC Watch dog Reset digital core*/
+    case 10:
+      retvar = "INTRUSION_RESET";
+      break; /**<10, Instrusion tested to reset CPU*/
+    case 11:
+      retvar = "TGWDT_CPU_RESET";
+      break; /**<11, Time Group reset CPU*/
+    case 12:
+      retvar = "SW_CPU_RESET";
+      break; /**<12, Software reset CPU*/
+    case 13:
+      retvar = "RTCWDT_CPU_RESET";
+      break; /**<13, RTC Watch dog Reset CPU*/
+    case 14:
+      retvar = "EXT_CPU_RESET";
+      break; /**<14, for APP CPU, reseted by PRO CPU*/
+    case 15:
+      retvar = "RTCWDT_BROWN_OUT_RESET";
+      break; /**<15, Reset when the vdd voltage is not stable*/
+    case 16:
+      retvar = "RTCWDT_RTC_RESET";
+      break; /**<16, RTC Watch dog reset digital core and rtc module*/
+    default:
+      retvar = "NO_MEAN";
   }
   return retvar;
 }
 #endif
-
-
 
 String ProcessorConfigCall(const String &var) {
   if (var == "HTMLTILE") {
@@ -434,40 +470,39 @@ String ProcessorConfigCall(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.Call;
+    return String("sLoRaAPRS for ") + reg.call;
   }
 
   if (var == "H2TITLE") {
     return String("Config Call");
   }
 
-  if (var == "CALL") {
-    return reg.Call;
+  if (var == PREFS_CALL) {
+    return reg.call;
   }
 
-  if (var == "LAT") {
-    return reg.LatFIX;
+  if (var == PREFS_POS_LAT_FIX) {
+    return String(reg.posfix.latitude);
   }
 
-  if (var == "LNG") {
-    return reg.LngFIX;
+  if (var == PREFS_POS_LNG_FIX) {
+    return String(reg.posfix.longitude);
   }
 
   if (var == "ERRORMSG") {
-    html_error.isSended = true;
-    return html_error.ErrorMsg;
+    return html_error.getErrorMsg();
   }
 
-  if (var == "APRS_SYMBOL") {
+  if (var == PREFS_APRS_SYMBOL) {
     DDD(reg.aprs_symbol);
     return String(reg.aprs_symbol);
   }
 
-  if (var == "APRS_SELECT") {
+  if (var == PREFS_APRS_CALL_EX) {
     return reg.aprs_call_ext;
   }
 
-  if (var == "WX_SELECT") {
+  if (var == PREFS_WX_CALL_EX) {
     DDD(reg.wx_call_ext);
     return reg.wx_call_ext;
   }
@@ -481,29 +516,25 @@ String ProcessorConfigCall(const String &var) {
 
 void handleRequestConfigCall(AsyncWebServerRequest *request) {
   DDD("handleRequestConfigCall");
-  if (request->hasParam("call")) {
-    String new_call(request->getParam("call")->value());
-    if (new_call.length() > 0 && new_call.length() < 16) {
-      new_call.toUpperCase();
-      Serial.println("write param 'call' " + new_call);
-      EEPROMwriteString(EEPROM_ADDR_CALL, new_call);
-      reg.Call = new_call;
-    } else {
-      Serial.println("ERR: call not valide! " + new_call);
-    }
+  
+  // call
+  String new_call = getWebParam(request, "call");
+  if (new_call.length() > 2 && new_call.length() < 16) {
+    new_call.toUpperCase();
+    reg.call = new_call;
+  } else {
+    html_error.ErrorMsg = String("call to short or to long");
+    Serial.println("ERR: call not valide! " + new_call);
   }
+
   DDD("call +OK");
+
+  // aprs_call_ext
   if (request->hasParam("aprs_call_ext")) {
-    String aprs_ext_x = request->getParam("aprs_call_ext")->value();
-    if (validateNumber(aprs_ext_x)) {
-      Serial.println("write param 'aprs_call_ext' " + aprs_ext_x);
-      EEPROMwriteString(EEPROM_ADDR_APRS_EXT, aprs_ext_x);
-      reg.aprs_call_ext = aprs_ext_x;
-      Serial.println("aprs_call_ext fertig");
-    } else {
-      Serial.println("ERR: APRS ext not valide! " + aprs_ext_x);
-    }
+    String new_aprs_call_ext = getWebParam(request, "aprs_call_ext");
+    
   }
+
   DDD("aprs_ext +OK");
   if (request->hasParam("wx_call_ext")) {
     String wx_call_ext_x = request->getParam("wx_call_ext")->value();
@@ -528,7 +559,7 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
     }
   }
 
-////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////
 
   if (request->hasParam("lat")) {
     DDD("param lat");
@@ -553,8 +584,6 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
       Serial.println("ERR: Lat not valide! " + new_lng);
     }
   }
-
-
 }
 
 String ProcessorGPSInfo(const String &var) {
@@ -563,7 +592,7 @@ String ProcessorGPSInfo(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.Call;
+    return String("sLoRaAPRS for ") + reg.call;
   }
 
   if (var == "H2TITLE") {
@@ -571,8 +600,7 @@ String ProcessorGPSInfo(const String &var) {
   }
 
   if (var == "ERRORMSG") {
-    html_error.isSended = true;
-    return html_error.ErrorMsg;
+    return html_error.getErrorMsg();
   }
 
   if (var == "BODY") {
@@ -582,13 +610,13 @@ String ProcessorGPSInfo(const String &var) {
   return String("wrong placeholder " + var);
 }
 
-String ProcessorWXInfo(const String& var){
+String ProcessorWXInfo(const String &var) {
   if (var == "HTMLTILE") {
     return String("simple LoRaAPRS system by DL7UXA");
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.Call;
+    return String("sLoRaAPRS for ") + reg.call;
   }
 
   if (var == "H2TITLE") {
@@ -596,8 +624,7 @@ String ProcessorWXInfo(const String& var){
   }
 
   if (var == "ERRORMSG") {
-    html_error.isSended = true;
-    return html_error.ErrorMsg;
+    return html_error.getErrorMsg();
   }
 
   if (var == "BODY") {
@@ -605,7 +632,6 @@ String ProcessorWXInfo(const String& var){
   }
 
   return String("wrong placeholder " + var);
-
 };
 
 String ProcessorConfigWifiAP(const String &var) {
@@ -614,7 +640,7 @@ String ProcessorConfigWifiAP(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.Call;
+    return String("sLoRaAPRS for ") + reg.call;
   }
 
   if (var == "H2TITLE") {
@@ -638,13 +664,7 @@ String ProcessorConfigWifiAP(const String &var) {
   }
 
   if (var == "ERRORMSG") {
-    html_error.isSended = true;
-    return html_error.ErrorMsg;
-  }
-
-  if (var == "ERRORMSG") {
-    html_error.isSended = true;
-    return html_error.ErrorMsg;
+    return html_error.getErrorMsg();
   }
 
   if (var == "BODY") {
@@ -702,7 +722,7 @@ String ProcessorConfigGateway(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.Call;
+    return String("sLoRaAPRS for ") + reg.call;
   }
 
   if (var == "H2TITLE") {
@@ -722,8 +742,8 @@ String ProcessorConfigGateway(const String &var) {
   }
 
   if (var == "ERRORMSG") {
-    html_error.isSended = true;
-    return html_error.ErrorMsg;
+
+  return html_error.getErrorMsg();
   }
 
   if (var == "BODY") {
@@ -764,7 +784,7 @@ String ProcessorSendMessage(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.Call;
+    return String("sLoRaAPRS for ") + reg.call;
   }
 
   if (var == "H2TITLE") {
@@ -772,8 +792,8 @@ String ProcessorSendMessage(const String &var) {
   }
 
   if (var == "ERRORMSG") {
-    html_error.isSended = true;
-    return html_error.ErrorMsg;
+
+  return html_error.getErrorMsg();
   }
 
   if (var == "TO") {
@@ -831,7 +851,7 @@ String ProcessorConfigWLAN(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.Call;
+    return String("sLoRaAPRS for ") + reg.call;
   }
 
   if (var == "H2TITLE") {
@@ -879,8 +899,7 @@ String ProcessorConfigWLAN(const String &var) {
   }
 
   if (var == "ERRORMSG") {
-    html_error.isSended = true;
-    return html_error.ErrorMsg;
+    return html_error.getErrorMsg();
   }
 
   if (var == "BODY") {
@@ -978,7 +997,7 @@ String ProcessorChangeMode(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.Call;
+    return String("sLoRaAPRS for ") + reg.call;
   }
 
   if (var == "H2TITLE") {
@@ -986,8 +1005,7 @@ String ProcessorChangeMode(const String &var) {
   }
 
   if (var == "ERRORMSG") {
-    html_error.isSended = true;
-    return html_error.ErrorMsg;
+    return html_error.getErrorMsg();
   }
 
   if (var == "SELECT_RUNMODE") {
@@ -1034,12 +1052,11 @@ void handleRequestChangeMode(AsyncWebServerRequest *request) {
     new_wifi_mode = request->getParam("new_wifi_mode")->value();
   }
 
-
-
   if (new_system_mode.length() == 1 && new_wifi_mode.length() == 1) {
     EEPROM.write(EEPROM_ADDR_CURRENT_WIFI_MODE, atoi(new_wifi_mode.c_str()));
     EEPROM.commit();
-    EEPROM.write(EEPROM_ADDR_CURRENT_SYSTEM_MODE, atoi(new_system_mode.c_str()));
+    EEPROM.write(EEPROM_ADDR_CURRENT_SYSTEM_MODE,
+                 atoi(new_system_mode.c_str()));
     EEPROM.commit();
     if (reg.current_system_mode != (system_mode)atoi(new_system_mode.c_str()) ||
         reg.current_wifi_mode != (wifi_mode)atoi(new_wifi_mode.c_str())) {
@@ -1324,3 +1341,37 @@ void sendGPSDataJson(void) {
 
   // serializeJsonPretty(root, Serial);
 };
+
+String getWebParam(AsyncWebServerRequest *request, const char *key,
+                   String prefsvar) {
+  String new_var = "";
+  if (request->hasParam(key)) {
+    new_var = request->getParam(key)->value();
+    if (new_var.length() > 0 && new_var.length() < 32) {
+      prefsvar = new_var;
+    }
+    return new_var;
+  } else {
+    char buf[32] = {0};
+    snprintf(buf, 32, "key %s not found in request %s, no value written", key,
+             request->pathArg);
+    DDD(buf);
+    return String("");
+  }
+}
+
+String getWebParam(AsyncWebServerRequest *request, const char *key) {
+  String new_var = "";
+  if (request->hasParam(key)) {
+    new_var = request->getParam(key)->value();
+    if (new_var.length() > 0 && new_var.length() < 32) {
+      return new_var;
+    }
+  } else {
+    char buf[32] = {0};
+    snprintf(buf, 32, "key %s not found in request %s, no value written", key,
+             request->pathArg);
+    DDD(buf);
+    return String("");
+  }
+}

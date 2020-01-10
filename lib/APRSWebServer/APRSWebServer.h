@@ -69,6 +69,7 @@ String ProcessorWXInfo(const String& var);
 String getResetReason(RESET_REASON reason);
 #endif
 
-
+String getWebParam(AsyncWebServerRequest *request, const char* key, String prefsvar);
+String getWebParam(AsyncWebServerRequest *request, const char* key);
 
 #endif
