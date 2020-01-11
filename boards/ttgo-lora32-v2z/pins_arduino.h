@@ -21,7 +21,7 @@
 #define LORA_MISO 19     // GPIO19 - SX1276 MISO
 #define LORA_MOSI 27    // GPIO27 - SX1276 MOSI
 #define LORA_CS 18     // GPIO18 - SX1276 CS
-#define LORA_RST 14   // GPIO14 - SX1276 RST
+#define LORA_RST 23   // GPIO14 - SX1276 RST
 #define LORA_IRQ 26  // GPIO26 - SX1276 IRQ (interrupt request)
 
 static const uint8_t LED_BUILTIN = 2;
@@ -31,6 +31,10 @@ static const uint8_t KEY_BUILTIN = 0;
 
 static const uint8_t TX = 1;
 static const uint8_t RX = 3;
+
+static const uint8_t GPSTX = 34;
+static const uint8_t GPSRX = 12;
+
 
 static const uint8_t SDA = 21;
 static const uint8_t SCL = 22;

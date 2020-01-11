@@ -96,6 +96,8 @@ status = bme.begin(0x76);
   ESPFSInit();
 
   RegistryInit();
+
+  
   // // dumpEEPROM();
 
   // // @TOTO UART for ESP8266 GPS

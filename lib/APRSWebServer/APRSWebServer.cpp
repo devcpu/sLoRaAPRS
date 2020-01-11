@@ -37,28 +37,27 @@ typedef struct HTML_Error {
   String ErrorMsg;
   boolean isSended;
 
-  public: 
-    void setErrorMsg(String msg) {
-      if (ErrorMsg == "") {
-        ErrorMsg = msg;
-      } else {
-        ErrorMsg += msg;
-      }
-      isSended = false;
-      }
-    String getErrorMsg(void) {
-      isSended = true;
-      return ErrorMsg;
+ public:
+  void setErrorMsg(String msg) {
+    if (ErrorMsg == "") {
+      ErrorMsg = msg;
+    } else {
+      ErrorMsg += msg;
     }
+    isSended = false;
+  }
+  String getErrorMsg(void) {
+    isSended = true;
+    return ErrorMsg;
+  }
 };
 
 HTML_Error html_error;
 
 struct SendMsgForm {
   String to = "";
-  String gateways = "";
+  String wide = "0";
   String msg = "";
-  boolean via = false;
 };
 
 SendMsgForm send_msg_form_tmp;
@@ -294,7 +293,6 @@ String ProcessorDefault(const String &var) {
   return String("wrong placeholder " + var);
 }
 
-
 String systemInfoProcessor(const String &var) {
   if (var == "HTMLTILE") {
     return String("simple LoRaAPRS system by DL7UXA");
@@ -320,10 +318,11 @@ String systemInfoProcessor(const String &var) {
 }
 
 String getSystemInfoTable(void) {
-  // #ifdef ESP32
-  //   uint64_t chipid = chipid=ESP.getEfuseMac();//The chip ID is essentially
-  //   its MAC address(length: 6 bytes).
-  // #endif
+#ifdef ESP32
+  uint64_t chipid = chipid =
+      ESP.getEfuseMac();  // The chip ID is essentially its MAC address(length:
+                          // 6 bytes).
+#endif
 
   //  (ideSize != realSize) ? ""
   FlashMode_t ideMode = ESP.getFlashChipMode();
@@ -332,29 +331,29 @@ String getSystemInfoTable(void) {
       {"Build DateTime: ", GetBuildDateAndTime()},
       {"SDKVersion: ", String(ESP.getSdkVersion())},
       {"BootCount: ", String(reg.boot_count)},
-      {"Uptime: ", String(millis() / 1000/60, DEC) + "min"},
+      {"Uptime: ", String(millis() / 1000 / 60, DEC) + "min"},
 #ifdef ESP32
       {"Chip Revision:", String(ESP.getChipRevision())},
-      {"ESP32 Chip ID:", String((uint16_t)chipid>>32, HEX) +
-        String((uint32_t)chipid, HEX)},
+      {"ESP32 Chip ID:",
+       String((uint16_t)chipid >> 32, HEX) + String((uint32_t)chipid, HEX)},
       {"Reset Reason CPU0: ", getResetReason(rtc_get_reset_reason(0))},
       {"Reset Reason CPU1: ", getResetReason(rtc_get_reset_reason(1))},
       {"CpuFreqMHz: ", String(ESP.getCpuFreqMHz()) + "MHz"},
       {"CycleCount: ", String(ESP.getCycleCount())},
       {"FlashChipMode: ", String(ESP.getFlashChipMode())},
-      {"FlashChipSize: ", String(ESP.getFlashChipSize()/1024/1024) + "MB"},
+      {"FlashChipSize: ", String(ESP.getFlashChipSize() / 1024 / 1024) + "MB"},
       {"FlashChipSpeed: ", String(ESP.getFlashChipSpeed()) + "MHz"},
-      {"SketchSize: ", String(ESP.getSketchSize()/1024) + "kB"}, 
-      {"FreeSketchSpace: ", String(ESP.getFreeSketchSpace()/1024) + "kB"},
+      {"SketchSize: ", String(ESP.getSketchSize() / 1024) + "kB"},
+      {"FreeSketchSpace: ", String(ESP.getFreeSketchSpace() / 1024) + "kB"},
       {"SketchMD5: ", String(ESP.getSketchMD5())},
-      {"HeapSize: ", String(ESP.getHeapSize()/1024) + "kB"},
-      {"FreeHeap: ", String(ESP.getFreeHeap()/1024) + "kB"},
-      {"MaxAllocHeap: ", String(ESP.getMaxAllocHeap()/1024) + "kB"},
-      {"MinFreeHeap: ", String(ESP.getMinFreeHeap()/1024) + "kB"},
-      {"PsramSize: ", String(ESP.getPsramSize()/1024) + "kB"},
-      {"FreePsram", String(ESP.getFreePsram()/1024) + "kB"},
-      {"MaxAllocPsram: ", String(ESP.getMaxAllocPsram()/1024) + "kB"},
-      {"MinFreePsram", String(ESP.getMinFreePsram()/1024) + "kB"},
+      {"HeapSize: ", String(ESP.getHeapSize() / 1024) + "kB"},
+      {"FreeHeap: ", String(ESP.getFreeHeap() / 1024) + "kB"},
+      {"MaxAllocHeap: ", String(ESP.getMaxAllocHeap() / 1024) + "kB"},
+      {"MinFreeHeap: ", String(ESP.getMinFreeHeap() / 1024) + "kB"},
+      {"PsramSize: ", String(ESP.getPsramSize() / 1024) + "kB"},
+      {"FreePsram", String(ESP.getFreePsram() / 1024) + "kB"},
+      {"MaxAllocPsram: ", String(ESP.getMaxAllocPsram() / 1024) + "kB"},
+      {"MinFreePsram", String(ESP.getMinFreePsram() / 1024) + "kB"},
 #elif defined(ESP8266)
       {"Flash real id:", String(ESP.getFlashChipId(), HEX)},
       {"Flash real size:", String(ESP.getFlashChipRealSize() / 1024) + "kB"},
@@ -516,73 +515,64 @@ String ProcessorConfigCall(const String &var) {
 
 void handleRequestConfigCall(AsyncWebServerRequest *request) {
   DDD("handleRequestConfigCall");
-  
+
   // call
-  String new_call = getWebParam(request, "call");
-  if (new_call.length() > 2 && new_call.length() < 16) {
-    new_call.toUpperCase();
-    reg.call = new_call;
-  } else {
-    html_error.ErrorMsg = String("call to short or to long");
-    Serial.println("ERR: call not valide! " + new_call);
+
+  if (request->hasParam(PREFS_CALL)) {
+    String new_call = "";
+    new_call = getWebParam(request, PREFS_CALL);
+    if (new_call.length() > 2 && new_call.length() < 16) {
+      new_call.toUpperCase();
+      reg.call = new_call;
+      setPrefsString(PREFS_CALL, new_call);
+    } else {
+      html_error.ErrorMsg = String("call to short or to long");
+      Serial.println("ERR: call not valide! " + new_call);
+    }
   }
 
   DDD("call +OK");
 
   // aprs_call_ext
-  if (request->hasParam("aprs_call_ext")) {
-    String new_aprs_call_ext = getWebParam(request, "aprs_call_ext");
-    
+  if (request->hasParam(PREFS_APRS_CALL_EX)) {
+    String new_aprs_call_ext =
+        getWebParam(request, PREFS_APRS_CALL_EX, reg.aprs_call_ext);
   }
 
   DDD("aprs_ext +OK");
-  if (request->hasParam("wx_call_ext")) {
-    String wx_call_ext_x = request->getParam("wx_call_ext")->value();
-    if (validateNumber(wx_call_ext_x)) {
-      Serial.println("write param 'wx_call_ext' " + wx_call_ext_x);
-      EEPROMwriteString(EEPROM_ADDR_WX_EXT, wx_call_ext_x);
-      reg.wx_call_ext = wx_call_ext_x;
-    } else {
-      Serial.println("ERR: WX ext not valide! " + wx_call_ext_x);
-    }
+  String new_wx_call_ext = "";
+  if (request->hasParam(PREFS_WX_CALL_EX)) {
+    getWebParam(request, PREFS_WX_CALL_EX, reg.wx_call_ext);
+  } else {
+    Serial.println("ERR: WX ext not valide! " + new_wx_call_ext);
   }
+
   DDD("wx_ext +OK");
-  if (request->hasParam("aprs_symbol")) {
-    String aprs_symbol_tmp = request->getParam("aprs_symbol")->value();
-    if (aprs_symbol_tmp.length() == 1) {
-      char aprs_symbol_x = aprs_symbol_tmp.charAt(0);
-      Serial.println("write param 'aprs_symbol' " + aprs_symbol_tmp);
-      EEPROMwriteString(EEPROM_ADDR_APRS_SYMBOL, aprs_symbol_tmp);
-      reg.aprs_symbol = aprs_symbol_x;
-    } else {
-      Serial.println("ERR: APRS Symbol not valide!" + aprs_symbol_tmp);
-    }
+
+  String new_aprs_symbol = "";
+  if (request->hasParam(PREFS_APRS_SYMBOL)) {
+    new_aprs_symbol = getWebParam(request, PREFS_APRS_SYMBOL);
+    reg.aprs_symbol = new_aprs_symbol.indexOf(0);
+    setPrefsChar(PREFS_APRS_SYMBOL, new_aprs_symbol);
+  } else {
+    Serial.println("ERR: APRS Symbol not valide!" + new_aprs_symbol);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  if (request->hasParam("lat")) {
-    DDD("param lat");
-    String new_lat = request->getParam("lat")->value();
-    if (new_lat.length() > 6) {
-      Serial.println("write param 'lat' " + new_lat);
-      EEPROMwriteString(EEPROM_ADDR_LAT_FIX, new_lat);
-      reg.LatFIX = new_lat;
-    } else {
-      Serial.println("ERR: Lat not valide! " + new_lat);
-    }
+  if (request->hasParam(PREFS_POS_LAT_FIX)) {
+    String new_lat =
+        getWebParam(request, PREFS_POS_ALT_FIX, reg.posfix.latitude);
   }
 
-  if (request->hasParam("lng")) {
-    DDD("param lng");
-    String new_lng = request->getParam("lng")->value();
-    if (new_lng.length() > 6) {
-      Serial.println("write param 'lng' " + new_lng);
-      EEPROMwriteString(EEPROM_ADDR_LNG_FIX, new_lng);
-      reg.LatFIX = new_lng;
-    } else {
-      Serial.println("ERR: Lat not valide! " + new_lng);
-    }
+  if (request->hasParam(PREFS_POS_LNG_FIX)) {
+    String new_lat =
+        getWebParam(request, PREFS_POS_ALT_FIX, reg.posfix.longitude);
+  }
+
+  if (request->hasParam(PREFS_POS_ALT_FIX)) {
+    String new_lat =
+        getWebParam(request, PREFS_POS_ALT_FIX, reg.posfix.altitude);
   }
 }
 
@@ -647,20 +637,20 @@ String ProcessorConfigWifiAP(const String &var) {
     return String("Config Wifi AP");
   }
 
-  if (var == "APCredentials0") {
-    return reg.APCredentials[0];
+  if (var == PREFS_AP_SSID) {
+    return reg.APCredentials.auth_name;
   }
 
-  if (var == "APCredentials1") {
-    return reg.APCredentials[1];
+  if (var == PREFS_AP_PASS) {
+    return reg.APCredentials.auth_tocken;
   }
 
-  if (var == "WebCredentials0") {
-    return reg.WebCredentials[0];
+  if (var == PREFS_WEB_ADMIN) {
+    return reg.WebCredentials.auth_name;
   }
 
-  if (var == "WebCredentials1") {
-    return reg.WebCredentials[1];
+  if (var == PREFS_WEB_PASS) {
+    return reg.WebCredentials.auth_tocken;
   }
 
   if (var == "ERRORMSG") {
@@ -675,45 +665,22 @@ String ProcessorConfigWifiAP(const String &var) {
 }
 
 void handleRequestConfigAP(AsyncWebServerRequest *request) {
-  if (request->hasParam("APCredentials0")) {
-    String APCredentials0(request->getParam("APCredentials0")->value());
-    String APCredentials1;
-    if (request->hasParam("APCredentials1")) {
-      APCredentials1 = request->getParam("APCredentials1")->value();
-    }
-    if (APCredentials0.length() > 0 &&
-        APCredentials0.length() < EEPROM_USER_LENGTH &&
-        APCredentials1.length() > 0 &&
-        APCredentials1.length() < EEPROM_PASSWORD_LENGTH) {
-      EEPROMwriteString(EEPROM_ADDR_AP_CREDENTIAL00, APCredentials0);
-      EEPROMwriteString(EEPROM_ADDR_AP_CREDENTIAL01, APCredentials1);
-      reg.APCredentials[0] = APCredentials0;
-      reg.APCredentials[1] = APCredentials1;
-    } else {
-      Serial.println("ERR: SSID or Password valide! " + APCredentials0 + "/" +
-                     APCredentials1);
-    }
+  if (request->hasParam(PREFS_AP_SSID)) {
+    getWebParam(request, PREFS_AP_SSID, reg.APCredentials.auth_name);
   }
 
-  if (request->hasParam("WebCredentials0")) {
-    String WebCredentials0(request->getParam("WebCredentials0")->value());
-    String WebCredentials1;
-    if (request->hasParam("WebCredentials1")) {
-      WebCredentials1 = request->getParam("WebCredentials1")->value();
-    }
-    if (WebCredentials0.length() > 0 &&
-        WebCredentials0.length() < EEPROM_USER_LENGTH &&
-        WebCredentials1.length() > 0 &&
-        WebCredentials1.length() < EEPROM_PASSWORD_LENGTH) {
-      EEPROMwriteString(EEPROM_ADDR_WEB_CREDENTIAL00, WebCredentials0);
-      EEPROMwriteString(EEPROM_ADDR_WEB_CREDENTIAL01, WebCredentials1);
-      reg.WebCredentials[0] = WebCredentials0;
-      reg.WebCredentials[1] = WebCredentials1;
-    } else {
-      Serial.println("ERR: SSID or Password valide! " + WebCredentials0 + "/" +
-                     WebCredentials1);
-    }
+  if (request->hasParam(PREFS_AP_PASS)) {
+    getWebParam(request, PREFS_AP_PASS, reg.APCredentials.auth_tocken);
   }
+
+  if (request->hasParam(PREFS_WEB_ADMIN)) {
+    getWebParam(request, PREFS_WEB_ADMIN, reg.WebCredentials.auth_name);
+  }
+
+  if (request->hasParam(PREFS_WEB_PASS)) {
+    getWebParam(request, PREFS_WEB_PASS, reg.WebCredentials.auth_tocken);
+  }
+
 }
 
 String ProcessorConfigGateway(const String &var) {
@@ -729,21 +696,20 @@ String ProcessorConfigGateway(const String &var) {
     return String("Config GateWay");
   }
 
-  if (var == "APRSServer0") {
+  if (var == PREFS_APRS_SERVER0) {
     return reg.APRSServer[0];
   }
 
-  if (var == "APRSServer1") {
+  if (var == PREFS_APRS_SERVER1) {
     return reg.APRSServer[1];
   }
 
-  if (var == "APRSPassword") {
+  if (var == PREFS_APRS_PASSWORD) {
     return reg.APRSPassword;
   }
 
   if (var == "ERRORMSG") {
-
-  return html_error.getErrorMsg();
+    return html_error.getErrorMsg();
   }
 
   if (var == "BODY") {
@@ -754,28 +720,18 @@ String ProcessorConfigGateway(const String &var) {
 }
 
 void handleRequestConfigGateway(AsyncWebServerRequest *request) {
-  DDD("start");
-  String APRSServer0 = "";
-  String APRSServer1 = "";
-  String APRSPassword = "";
-  if (request->hasParam("APRSServer0")) {
-    APRSServer0 = request->getParam("APRSServer0")->value();
+  if (request->hasParam(PREFS_APRS_PASSWORD)) {
+    getWebParam(request, PREFS_APRS_PASSWORD, reg.APRSPassword);
   }
-  DDD("has APRSServer0");
-  if (request->hasParam("APRSServer1")) {
-    APRSServer1 = request->getParam("APRSServer1")->value();
+
+  if (request->hasParam(PREFS_APRS_SERVER0)) {
+    getWebParam(request, PREFS_APRS_SERVER0, reg.APRSServer[0]);
   }
-  DDD("has APRSServer1");
-  if (request->hasParam("APRSPassword")) {
-    APRSPassword = request->getParam("APRSPassword")->value();
+
+  if (request->hasParam(PREFS_APRS_SERVER1)) {
+    getWebParam(request, PREFS_APRS_SERVER1, reg.APRSServer[1]);
   }
-  DDD("has APRSPassword");
-  EEPROMwriteString(EEPROM_ADDR_APRS_SERVER, APRSServer0);
-  EEPROMwriteString(EEPROM_ADDR_APRS_SERVER + 50, APRSServer1);
-  EEPROMwriteString(EEPROM_ADDR_APRS_PASSWORD, APRSPassword);
-  reg.APRSServer[0] = APRSServer0;
-  reg.APRSServer[1] = APRSServer1;
-  reg.APRSPassword = APRSPassword;
+
 }
 
 String ProcessorSendMessage(const String &var) {
@@ -792,19 +748,18 @@ String ProcessorSendMessage(const String &var) {
   }
 
   if (var == "ERRORMSG") {
-
-  return html_error.getErrorMsg();
+    return html_error.getErrorMsg();
   }
 
-  if (var == "TO") {
+  if (var == MSG_FORM_TO) {
     return send_msg_form_tmp.to;
   }
 
-  if (var == "GATEWAY") {
-    return send_msg_form_tmp.gateways;
+  if (var == MSG_FORM_WIDE) {
+    return send_msg_form_tmp.wide;
   }
 
-  if (var == "MSG") {
+  if (var == MSG_FORM_MSG) {
     return send_msg_form_tmp.msg;
   }
 
@@ -816,31 +771,18 @@ String ProcessorSendMessage(const String &var) {
 }
 
 void handleRequestSendMessage(AsyncWebServerRequest *request) {
-  String msg = "";
-  String to = "";
-  String gateways = "";
-  if (request->hasParam("msg")) {
-    msg = request->getParam("msg")->value();
-  }
-  if (request->hasParam("to")) {
-    to = request->getParam("to")->value();
-  }
-  if (request->hasParam("gateways")) {
-    gateways = request->getParam("gateways")->value();
-  }
+  String msg = getWebParam(request, MSG_FORM_MSG);
+  String to = getWebParam(request, MSG_FORM_TO);
+  String wide = getWebParam(request, MSG_FORM_WIDE);
 
-  if (msg.length() > 200) {
-    send_msg_form_tmp.msg = msg;
-    if (gateways && gateways.length() > 3) {
-      send_msg_form_tmp.gateways = gateways;
-    }
-    send_msg_form_tmp.to = to;
-    return HTMLSendError("Message to long, please try again", request);
+  if (msg.length() > 0 && msg.length() < 256 && to.length() > 4) {
+    reg.TxMsg.msg = msg;
+    reg.TxMsg.to = to;
+  } else {
+    html_error.setErrorMsg("Error wrong parameter");
   }
-  reg.TxMsg.msg = msg;
-  reg.TxMsg.newmessage = true;
-  if (gateways.length() > 4) {
-    reg.TxMsg.gateways = gateways;
+  if (wide.length() > 0) {
+    reg.TxMsg.wide = wide;
   }
   reg.TxMsg.to = to;
 };
@@ -858,44 +800,36 @@ String ProcessorConfigWLAN(const String &var) {
     return String("Configure WLAN");
   }
 
-  if (var == "WifiCrendentials00") {
-    Serial.println(reg.WifiCrendentials[0][0]);
-    return reg.WifiCrendentials[0][0];
+  if (var == PREFS_LAN0_SSID) {
+    return reg.WifiCrendentials[0].auth_name;
   }
 
-  if (var == "WifiCrendentials01") {
-    Serial.println(reg.WifiCrendentials[0][1]);
-    return reg.WifiCrendentials[0][1];
+  if (var == PREFS_LAN0_AUTH) {
+    return reg.WifiCrendentials[0].auth_tocken;
   }
 
-  if (var == "WifiCrendentials10") {
-    Serial.println(reg.WifiCrendentials[1][0]);
-    return reg.WifiCrendentials[1][0];
+  if (var == PREFS_LAN1_SSID) {
+    return reg.WifiCrendentials[1].auth_name;
   }
 
-  if (var == "WifiCrendentials11") {
-    Serial.println(reg.WifiCrendentials[1][1]);
-    return reg.WifiCrendentials[1][1];
+  if (var == PREFS_LAN1_AUTH) {
+    return reg.WifiCrendentials[1].auth_tocken;
   }
 
-  if (var == "WifiCrendentials20") {
-    Serial.println(reg.WifiCrendentials[2][0]);
-    return reg.WifiCrendentials[2][0];
+  if (var == PREFS_LAN2_SSID) {
+    return reg.WifiCrendentials[2].auth_name;
   }
 
-  if (var == "WifiCrendentials21") {
-    Serial.println(reg.WifiCrendentials[2][1]);
-    return reg.WifiCrendentials[2][1];
+  if (var == PREFS_LAN2_AUTH) {
+    return reg.WifiCrendentials[2].auth_tocken;
   }
 
-  if (var == "WifiCrendentials30") {
-    Serial.println(reg.WifiCrendentials[3][0]);
-    return reg.WifiCrendentials[3][0];
+  if (var == PREFS_LAN3_SSID) {
+    return reg.WifiCrendentials[3].auth_name;
   }
 
-  if (var == "WifiCrendentials31") {
-    Serial.println(reg.WifiCrendentials[3][1]);
-    return reg.WifiCrendentials[3][1];
+  if (var == PREFS_LAN3_AUTH) {
+    return reg.WifiCrendentials[3].auth_tocken;
   }
 
   if (var == "ERRORMSG") {
@@ -910,86 +844,28 @@ String ProcessorConfigWLAN(const String &var) {
 };
 
 void handleRequestConfigWLAN(AsyncWebServerRequest *request) {
-  if (request->hasParam("WifiCrendentials00")) {
-    String WifiCrendentials00(request->getParam("WifiCrendentials00")->value());
-    String WifiCrendentials01;
-    if (request->hasParam("WifiCrendentials01")) {
-      WifiCrendentials01 = request->getParam("WifiCrendentials01")->value();
-    }
-    if (WifiCrendentials00.length() > 0 &&
-        WifiCrendentials00.length() < EEPROM_USER_LENGTH &&
-        WifiCrendentials01.length() > 0 &&
-        WifiCrendentials01.length() < EEPROM_PASSWORD_LENGTH) {
-      EEPROMwriteString(EEPROM_ADDR_WIFI_CREDENTIAL00, WifiCrendentials00);
-      EEPROMwriteString(EEPROM_ADDR_WIFI_CREDENTIAL01, WifiCrendentials01);
-      reg.WifiCrendentials[0][0] = WifiCrendentials00;
-      reg.WifiCrendentials[0][1] = WifiCrendentials01;
-    } else {
-      Serial.println("ERR: SSID or Password valide! " + WifiCrendentials00 +
-                     "/" + WifiCrendentials01);
-    }
+  if (request->hasParam(PREFS_LAN0_SSID)) {
+    getWebParam(request, PREFS_LAN0_SSID, reg.WifiCrendentials[0].auth_name);
+    getWebParam(request, PREFS_LAN0_AUTH, reg.WifiCrendentials[0].auth_tocken);
   }
 
-  if (request->hasParam("WifiCrendentials10")) {
-    String WifiCrendentials10(request->getParam("WifiCrendentials10")->value());
-    String WifiCrendentials11;
-    if (request->hasParam("WifiCrendentials11")) {
-      WifiCrendentials11 = request->getParam("WifiCrendentials11")->value();
-    }
-    if (WifiCrendentials10.length() > 0 &&
-        WifiCrendentials10.length() < EEPROM_USER_LENGTH &&
-        WifiCrendentials11.length() > 0 &&
-        WifiCrendentials11.length() < EEPROM_PASSWORD_LENGTH) {
-      EEPROMwriteString(EEPROM_ADDR_WIFI_CREDENTIAL10, WifiCrendentials10);
-      EEPROMwriteString(EEPROM_ADDR_WIFI_CREDENTIAL11, WifiCrendentials11);
-      reg.WifiCrendentials[1][0] = WifiCrendentials10;
-      reg.WifiCrendentials[1][1] = WifiCrendentials11;
-    } else {
-      Serial.println("ERR: SSID or Password valide! " + WifiCrendentials10 +
-                     "/" + WifiCrendentials11);
-    }
+  if (request->hasParam(PREFS_LAN1_SSID)) {
+    getWebParam(request, PREFS_LAN1_SSID, reg.WifiCrendentials[1].auth_name);
+    getWebParam(request, PREFS_LAN1_AUTH, reg.WifiCrendentials[1].auth_tocken);
   }
 
-  if (request->hasParam("WifiCrendentials20")) {
-    String WifiCrendentials20(request->getParam("WifiCrendentials20")->value());
-    String WifiCrendentials21;
-    if (request->hasParam("WifiCrendentials21")) {
-      WifiCrendentials21 = request->getParam("WifiCrendentials21")->value();
-    }
-    if (WifiCrendentials20.length() > 0 &&
-        WifiCrendentials20.length() < EEPROM_USER_LENGTH &&
-        WifiCrendentials21.length() > 0 &&
-        WifiCrendentials21.length() < EEPROM_PASSWORD_LENGTH) {
-      EEPROMwriteString(EEPROM_ADDR_WIFI_CREDENTIAL20, WifiCrendentials20);
-      EEPROMwriteString(EEPROM_ADDR_WIFI_CREDENTIAL21, WifiCrendentials21);
-      reg.WifiCrendentials[2][0] = WifiCrendentials20;
-      reg.WifiCrendentials[2][1] = WifiCrendentials21;
-    } else {
-      Serial.println("ERR: SSID or Password valide! " + WifiCrendentials20 +
-                     "/" + WifiCrendentials21);
-    }
+  if (request->hasParam(PREFS_LAN2_SSID)) {
+    getWebParam(request, PREFS_LAN2_SSID, reg.WifiCrendentials[2].auth_name);
+    getWebParam(request, PREFS_LAN2_AUTH, reg.WifiCrendentials[2].auth_tocken);
   }
 
-  if (request->hasParam("WifiCrendentials30")) {
-    String WifiCrendentials30(request->getParam("WifiCrendentials30")->value());
-    String WifiCrendentials31;
-    if (request->hasParam("WifiCrendentials31")) {
-      WifiCrendentials31 = request->getParam("WifiCrendentials31")->value();
-    }
-    if (WifiCrendentials30.length() > 0 &&
-        WifiCrendentials30.length() < EEPROM_USER_LENGTH &&
-        WifiCrendentials31.length() > 0 &&
-        WifiCrendentials31.length() < EEPROM_PASSWORD_LENGTH) {
-      EEPROMwriteString(EEPROM_ADDR_WIFI_CREDENTIAL30, WifiCrendentials30);
-      EEPROMwriteString(EEPROM_ADDR_WIFI_CREDENTIAL31, WifiCrendentials31);
-      reg.WifiCrendentials[3][0] = WifiCrendentials30;
-      reg.WifiCrendentials[3][1] = WifiCrendentials31;
-    } else {
-      Serial.println("ERR: SSID or Password valide! " + WifiCrendentials30 +
-                     "/" + WifiCrendentials31);
-    }
+  if (request->hasParam(PREFS_LAN3_SSID)) {
+    getWebParam(request, PREFS_LAN3_SSID, reg.WifiCrendentials[3].auth_name);
+    getWebParam(request, PREFS_LAN3_AUTH, reg.WifiCrendentials[3].auth_tocken);
   }
-};
+
+
+}
 
 String ProcessorChangeMode(const String &var) {
   if (var == "HTMLTILE") {
@@ -1008,7 +884,7 @@ String ProcessorChangeMode(const String &var) {
     return html_error.getErrorMsg();
   }
 
-  if (var == "SELECT_RUNMODE") {
+  if (var == PREFS_CURRENT_SYSTEM_MODE) {
     // enum system_mode {mode_tracker, mode_wxtracker, mode_wxfix,
     // mode_repeater, mode_gateway, mode_repeater_gateway};
     String options[] = {"GPS Tracker",
@@ -1018,19 +894,19 @@ String ProcessorChangeMode(const String &var) {
                         "APRS Gateway",
                         "APRS LoRa Repeater & APRS Gateway"};
 
-    return optionsFeldGenerator(reg.current_system_mode, "new_system_mode",
+    return optionsFeldGenerator(reg.current_system_mode, PREFS_CURRENT_SYSTEM_MODE,
                                 options, 6);
   }
 
   // enum wifi_mode {wifi_off, wifi_ap, wifi_client};
-  if (var == "SELECT_WIFIMODE") {
+  if (var == PREFS_CURRENT_WIFI_MODE) {
     String options[] = {
         "Wifi OFF",
         "Wifi AP",
         "WLAN Connect",
     };
 
-    return optionsFeldGenerator(reg.current_wifi_mode, "new_wifi_mode", options,
+    return optionsFeldGenerator(reg.current_wifi_mode, PREFS_CURRENT_WIFI_MODE, options,
                                 3);
   }
 
@@ -1043,29 +919,19 @@ String ProcessorChangeMode(const String &var) {
 
 void handleRequestChangeMode(AsyncWebServerRequest *request) {
   DDD("handleRequestChangeMode");
-  String new_system_mode = "";
-  String new_wifi_mode = "";
-  if (request->hasParam("new_system_mode")) {
-    new_system_mode = request->getParam("new_system_mode")->value();
-  }
-  if (request->hasParam("new_wifi_mode")) {
-    new_wifi_mode = request->getParam("new_wifi_mode")->value();
+  if (request->hasParam(PREFS_CURRENT_SYSTEM_MODE)) {
+    String new_system_mode = getWebParam(request, PREFS_CURRENT_SYSTEM_MODE);
+    setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE, new_system_mode.toInt());
+    reg.current_system_mode = (system_mode) new_system_mode.toInt();
   }
 
-  if (new_system_mode.length() == 1 && new_wifi_mode.length() == 1) {
-    EEPROM.write(EEPROM_ADDR_CURRENT_WIFI_MODE, atoi(new_wifi_mode.c_str()));
-    EEPROM.commit();
-    EEPROM.write(EEPROM_ADDR_CURRENT_SYSTEM_MODE,
-                 atoi(new_system_mode.c_str()));
-    EEPROM.commit();
-    if (reg.current_system_mode != (system_mode)atoi(new_system_mode.c_str()) ||
-        reg.current_wifi_mode != (wifi_mode)atoi(new_wifi_mode.c_str())) {
-      reg.current_system_mode = (system_mode)atoi(new_system_mode.c_str());
-      reg.current_wifi_mode = (wifi_mode)atoi(new_wifi_mode.c_str());
-      reg.new_mode = true;
-    }
+  if (request->hasParam(PREFS_CURRENT_WIFI_MODE)) {
+    String new_wifi_mode = getWebParam(request, PREFS_CURRENT_WIFI_MODE);
+    setPrefsUInt(PREFS_CURRENT_WIFI_MODE, new_wifi_mode.toInt());
+    reg.current_wifi_mode = (wifi_mode) new_wifi_mode.toInt();
   }
-};
+
+}
 
 String GetBuildDateAndTime(void) {
   // "2017-03-07T11:08:02" - ISO8601:2004
@@ -1349,15 +1215,33 @@ String getWebParam(AsyncWebServerRequest *request, const char *key,
     new_var = request->getParam(key)->value();
     if (new_var.length() > 0 && new_var.length() < 32) {
       prefsvar = new_var;
+      setPrefsString(key, new_var);
     }
     return new_var;
   } else {
     char buf[32] = {0};
-    snprintf(buf, 32, "key %s not found in request %s, no value written", key,
-             request->pathArg);
+    snprintf(buf, 32, "key %s not found in request,  no value written", key);
     DDD(buf);
     return String("");
   }
+  return new_var;
+}
+
+String getWebParam(AsyncWebServerRequest *request, const char *key,
+                   double prefsvar) {
+  String new_var = "";
+  if (request->hasParam(key)) {
+    new_var = request->getParam(key)->value();
+    prefsvar = new_var.toDouble();
+    setPrefsDouble(key, new_var.toDouble());
+    return new_var;
+  } else {
+    char buf[32] = {0};
+    snprintf(buf, 32, "key %s not found in request, no value written", key);
+    DDD(buf);
+    return String("");
+  }
+  return new_var;
 }
 
 String getWebParam(AsyncWebServerRequest *request, const char *key) {
@@ -1369,9 +1253,9 @@ String getWebParam(AsyncWebServerRequest *request, const char *key) {
     }
   } else {
     char buf[32] = {0};
-    snprintf(buf, 32, "key %s not found in request %s, no value written", key,
-             request->pathArg);
+    snprintf(buf, 32, "key %s not found in request, no value written", key);
     DDD(buf);
     return String("");
   }
+  return new_var;
 }

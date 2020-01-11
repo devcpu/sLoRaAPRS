@@ -57,7 +57,7 @@ AXP192_SLAVE_ADDRESS 0x34 comes from <axp20x.h>
 
 
 
-// GPS UART SoftWareSerial
+// GPS UART
 #ifdef T_BEAM_V1_0
    #define RXPin 12
    #define TXPin 34

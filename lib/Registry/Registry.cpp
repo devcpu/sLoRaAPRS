@@ -49,42 +49,46 @@ void RegistryInit(void) {
 
 
 void registryWriteInit(void){
-  setPrefsString(PREFS_VERSION, "0.0.1 prealpha");
-  setPrefsString(PREFS_RELASE, "Gehasi");
+  preferences.begin(NVS_APP_NAME_SPACE, false);
+  preferences.putString(PREFS_VERSION, "0.0.1 prealpha");
+  //setPrefsString(PREFS_VERSION, "0.0.1 prealpha");
+
+  // setPrefsString(PREFS_RELASE, "Gehasi");
+  preferences.putString(PREFS_RELASE, "Gehasi");
 
   setPrefsUInt(PREFS_CURRENT_WIFI_MODE, (uint8_t) reg.current_wifi_mode);
   setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE, reg.current_system_mode);
-    
+  delay(100);  
   setPrefsString(PREFS_CALL, reg.call);
   setPrefsString(PREFS_APRS_CALL_EX, reg.aprs_call_ext);
   setPrefsString(PREFS_WX_CALL_EX, reg.wx_call_ext);
   setPrefsChar(PREFS_APRS_SYMBOL, reg.aprs_symbol);
+  delay(100);
+  // setPrefsString(PREFS_WEB_ADMIN, reg.WebCredentials.auth_name);
+  // setPrefsString(PREFS_WEB_PASS, reg.WebCredentials.auth_tocken);
+  
+  // setPrefsString(PREFS_AP_SSID, reg.APCredentials.auth_name);
+  // setPrefsString(PREFS_AP_PASS, reg.APCredentials.auth_tocken);
+  
+  // setPrefsString(PREFS_LAN0_SSID, reg.WifiCrendentials[0].auth_name);
+  // setPrefsString(PREFS_LAN0_AUTH, reg.WifiCrendentials[0].auth_tocken);
+  // setPrefsString(PREFS_LAN1_SSID, reg.WifiCrendentials[0].auth_name);
+  // setPrefsString(PREFS_LAN1_AUTH, reg.WifiCrendentials[0].auth_tocken);
+  // setPrefsString(PREFS_LAN2_SSID, reg.WifiCrendentials[0].auth_name);
+  // setPrefsString(PREFS_LAN2_AUTH, reg.WifiCrendentials[0].auth_tocken);
+  // setPrefsString(PREFS_LAN3_SSID, reg.WifiCrendentials[0].auth_name);
+  // setPrefsString(PREFS_LAN3_AUTH, reg.WifiCrendentials[0].auth_tocken);
+  
+  
+  // setPrefsDouble(PREFS_POS_LAT_FIX, reg.posfix.latitude);
+  // setPrefsDouble(PREFS_POS_LNG_FIX, reg.posfix.longitude);
+  // setPrefsDouble(PREFS_POS_ALT_FIX, reg.posfix.altitude);
 
-  setPrefsString(PREFS_WEB_ADMIN, reg.WebCredentials.auth_name);
-  setPrefsString(PREFS_WEB_PASS, reg.WebCredentials.auth_tocken);
+  // setPrefsString(PREFS_APRS_PASSWORD, reg.APRSPassword);
+  // setPrefsString(PREFS_APRS_SERVER0, reg.APRSServer[0]);
+  // setPrefsString(PREFS_APRS_SERVER1, reg.APRSServer[1]);
   
-  setPrefsString(PREFS_AP_SSID, reg.APCredentials.auth_name);
-  setPrefsString(PREFS_AP_PASS, reg.APCredentials.auth_tocken);
-  
-  setPrefsString(PREFS_LAN0_SSID, reg.WifiCrendentials[0].auth_name);
-  setPrefsString(PREFS_LAN0_AUTH, reg.WifiCrendentials[0].auth_tocken);
-  setPrefsString(PREFS_LAN1_SSID, reg.WifiCrendentials[0].auth_name);
-  setPrefsString(PREFS_LAN1_AUTH, reg.WifiCrendentials[0].auth_tocken);
-  setPrefsString(PREFS_LAN2_SSID, reg.WifiCrendentials[0].auth_name);
-  setPrefsString(PREFS_LAN2_AUTH, reg.WifiCrendentials[0].auth_tocken);
-  setPrefsString(PREFS_LAN3_SSID, reg.WifiCrendentials[0].auth_name);
-  setPrefsString(PREFS_LAN3_AUTH, reg.WifiCrendentials[0].auth_tocken);
-  
-  
-  setPrefsDouble(PREFS_POS_LAT_FIX, reg.posfix.latitude);
-  setPrefsDouble(PREFS_POS_LNG_FIX, reg.posfix.longitude);
-  setPrefsDouble(PREFS_POS_ALT_FIX, reg.posfix.altitude);
-
-  setPrefsString(PREFS_APRS_PASSWORD, reg.APRSPassword);
-  setPrefsString(PREFS_APRS_SERVER0, reg.APRSServer[0]);
-  setPrefsString(PREFS_APRS_SERVER1, reg.APRSServer[1]);
-  
-  
+  preferences.end();
 };
 
 /* * * * * * * * * * * * * * * * * * * * * */
@@ -147,7 +151,11 @@ double getPrefsDouble(String key) {
 
 void setPrefsString(const char* key, char*  value){
   preferences.begin(NVS_APP_NAME_SPACE, false);
-  preferences.putString(key, value);
+  String old_value = getPrefsString(key);
+  if (old_value != value) {
+    preferences.putString(key, value);
+  }
+  
   preferences.end();
 }
 
@@ -162,7 +170,10 @@ void setPrefsString(String key, String value) {
 
 void setPrefsUInt(const char* key, uint16_t value) {
   preferences.begin(NVS_APP_NAME_SPACE, false);
-  preferences.putUInt(key, value);
+  uint16_t old_value = getPrefsInt(key);
+  if (old_value != value) {
+    preferences.putUInt(key, value);
+  }
   preferences.end();
 }
 
@@ -180,7 +191,11 @@ void setPrefsUInt(String key, String value) {
 
 void setPrefsDouble(const char *key, double value) {
   preferences.begin(NVS_APP_NAME_SPACE, false);
-  preferences.putDouble(key, value);
+  double old_value = getPrefsDouble(key);
+  if (old_value != value) {
+    preferences.putDouble(key, value);
+  }
+  
   preferences.end();
 }
 
@@ -197,7 +212,11 @@ void setPrefsDouble(String key, String value) {
 
 void setPrefsChar(const char* key, char value) {
   preferences.begin(NVS_APP_NAME_SPACE, false);
-  preferences.putChar(key, value);
+  char old_value = getPrefsChar(key);
+  if (old_value != value) {
+    preferences.putChar(key, value);
+  }
+  
   preferences.end();
 }
 

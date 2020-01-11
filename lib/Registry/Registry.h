@@ -37,6 +37,10 @@
 #define PREFS_POS_LNG_FIX "LNGFIX"
 #define PREFS_POS_ALT_FIX "ALTFIX"
 
+#define MSG_FORM_TO "to"
+#define MSG_FORM_WIDE "wide"
+#define MSG_FORM_MSG "msg"
+
 
 enum wifi_mode { 
   wifi_off, 
@@ -55,7 +59,7 @@ enum system_mode {
 
 struct APRSMessage {
   String msg;
-  String gateways;
+  String wide;
   String to;
   boolean processed;
   boolean newmessage;
