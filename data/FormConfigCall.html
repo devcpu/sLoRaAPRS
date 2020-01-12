@@ -11,12 +11,12 @@
     <input type="text" maxlength="1" name="aprs_symbol" value="%aprs_symbol%"><br />
   </label><br />
   <label>
-    APRS extension (%call%-%APRS_SELECT%):
-    <input name="aprs_call_ext" type="number" min="0" max="15" step="1" value="%APRS_SELECT%">
+    APRS extension (%call%-%aprs_ext%):
+    %aprs_ext_options%
   </label><br />
   <label>
-    WX extension (%call%-%WX_SELECT%):<br>
-    <input name="wx_call_ext" type="number" min="0" max="15" step="1" value="%WX_SELECT%">
+    WX extension (%call%-%wx_ext%):<br>
+    %wx_ext_options%
   </label><br /><br />
     <input type="submit" value="Submit">
   </fieldset>
@@ -30,15 +30,15 @@
     <legend>Configure Fix Position:</legend>
     <label>
       Latitude:
-    <input type="text" maxlength="12" name="LATFIX" value="%LATFIX%" required><br />
+    <input type="text" maxlength="12" name="lat_fix" value="%lat_fix%" required><br />
   </label><br />
   <label>
     Longtitude:
-    <input type="text" maxlength="12" name="LNGFIX" value="%LNGFIX%"><br />
+    <input type="text" maxlength="12" name="lng_fix" value="%lng_fix%"><br />
   </label><br />
   <label>
     Altitude:
-    <input type="text" maxlength="12" name="ALTFIX" value="%ALTFIX%"><br />
+    <input type="text" maxlength="12" name="alt_fix" value="%alt_fix%"><br />
   </label><br />
     <input type="submit" value="Submit">
   </fieldset>

@@ -4,7 +4,7 @@
 #include <LoRa.h>
 #include <LoRaAPRSConfig.h>
 
-void initLoRa();
+bool initLoRa(void);
 void sendMessage(char* outgoing);
 
 #endif

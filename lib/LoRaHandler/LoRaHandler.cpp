@@ -1,9 +1,10 @@
 #include <LoRaHandler.h>
 
-void initLoRa() {
+bool initLoRa() {
   LoRa.setPins(LoRaCsPin, LoRaResetPin, LoRaIRQPin);
   if (!LoRa.begin(LoRaTXFREQ)) {
     Serial.println("Starting LoRa failed!");
+    return false;
   }
   LoRa.setSpreadingFactor(LoRaSpreadingFactor);
   LoRa.setSignalBandwidth(LoRaSignalBandwidth);
@@ -13,7 +14,7 @@ void initLoRa() {
   }
   LoRa.setTxPower(LoRaTXdbmW);
   Serial.println("Init LoRa ready!");
-
+  return true;
 }
 
 

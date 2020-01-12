@@ -1,6 +1,7 @@
 #include <APRSWiFi.h>
 #include <LoRaAPRSConfig.h>
 #include <Registry.h>
+#include <TrackerDisplay.h>
 
 
 extern Registry reg; 
@@ -36,10 +37,12 @@ WiFi.softAP(reg.APCredentials[0], reg.APCredentials[1]);
     Serial.println("++++++++++   Password: " + reg.APCredentials.auth_tocken +
                    "         ++++++++++");
     Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    write3Line(" WIFI AP", reg.APCredentials.auth_name.c_str(), reg.APCredentials.auth_tocken.c_str(), false, 10000);
   } else {
     Serial.print("AP IP address: ");
     Serial.println(myIP);
     Serial.println("SSID: " + reg.APCredentials.auth_name);
+    write3Line(" WIFI AP", "  SSID:", reg.APCredentials.auth_name.c_str(), true, 10000);
   }
 }
 
@@ -50,7 +53,6 @@ void WifiConnect(void) {
   delay(1000);
   Serial.println("Trying Connecting to WiFi ..");
   WiFi.begin(reg.WifiCrendentials[0].auth_name.c_str(), reg.WifiCrendentials[0].auth_tocken.c_str());
-
 
 // @TODO
   uint8_t count = 0;
@@ -64,6 +66,7 @@ void WifiConnect(void) {
   Serial.println(WiFi.localIP());
   IPAddress myIP = WiFi.localIP();
   reg.SERVER_IP = myIP.toString();
+  write3Line("WiFiclient", reg.APCredentials.auth_name.c_str(), myIP.toString().c_str(), true, 10000);
 
 }
 

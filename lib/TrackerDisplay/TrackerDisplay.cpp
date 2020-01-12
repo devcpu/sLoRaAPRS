@@ -17,16 +17,17 @@ bool displayCange = true;
 uint16_t tracker_display_time = 3000;
 
 
-void initDisplay(void){
+bool initDisplay(void){
   Serial.println("Init Display SSD1306!");
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
      Serial.println("Dsiplay SSD1306 on 0x3c not ready!");
+     return false;
   }
   display.display();
   //write2Display(String("SystemInit"), String("Display +OK"), String(""), String(""));
 
-  delay(2000);
-
+  delay(1000);
+  return true;
 };
 
 // TextSize(1) ^= 21 Zeichen
@@ -56,7 +57,7 @@ void write2Display(String head = "", String line1 = "", String line2 = "", Strin
 
 
 void tracker_display_tick(void){
-  Serial.print(".");
+  //Serial.print(".");
   static uint64_t ts = 0;
   if (ts + tracker_display_time > millis()) {
     return;
@@ -152,7 +153,7 @@ void writeWX(){
 
 
 // fuer Erweiterungen in der Hauptzeile z.B. ttl next tx
-void writeHead(char* head){
+void writeHead(const char* head){
   char headx[11];
   char sat[3];
   char hdop[3];
@@ -161,8 +162,8 @@ void writeHead(char* head){
     snprintf(sat, 3, "%d", int(gps.satellites.value()));
     snprintf(hdop, 3, "%d", int(gps.hdop.hdop()));
   } else {
-    strcpy(sat, "XX");
-    strcpy(hdop, "XX");
+    strcpy(sat, "--");
+    strcpy(hdop, "--");
   }
 
   display.setTextColor(WHITE);
@@ -183,4 +184,32 @@ void write_no_vaild_data() {
   display.setCursor(0,44);
   display.println("data yet");
   display.display();
+}
+
+void write3Line(const char *head, const char *line1, const char *line2, bool toSerial, u_long sleep){
+  display.clearDisplay();
+  writeHead(head);
+  display.setTextSize(2); 
+  display.setCursor(0,22);
+  display.print(line1);
+  display.setCursor(0,44);
+  display.print(line2);
+  display.display();
+  if (toSerial) {
+    write3toSerial(head, line1, line2, sleep);
+  } else {
+    delay(sleep);
+  }
+  
+
+}
+
+void write3toSerial(const char *head, const char *line1, const char *line2, u_long sleep){
+    Serial.println("\n+------------");
+    Serial.printf("| %s\n", head);
+    Serial.println("+------------");
+    Serial.printf("| %s\n", line1);
+    Serial.printf("| %s\n", line2);
+    Serial.println("+------------\n\n");
+    delay(sleep);
 }

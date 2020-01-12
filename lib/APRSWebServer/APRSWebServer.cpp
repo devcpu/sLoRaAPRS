@@ -1,13 +1,4 @@
-#define MODDEBUG
-#ifdef MODDEBUG
-#define DDD(x) \
-  Serial.printf("DDD>: %s::%d %s\n", __FILE__, __LINE__, String(x).c_str());
-#else
-#define DDD(x) ;
-#endif
-
-#include <debug.h>
-
+#include <uxa_debug.h>
 #include <APRSWebServer.h>
 #include <APRSWiFi.h>
 #include <APRS_MSG.h>
@@ -16,10 +7,13 @@
 #include <AsyncJson.h>
 #include <Registry.h>
 #include <TinyGPS++.h>
-
+#include <Preferences.h>
 #include <SPIFFSEditor.h>
 
 #include <Ticker.h>
+
+extern Preferences preferences;
+
 //#include "CallBackList.h"
 
 // @TODO remove together with restart()
@@ -342,7 +336,7 @@ String getSystemInfoTable(void) {
       {"CycleCount: ", String(ESP.getCycleCount())},
       {"FlashChipMode: ", String(ESP.getFlashChipMode())},
       {"FlashChipSize: ", String(ESP.getFlashChipSize() / 1024 / 1024) + "MB"},
-      {"FlashChipSpeed: ", String(ESP.getFlashChipSpeed()) + "MHz"},
+      {"FlashChipSpeed: ", String(ESP.getFlashChipSpeed()/1024/1024) + "MHz"},
       {"SketchSize: ", String(ESP.getSketchSize() / 1024) + "kB"},
       {"FreeSketchSpace: ", String(ESP.getFreeSketchSpace() / 1024) + "kB"},
       {"SketchMD5: ", String(ESP.getSketchMD5())},
@@ -464,6 +458,28 @@ String getResetReason(RESET_REASON reason) {
 #endif
 
 String ProcessorConfigCall(const String &var) {
+
+      String options[][2] = {
+        {" -0: Primärstation", "0"},
+        {" -1: weiter allgemeine Std", "1"},
+        {" -2: weiter allgemeine Std", "2"},
+        {" -3: weiter allgemeine Std", "3"},
+        {" -4: weiter allgemeine Std", "4"},
+        {" -5: anderses Netzwerk (D-Star / 3G)", "5"},
+        {" -6: Satellit", "6"},
+        {" -7: Handfunkgerät", "7"},
+        {" -8: Boot / Schiff", "8"},
+        {" -9: Mobilstadtion", "9"},
+        {"-10: APRS-IS ohne Funkmodul", "10"},
+        {"-11: Ballon / Fluggerät / Raumschiff", "11"},
+        {"-12: APRStt / DTML (Einweg)", "12"},
+        {"-13: Wetterstation", "13"},
+        {"-14: Lastkraftwagen (permanent)", "14"},
+        {"-15: weiter allgemeine Std", "15"},
+    };
+
+
+
   if (var == "HTMLTILE") {
     return String("simple LoRaAPRS system by DL7UXA");
   }
@@ -481,11 +497,15 @@ String ProcessorConfigCall(const String &var) {
   }
 
   if (var == PREFS_POS_LAT_FIX) {
-    return String(reg.posfix.latitude);
+    return String(reg.posfix.latitude, 6);
   }
 
   if (var == PREFS_POS_LNG_FIX) {
-    return String(reg.posfix.longitude);
+    return String(reg.posfix.longitude, 6);
+  }
+
+  if (var == PREFS_POS_ALT_FIX) {
+    return String(reg.posfix.altitude, 1);
   }
 
   if (var == "ERRORMSG") {
@@ -497,14 +517,24 @@ String ProcessorConfigCall(const String &var) {
     return String(reg.aprs_symbol);
   }
 
+  if (var == "aprs_ext_options") {
+    return optionsFeldGenerator(reg.aprs_call_ext.toInt(), PREFS_APRS_CALL_EX, options, 16);
+  }
+
   if (var == PREFS_APRS_CALL_EX) {
     return reg.aprs_call_ext;
   }
 
-  if (var == PREFS_WX_CALL_EX) {
+
+  if (var == "wx_ext_options") {
     DDD(reg.wx_call_ext);
+    return optionsFeldGenerator(reg.wx_call_ext.toInt(), PREFS_WX_CALL_EX, options, 16);
+  }
+
+  if (var == PREFS_WX_CALL_EX) {
     return reg.wx_call_ext;
   }
+
 
   if (var == "BODY") {
     return readSPIFFS2String("/FormConfigCall.html") + mainmenue;
@@ -521,10 +551,14 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_CALL)) {
     String new_call = "";
     new_call = getWebParam(request, PREFS_CALL);
+    DDD(new_call);
     if (new_call.length() > 2 && new_call.length() < 16) {
       new_call.toUpperCase();
+      DDD(new_call)
       reg.call = new_call;
+      DDD("to_reg.call");
       setPrefsString(PREFS_CALL, new_call);
+      DDD("setPrefsString");
     } else {
       html_error.ErrorMsg = String("call to short or to long");
       Serial.println("ERR: call not valide! " + new_call);
@@ -534,18 +568,12 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
   DDD("call +OK");
 
   // aprs_call_ext
-  if (request->hasParam(PREFS_APRS_CALL_EX)) {
-    String new_aprs_call_ext =
-        getWebParam(request, PREFS_APRS_CALL_EX, reg.aprs_call_ext);
-  }
+  reg.aprs_call_ext = getWebParam(request, PREFS_APRS_CALL_EX);
+  setPrefsString(PREFS_APRS_CALL_EX, reg.aprs_call_ext);
 
   DDD("aprs_ext +OK");
-  String new_wx_call_ext = "";
-  if (request->hasParam(PREFS_WX_CALL_EX)) {
-    getWebParam(request, PREFS_WX_CALL_EX, reg.wx_call_ext);
-  } else {
-    Serial.println("ERR: WX ext not valide! " + new_wx_call_ext);
-  }
+  reg.wx_call_ext = getWebParam(request, PREFS_WX_CALL_EX);
+  setPrefsString(PREFS_WX_CALL_EX, reg.wx_call_ext);
 
   DDD("wx_ext +OK");
 
@@ -553,7 +581,8 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_APRS_SYMBOL)) {
     new_aprs_symbol = getWebParam(request, PREFS_APRS_SYMBOL);
     reg.aprs_symbol = new_aprs_symbol.indexOf(0);
-    setPrefsChar(PREFS_APRS_SYMBOL, new_aprs_symbol);
+    DDD(new_aprs_symbol);
+    setPrefsChar(PREFS_APRS_SYMBOL, new_aprs_symbol.indexOf(0));
   } else {
     Serial.println("ERR: APRS Symbol not valide!" + new_aprs_symbol);
   }
@@ -562,17 +591,25 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
 
   if (request->hasParam(PREFS_POS_LAT_FIX)) {
     String new_lat =
-        getWebParam(request, PREFS_POS_ALT_FIX, reg.posfix.latitude);
+        getWebParam(request, PREFS_POS_LAT_FIX);
+    DDD(new_lat);
+    reg.posfix.latitude = new_lat.toDouble();
+    setPrefsDouble(PREFS_POS_LAT_FIX, reg.posfix.latitude);
   }
 
   if (request->hasParam(PREFS_POS_LNG_FIX)) {
-    String new_lat =
-        getWebParam(request, PREFS_POS_ALT_FIX, reg.posfix.longitude);
+    String new_lng =
+        getWebParam(request, PREFS_POS_LNG_FIX);
+    reg.posfix.longitude = new_lng.toDouble();
+    setPrefsDouble(PREFS_POS_LNG_FIX, reg.posfix.longitude);
   }
 
   if (request->hasParam(PREFS_POS_ALT_FIX)) {
-    String new_lat =
-        getWebParam(request, PREFS_POS_ALT_FIX, reg.posfix.altitude);
+    String new_alt =
+        getWebParam(request, PREFS_POS_ALT_FIX);
+    reg.posfix.altitude = new_alt.toDouble();
+    setPrefsDouble(PREFS_POS_ALT_FIX, reg.posfix.altitude);
+
   }
 }
 
@@ -666,19 +703,25 @@ String ProcessorConfigWifiAP(const String &var) {
 
 void handleRequestConfigAP(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_AP_SSID)) {
-    getWebParam(request, PREFS_AP_SSID, reg.APCredentials.auth_name);
+  
+    reg.APCredentials.auth_name = getWebParam(request, PREFS_AP_SSID);
+    setPrefsString(PREFS_AP_SSID, reg.APCredentials.auth_name);
+
   }
 
   if (request->hasParam(PREFS_AP_PASS)) {
-    getWebParam(request, PREFS_AP_PASS, reg.APCredentials.auth_tocken);
+    reg.APCredentials.auth_tocken = getWebParam(request, PREFS_AP_PASS);
+    setPrefsString(PREFS_AP_PASS, reg.APCredentials.auth_tocken);
   }
 
   if (request->hasParam(PREFS_WEB_ADMIN)) {
-    getWebParam(request, PREFS_WEB_ADMIN, reg.WebCredentials.auth_name);
+    reg.WebCredentials.auth_name = getWebParam(request, PREFS_WEB_ADMIN);
+    setPrefsString(PREFS_WEB_ADMIN, reg.WebCredentials.auth_name);
   }
 
   if (request->hasParam(PREFS_WEB_PASS)) {
-    getWebParam(request, PREFS_WEB_PASS, reg.WebCredentials.auth_tocken);
+    reg.WebCredentials.auth_tocken = getWebParam(request, PREFS_WEB_PASS);
+    setPrefsString(PREFS_WEB_PASS, reg.WebCredentials.auth_tocken);
   }
 
 }
@@ -721,15 +764,18 @@ String ProcessorConfigGateway(const String &var) {
 
 void handleRequestConfigGateway(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_APRS_PASSWORD)) {
-    getWebParam(request, PREFS_APRS_PASSWORD, reg.APRSPassword);
+    reg.APRSPassword = getWebParam(request, PREFS_APRS_PASSWORD);
+    setPrefsString(PREFS_APRS_PASSWORD, reg.APRSPassword);
   }
 
   if (request->hasParam(PREFS_APRS_SERVER0)) {
-    getWebParam(request, PREFS_APRS_SERVER0, reg.APRSServer[0]);
+    reg.APRSServer[0] = getWebParam(request, PREFS_APRS_SERVER0);
+    setPrefsString(PREFS_APRS_SERVER0, reg.APRSServer[0]);
   }
 
   if (request->hasParam(PREFS_APRS_SERVER1)) {
-    getWebParam(request, PREFS_APRS_SERVER1, reg.APRSServer[1]);
+    reg.APRSServer[1] = getWebParam(request, PREFS_APRS_SERVER1);
+    setPrefsString(PREFS_APRS_SERVER1, reg.APRSServer[1]);
   }
 
 }
@@ -845,23 +891,31 @@ String ProcessorConfigWLAN(const String &var) {
 
 void handleRequestConfigWLAN(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_LAN0_SSID)) {
-    getWebParam(request, PREFS_LAN0_SSID, reg.WifiCrendentials[0].auth_name);
-    getWebParam(request, PREFS_LAN0_AUTH, reg.WifiCrendentials[0].auth_tocken);
+    reg.WifiCrendentials[0].auth_name = getWebParam(request, PREFS_LAN0_SSID);
+    setPrefsString(PREFS_LAN0_SSID, reg.WifiCrendentials[0].auth_name);
+    reg.WifiCrendentials[0].auth_tocken = getWebParam(request, PREFS_LAN0_AUTH);
+    setPrefsString(PREFS_LAN0_AUTH, reg.WifiCrendentials[0].auth_tocken);
   }
 
   if (request->hasParam(PREFS_LAN1_SSID)) {
-    getWebParam(request, PREFS_LAN1_SSID, reg.WifiCrendentials[1].auth_name);
-    getWebParam(request, PREFS_LAN1_AUTH, reg.WifiCrendentials[1].auth_tocken);
+    reg.WifiCrendentials[1].auth_name = getWebParam(request, PREFS_LAN1_SSID);
+    setPrefsString(PREFS_LAN1_SSID, reg.WifiCrendentials[1].auth_name);
+    reg.WifiCrendentials[1].auth_tocken = getWebParam(request, PREFS_LAN1_AUTH);
+    setPrefsString(PREFS_LAN1_AUTH, reg.WifiCrendentials[1].auth_tocken);
   }
 
   if (request->hasParam(PREFS_LAN2_SSID)) {
-    getWebParam(request, PREFS_LAN2_SSID, reg.WifiCrendentials[2].auth_name);
-    getWebParam(request, PREFS_LAN2_AUTH, reg.WifiCrendentials[2].auth_tocken);
+    reg.WifiCrendentials[2].auth_name = getWebParam(request, PREFS_LAN2_SSID);
+    setPrefsString(PREFS_LAN2_SSID, reg.WifiCrendentials[2].auth_name);
+    reg.WifiCrendentials[2].auth_tocken = getWebParam(request, PREFS_LAN2_AUTH);
+    setPrefsString(PREFS_LAN2_AUTH, reg.WifiCrendentials[2].auth_tocken);
   }
 
   if (request->hasParam(PREFS_LAN3_SSID)) {
-    getWebParam(request, PREFS_LAN3_SSID, reg.WifiCrendentials[3].auth_name);
-    getWebParam(request, PREFS_LAN3_AUTH, reg.WifiCrendentials[3].auth_tocken);
+    reg.WifiCrendentials[3].auth_name = getWebParam(request, PREFS_LAN3_SSID);
+    setPrefsString(PREFS_LAN3_SSID, reg.WifiCrendentials[3].auth_name);
+    reg.WifiCrendentials[3].auth_tocken = getWebParam(request, PREFS_LAN3_AUTH);
+    setPrefsString(PREFS_LAN3_AUTH, reg.WifiCrendentials[3].auth_tocken);
   }
 
 
@@ -887,23 +941,25 @@ String ProcessorChangeMode(const String &var) {
   if (var == PREFS_CURRENT_SYSTEM_MODE) {
     // enum system_mode {mode_tracker, mode_wxtracker, mode_wxfix,
     // mode_repeater, mode_gateway, mode_repeater_gateway};
-    String options[] = {"GPS Tracker",
-                        "WX Tracker",
-                        "WX Fix Position (no GPS)",
-                        "APRS LoRa Repeater",
-                        "APRS Gateway",
-                        "APRS LoRa Repeater & APRS Gateway"};
+    String options[][2] = {
+        {"GPS Tracker", "0"},
+        {"WX Tracker", "1"},
+        {"WX Fix Position (no GPS)", "2"},
+        {"APRS LoRa Repeater", "3"},
+        {"APRS Gateway", "4"},
+        {"APRS LoRa Repeater & APRS Gateway", String(mode_repeater_gateway)},
+    };
 
-    return optionsFeldGenerator(reg.current_system_mode, PREFS_CURRENT_SYSTEM_MODE,
-                                options, 6);
+    return optionsFeldGenerator(reg.current_system_mode,
+                                PREFS_CURRENT_SYSTEM_MODE, options, 6);
   }
 
   // enum wifi_mode {wifi_off, wifi_ap, wifi_client};
   if (var == PREFS_CURRENT_WIFI_MODE) {
-    String options[] = {
-        "Wifi OFF",
-        "Wifi AP",
-        "WLAN Connect",
+    String options[][2] = {
+        { "Wifi OFF", "0"},
+        {"Wifi AP", "1" },
+        {"WLAN Connect", "2" }
     };
 
     return optionsFeldGenerator(reg.current_wifi_mode, PREFS_CURRENT_WIFI_MODE, options,
@@ -1042,27 +1098,36 @@ String readSPIFFS2String(const char *path) {
   return retvar;
 };
 
-String optionsFeldGenerator(uint8_t selected, const char *name, String data[],
+/**
+ * @brief generates HTML options field from given parameter
+ * 
+ * @param selected pre selected field
+ * @param name field name (HTML)
+ * @param data array of HTML display Strings (keys) -> values
+ * @param size count elements
+ * @return String 
+ */
+String optionsFeldGenerator(uint8_t selected, const char *name, String data[][2],
                             uint8_t size) {
   DDD(name);
   DDD(selected);
-  char buf[1000] = {0};
-  char zbuf[128] = {0};
+  char buf[1200] = {0};
+  char zbuf[1200] = {0};
   char selectxt[32] = {0};
-  snprintf(zbuf, 128, "\n\n<select name='%s'>\n", name);
-  strncat(buf, zbuf, 1000);
+  snprintf(zbuf, 1200, "\n\n<select name='%s'>\n", name);
+  strncat(buf, zbuf, 1200);
   for (uint8_t i = 0; i < size; i++) {
     if (i == selected) {
-      strncpy(selectxt, "selected", 32);
+      strncpy(selectxt, " selected ", 32);
     } else {
       strncpy(selectxt, "", 32);
     }
-    snprintf(zbuf, 64, "<option value='%d' %s> %s</option>\n", i, selectxt,
-             data[i].c_str());
-    strncat(buf, zbuf, 128);
+    snprintf(zbuf, 1200, "<option value=\"%s\"%s>%s</option>\n", data[i][1].c_str(), selectxt,
+             data[i][0].c_str());
+    strncat(buf, zbuf, 1200);
   }  // END for
 
-  strncat(buf, "</select>\n\n", 1000);
+  strncat(buf, "</select>\n\n", 1200);
 
   DDD(name);
 
@@ -1208,41 +1273,42 @@ void sendGPSDataJson(void) {
   // serializeJsonPretty(root, Serial);
 };
 
-String getWebParam(AsyncWebServerRequest *request, const char *key,
-                   String prefsvar) {
-  String new_var = "";
-  if (request->hasParam(key)) {
-    new_var = request->getParam(key)->value();
-    if (new_var.length() > 0 && new_var.length() < 32) {
-      prefsvar = new_var;
-      setPrefsString(key, new_var);
-    }
-    return new_var;
-  } else {
-    char buf[32] = {0};
-    snprintf(buf, 32, "key %s not found in request,  no value written", key);
-    DDD(buf);
-    return String("");
-  }
-  return new_var;
-}
+// String getWebParam(AsyncWebServerRequest *request, const char *key,
+//                    String prefsvar) {
+//   String new_var = "";
+//   if (request->hasParam(key)) {
+//     new_var = request->getParam(key)->value();
+//     if (new_var.length() > 0 && new_var.length() < 32) {
+//       prefsvar = new_var;
+//       Serial.printf("set new var to reg key=%s value=%s\n", key, new_var);
+//       setPrefsString(key, new_var);
+//     }
+//     return new_var;
+//   } else {
+//     char buf[32] = {0};
+//     snprintf(buf, 32, "ERR> key %s not found in request,  no value written", key);
+//     DDD(buf);
+//     return String("");
+//   }
+//   return new_var;
+// }
 
-String getWebParam(AsyncWebServerRequest *request, const char *key,
-                   double prefsvar) {
-  String new_var = "";
-  if (request->hasParam(key)) {
-    new_var = request->getParam(key)->value();
-    prefsvar = new_var.toDouble();
-    setPrefsDouble(key, new_var.toDouble());
-    return new_var;
-  } else {
-    char buf[32] = {0};
-    snprintf(buf, 32, "key %s not found in request, no value written", key);
-    DDD(buf);
-    return String("");
-  }
-  return new_var;
-}
+// String getWebParam(AsyncWebServerRequest *request, const char *key,
+//                    double prefsvar) {
+//   String new_var = "";
+//   if (request->hasParam(key)) {
+//     new_var = request->getParam(key)->value();
+//     prefsvar = new_var.toDouble();
+//     setPrefsDouble(key, new_var.toDouble());
+//     return new_var;
+//   } else {
+//     char buf[32] = {0};
+//     snprintf(buf, 32, "key %s not found in request, no value written", key);
+//     DDD(buf);
+//     return String("");
+//   }
+//   return new_var;
+// }
 
 String getWebParam(AsyncWebServerRequest *request, const char *key) {
   String new_var = "";

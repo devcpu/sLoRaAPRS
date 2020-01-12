@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#define NVS_APP_NAME_SPACE "sLA"
+#define NVS_APP_NAME_SPACE "sla"
 #define SYSTEM_STRING "sLoRaAPRS"
 #define DEFAULT_PASSWORD "letmein42"
 #define CHANGE_ME "CHANGEME"
@@ -12,12 +12,12 @@
 #define PREFS_VERSION "Version"
 #define PREFS_RELASE "Release"
 #define PREFS_BOOT_COUNT "boot_count"
-#define PREFS_CURRENT_WIFI_MODE "current_wifi_mode"
-#define PREFS_CURRENT_SYSTEM_MODE "current_system_mode"
+#define PREFS_CURRENT_WIFI_MODE "c_wifi_mode"
+#define PREFS_CURRENT_SYSTEM_MODE "c_system_mode"
 #define PREFS_CALL "call"
 #define PREFS_APRS_SYMBOL "aprs_symbol"
-#define PREFS_APRS_CALL_EX "aprs_call_ext"
-#define PREFS_WX_CALL_EX "wx_call_ext"
+#define PREFS_APRS_CALL_EX "aprs_ext"
+#define PREFS_WX_CALL_EX "wx_ext"
 #define PREFS_WEB_ADMIN "web_admin"
 #define PREFS_WEB_PASS "web_pass"
 #define PREFS_AP_SSID "ap_ssid"
@@ -27,15 +27,15 @@
 #define PREFS_APRS_SERVER1 "aprs_server1"
 #define PREFS_LAN0_SSID "lan0_ssid"
 #define PREFS_LAN0_AUTH "lan0_auth"
-#define PREFS_LAN1_SSID "lan0_ssid"
-#define PREFS_LAN1_AUTH "lan0_auth"
-#define PREFS_LAN2_SSID "lan0_ssid"
-#define PREFS_LAN2_AUTH "lan0_auth"
-#define PREFS_LAN3_SSID "lan0_ssid"
-#define PREFS_LAN3_AUTH "lan0_auth"
-#define PREFS_POS_LAT_FIX "LatFIX"
-#define PREFS_POS_LNG_FIX "LNGFIX"
-#define PREFS_POS_ALT_FIX "ALTFIX"
+#define PREFS_LAN1_SSID "lan1_ssid"
+#define PREFS_LAN1_AUTH "lan1_auth"
+#define PREFS_LAN2_SSID "lan2_ssid"
+#define PREFS_LAN2_AUTH "lan2_auth"
+#define PREFS_LAN3_SSID "lan3_ssid"
+#define PREFS_LAN3_AUTH "lan3_auth"
+#define PREFS_POS_LAT_FIX "lat_fix"
+#define PREFS_POS_LNG_FIX "lng_fix"
+#define PREFS_POS_ALT_FIX "alt_fix"
 
 #define MSG_FORM_TO "to"
 #define MSG_FORM_WIDE "wide"
@@ -84,6 +84,7 @@ struct Credentials {
 
 struct Registry {
   String Version = "";
+  String Release = "";
   boolean newTxMesg = false;
   boolean newRxMesg = false;
   
@@ -123,27 +124,25 @@ void RegistryInit(void);
 
 void registryWriteInit(void);
 
+
+
+
+
 String getPrefsString(String key);
+void setPrefsString(const char* key, String  value);
+
 uint16_t getPrefsInt(String key);
-char getPrefsChar(String key);
-
-void setPrefsString(const char* key, char*  value);
-void setPrefsString(const char* key, String value);
-void setPrefsString(String key, String value);
-
 void setPrefsUInt(const char* key, uint16_t value);
-void setPrefsUInt(String key, uint16_t value);
-void setPrefsUInt(const char* key, uint16_t value);
-void setPrefsUInt(String key, String value);
-
 
 double getPrefsDouble(const char *key);
-double getPrefsDouble(String key);
 void setPrefsDouble(const char *key, double value);
-void setPrefsDouble(const char *key, String value);
-void setPrefsDouble(String key, String value);
 
+char getPrefsChar(String key);
 void setPrefsChar(const char* key, char value);
-void setPrefsChar(String key, String value);
+
+void RegistryToString(void);
+
+String getRunMode();
+String getWifiMode();
 
 #endif

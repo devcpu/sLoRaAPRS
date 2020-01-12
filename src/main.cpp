@@ -19,19 +19,9 @@
 #include <OneButtonHandler.h>
 #include <SPI.h>
 #include <TrackerDisplay.h>
-
+#include <BMEHandler.h>
 #include <fap.h>
 //#include <iGate.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
-
-// 1013.25 ^= -50.96m
-// 1100.00 ^= 634.93m
-// 1033.25 ^= 116.89m
-// 1029.57 ^= 83.80 m
-#define SEALEVELPRESSURE_HPA (1029.57)
-Adafruit_BME280 bme;
-
 
 extern Registry reg;  // config & system status
 
@@ -54,72 +44,67 @@ void setup() {
   // ESP.deepSleep(1, WAKE_RF_DISABLED);
   Serial.begin(115200);
   delay(1000);
-  Serial.println("sLoRaAPRS system starting ...");
-  Wire.begin(SDA, SCL);
-  delay(500);
 
-  #ifdef T_BEAM_V1_0
-    initAXP();
-  #endif
+  if (Wire.begin(SDA, SCL)) {
+    write3toSerial("Init I2C", "  System", "   +OK", DISPLA_DELAY_SHORT);  
+  } else {
+    write3toSerial("Init I2C", "   -ERR", "check wire", DISPLA_DELAY_LONG);
+  }
 
+  if (initDisplay()) {
+    write3Line("Init Disp.", "Display", "   +OK", true, DISPLA_DELAY_SHORT);  
+  } else {
+    write3Line("Init Disp.", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);  
+  }
 
-unsigned status;
-status = bme.begin(0x76);
+  //write3Line({{""}, {""}, {""}}, true, 1);
+#ifdef T_BEAM_V1_0
+    if (initAXP()) {
+      write3Line("Init AXP", " AXP 192", "   +OK", true, DISPLA_DELAY_SHORT);
+    } else {
+      write3Line("Init AXP", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);
+    }
+#endif
 
-    bme.setSampling(Adafruit_BME280::MODE_FORCED,
-                    Adafruit_BME280::SAMPLING_X1, // temperature
-                    Adafruit_BME280::SAMPLING_X1, // pressure
-                    Adafruit_BME280::SAMPLING_X1, // humidity
-                    Adafruit_BME280::FILTER_OFF   );
-                      
-    // suggested rate is 1/60Hz (1m)
-
-    bme.takeForcedMeasurement();
-    Serial.print("Temperature = ");
-    Serial.print(bme.readTemperature());
-    Serial.println(" *C");
-    Serial.print("Pressure = ");
-    Serial.print(bme.readPressure() / 100.0F);
-    Serial.println(" hPa");
-    Serial.print("Approx. Altitude = ");
-    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
-    Serial.println(" m");
-    Serial.print("Humidity = ");
-    Serial.print(bme.readHumidity());
-    Serial.println(" %");
-    Serial.println();
-
-  delay(2000);
-
-  initDisplay();
-
-  ESPFSInit();
 
   RegistryInit();
+  write3Line("Init Pref.", "Prefernces", "   +OK", true, DISPLA_DELAY_SHORT);
+
+  if (BMEHandlerInit()) {
+    write3Line("Init BME", "  BME280", "   +OK", true, DISPLA_DELAY_SHORT);
+  } else {
+    write3Line("Init BME", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);
+  }
+
+  if (ESPFSInit()) {
+    write3Line("Init SPIFS", "  SPIFFS", "   +OK", true, DISPLA_DELAY_SHORT);
+  } else {
+    write3Line("Init SPIFS", "   -ERR", "check chip", true, DISPLA_DELAY_SHORT);
+  }
+
+
+  ss.begin(GPS_BAUD, SERIAL_8N1, TXPin, RXPin);
+  write3Line("Init UART", " GPS UART", "   +OK", true, DISPLA_DELAY_SHORT);
+
+  tx_msg.reset();
+
+if (initLoRa()) {
+    write3Line("Init LoRa", "LoDaDevive", "   +OK", true, DISPLA_DELAY_SHORT);
+  } else {
+    write3Line("Init LoRa", "   -ERR", "check wire", true, DISPLA_DELAY_SHORT);
+  }
 
   
-  // // dumpEEPROM();
 
-  // // @TOTO UART for ESP8266 GPS
-  // // #ifdef ESP32
-  // //   Serial.println("GPS UART setup ...");
-  // //   ss.begin(GPS_BAUD, SERIAL_8N1, TXPin, RXPin);
-  // // #elif defined(ESP8266)
-  // // #endif
-
-  // //  tx_msg.reset();
-
-  // // initLoRa();
-
-  // // pinMode(TXLED, OUTPUT);
+  pinMode(TXLED, OUTPUT);
 
   initOneButton();
+  write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
 
-  Serial.printf("system run mode %d\n", reg.current_system_mode);
-  Serial.printf("wifi mode %d\n", reg.current_wifi_mode);
+  reg.current_wifi_mode = wifi_client;
 
-  Serial.printf("system run mode %d\n", reg.current_system_mode);
-  Serial.printf("wifi mode %d\n", reg.current_wifi_mode);
+  write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
+  write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
 
   if (reg.current_wifi_mode == wifi_ap) {
     Serial.println("start wifi_ap");
@@ -139,10 +124,10 @@ status = bme.begin(0x76);
   // ESP8266
   // dumpEEPROM();
 
-  Serial.println("sLoRaAPRS up & running");
-  Serial.println("enjoy\n");
+  //Scanner();
 
- //iGate_udp_connect();
+  write3Line("sLoRaAPRS", "  up &", " running", true, 2000);
+  write3Line("  Enjoy", "   the", "   day", true, 2000);
 
 }
 
@@ -161,27 +146,32 @@ void loop() {
   // }
 
   //button.tick();
-  // tracker_display_tick();
+  //tracker_display_tick();
   // odd++;
   // // Serial.printf("++++++++++   Starte neue Loop-Runde  Zeit: %s-%s-%d
   // // ++++++++++\n", tx_msg._gps_hour, tx_msg._gps_minute, gps.time.second());
-  // if ((lastTx + nextTx) < millis()) {  // start Tx
-  //   // Serial.printf("%s-%s-%s age: %d \n", tx_msg._gps_year,
-  //   tx_msg._gps_month,
-  //   // tx_msg._gps_day, gps.date.age());
-  //   Serial.printf("\nsatellites: %d ", gps.satellites.value());
-  //   Serial.printf("hdop: %03.1f\n", gps.hdop.hdop());
+  if ((lastTx + nextTx) < millis()) {  // start Tx
+    // Serial.printf("%s-%s-%s age: %d \n", tx_msg._gps_year,
+    // tx_msg._gps_month,
+    // tx_msg._gps_day, gps.date.age());
 
-  //   gps_error = setAllGPSData();
-  //   if (!gps_error) {
+    Serial.printf("\nTime: %d ", millis()/1000UL);
+    Serial.printf("\nsatellites: %d ", gps.satellites.value());
+    Serial.printf("hdop: %03.1f\n", gps.hdop.hdop());
+
+    gps_error = setAllGPSData();
+    // if (!gps_error) {
+      Serial.printf("%s-%s-%s age: %d \n", tx_msg._gps_year, tx_msg._gps_month, tx_msg._gps_day, gps.date.age());
+      Serial.printf("%s:%s:%s \n", tx_msg._gps_hour, tx_msg._gps_minute, tx_msg._gps_second);
   //     // sendMessage(tx_msg.getAPRSTxPos(txmsg));
   //     sendMessage(tx_msg.getAPRSTxTrackInfo(txmsg));
-  //   } else {
-  //     Serial.printf("GPS not ready %d\n", gps_error);
-  //   }
-  //   lastTx = millis();  // gps not ok we wait also
-  // }
-  // smartDelay(50);
+    // } else {
+    //   Serial.printf("GPS not ready %d\n", gps_error);
+    // }
+    lastTx = millis();  // gps not ok we wait also
+    smartDelay(50);
+  }
+
 }
 
 uint8_t setAllGPSData(void) {
@@ -235,11 +225,12 @@ uint8_t setAllGPSData(void) {
   return gps_error;
 };
 
-void initAXP() {
+bool initAXP() {
   if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) {
     Serial.println("AXP192 Begin PASS");
   } else {
     Serial.println("AXP192 Begin FAIL");
+    return false;
   }
   axp.setPowerOutPut(AXP192_LDO2, AXP202_ON);
   axp.setPowerOutPut(AXP192_LDO3, AXP202_ON);
@@ -247,6 +238,7 @@ void initAXP() {
   axp.setPowerOutPut(AXP192_EXTEN, AXP202_ON);
   axp.setPowerOutPut(AXP192_DCDC1, AXP202_ON);
   axp.setDCDC1Voltage(3300);
+  return true;
 }
 
 static void smartDelay(uint32_t ms) {

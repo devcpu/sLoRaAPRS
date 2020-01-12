@@ -55,7 +55,7 @@ AXP192_SLAVE_ADDRESS 0x34 comes from <axp20x.h>
 #endif
 
 
-
+static const uint32_t GPSBaud = 9600;
 
 // GPS UART
 #ifdef T_BEAM_V1_0

@@ -8,18 +8,19 @@
 
 boolean ESPFSInit() {
   bool initok = false;
-#ifdef ESP32
-  initok = SPIFFS.begin(true);
-#elif defined(ESP8266)
+// #ifdef ESP32
+//   initok = SPIFFS.begin(true);
+// #elif defined(ESP8266)
   initok = SPIFFS.begin();
   if (!(initok))  // Format SPIFS, of not formatted. - Try 1
   {
-    Serial.println("Format SPIFFS");
+    Serial.println("Format SPIFFS (try 1). Please wait ... ");
     SPIFFS.format();
     initok = SPIFFS.begin();
   }
   if (!(initok))  // Format SPIFS, of not formatted. - Try 2
   {
+    Serial.println("Format SPIFFS (try 2). Please wait ... ");
     SPIFFS.format();
     initok = SPIFFS.begin();
   }
@@ -28,6 +29,6 @@ boolean ESPFSInit() {
   } else {
     Serial.println("SPIFFS ist nicht OK");
   }
-#endif
+// #endif
   return initok;
 }

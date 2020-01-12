@@ -13,7 +13,7 @@
 
 #define OLED_RESET 4
 
-void initDisplay(void);
+bool initDisplay(void);
 
 extern APRS_MSG tx_msg;
 extern TinyGPSPlus gps;
@@ -28,6 +28,9 @@ void writeUTC();
 void writeGPS();
 void writeWX();
 void writeHead(char* head);
+
+void write3Line(const char *head, const char *line1, const char *line2, bool toSerial, u_long sleep);
+void write3toSerial(const char *head, const char *line1, const char *line2, u_long sleep);
 
 
 void write_no_vaild_data(void);

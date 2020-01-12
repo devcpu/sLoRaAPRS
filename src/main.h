@@ -5,12 +5,13 @@
 #include <Arduino.h>
 #include <APRSWiFi.h>
 #include <ESPFS.h>
-
 #include <APRS_MSG.h>
 #include <TinyGPS++.h>
 #include <LoRaAPRSConfig.h>
 
-
+#define DISPLA_DELAY_SHORT 1000
+#define DISPLA_DELAY_MEDIUM 3000
+#define DISPLA_DELAY_LONG 5000
 
 #ifdef T_BEAM_V1_0
   #include <axp20x.h>
@@ -22,18 +23,13 @@
   DHTesp dht;
 #endif
 
-#define WX_BME280_SENSOR
-
-
-
+// @TODO ifdef GPS
+HardwareSerial ss(1);        // TTGO has HW serial to GPS // 1 = first UART
+uint8_t setAllGPSData();
 
 extern void WifiDisconnect(void);
 
-// @TODO ifdef GPS
-HardwareSerial ss(1);        // TTGO has HW serial to GPS // 1 = first UART
-
-uint8_t setAllGPSData();
-void initAXP();
+bool initAXP();
 static void smartDelay(uint32_t ms);
 
 

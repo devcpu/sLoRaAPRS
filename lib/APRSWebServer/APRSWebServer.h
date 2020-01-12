@@ -50,7 +50,7 @@ String GetBuildDateAndTime(void);
 String readSPIFFS2String(const char* path);
 void reboot(AsyncWebServerRequest *request);
 
-String optionsFeldGenerator(uint8_t selected, const char *name, String data[], uint8_t size);
+String optionsFeldGenerator(uint8_t selected, const char *name, String data[][2], uint8_t size);
 
 void showRequest(AsyncWebServerRequest *request);
 boolean validateNumber(String test);
@@ -69,8 +69,8 @@ String ProcessorWXInfo(const String& var);
 String getResetReason(RESET_REASON reason);
 #endif
 
-String getWebParam(AsyncWebServerRequest *request, const char* key, String prefsvar);
-String getWebParam(AsyncWebServerRequest *request, const char *key, double prefsvar);
+// String getWebParam(AsyncWebServerRequest *request, const char* key, String prefsvar);
+// String getWebParam(AsyncWebServerRequest *request, const char *key, double prefsvar);
 String getWebParam(AsyncWebServerRequest *request, const char* key);
 
 #endif
