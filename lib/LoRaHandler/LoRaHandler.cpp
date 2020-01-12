@@ -31,7 +31,7 @@ void sendMessage(char* outgoing) {
 
   /* 
     LoRa.print adds some cryptic char to head, 
-    differnt textse trigger different chars,
+    differnt textes trigger different chars,
     so we write char by char
   */
   for (uint8_t i=0; i<strlen(outgoing); i++) { 
@@ -40,7 +40,8 @@ void sendMessage(char* outgoing) {
 
   // LoRa.write(strlen(out));        // add payload length
   // LoRa.print(out);                 // add payload
-  LoRa.endPacket(true);                     // finish packet and send it
+  //LoRa.endPacket(true); async mod
+  LoRa.endPacket(false);                     // finish packet and send it
   msgCount++;                           // increment message ID
 }
 

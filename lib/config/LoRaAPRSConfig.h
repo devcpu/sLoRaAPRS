@@ -30,7 +30,7 @@
 
 
 #define LoRaTXFREQ  433775000      // Transmit frequency in MHz
-#define LoRaTXdbmW  18           // Transmit power in dBm PA needs 23
+#define LoRaTXdbmW  18           // Transmit power in dBm PA needs 23 /18 normal
 #define LoRaTXenablePA  0        // switch internal power amplifier on (1) or off (0)
 
 #define LoRaRXFREQ  433900000     // Transmit frequency in MHz

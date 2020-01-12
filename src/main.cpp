@@ -30,7 +30,7 @@ extern Registry reg;  // config & system status
 APRS_MSG tx_msg;  // converts all data to APRS messages
 TinyGPSPlus gps;  // driver fot GPS
 
-uint32_t lastTx = 0L, nextTx = 10000L;  // ticker for APRS messages
+uint32_t lastTx = 0L, nextTx = 20000L;  // ticker for APRS messages
 uint8_t gps_error = 0;
 char txmsg[254];
 
@@ -154,7 +154,12 @@ void loop() {
     // Serial.printf("%s-%s-%s age: %d \n", tx_msg._gps_year,
     // tx_msg._gps_month,
     // tx_msg._gps_day, gps.date.age());
-
+    uint64_t t0 = millis();
+    char msg_buf[256] = {0};
+    snprintf(msg_buf, 256, "DL7UXA-1>APRS:!5229.16N/01334.52E_359/031/A=000127 uptime [%d]", millis()/1000);
+    sendMessage(msg_buf);
+    uint64_t t1 = millis();
+    Serial.printf("Zeit für Zeichen %d\n", t1 - t0);
     Serial.printf("\nTime: %d ", millis()/1000UL);
     Serial.printf("\nsatellites: %d ", gps.satellites.value());
     Serial.printf("hdop: %03.1f\n", gps.hdop.hdop());
