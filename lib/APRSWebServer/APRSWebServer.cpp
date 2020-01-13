@@ -80,9 +80,7 @@ void WebserverStart(void) {
   Serial.println("starting Webserver");
   WebServer = new AsyncWebServer(80);
   ws = new AsyncWebSocket("/ws");
-  void handleRequestChangeMode(AsyncWebServerRequest * request);
-  String ProcessorChangeMode(const String &var);
-
+  
   ws->onEvent(onWsEvent);
   WebServer->addHandler(ws);
 
@@ -154,6 +152,8 @@ void WebserverStart(void) {
     if (request->params() == 2) {
       DDD(request->params());
       handleRequestChangeMode(request);
+      Serial.printf("new run_mode: %d / new_wifi_mode %d\n", (int)reg.current_system_mode, (int)reg.current_wifi_mode);
+      Serial.printf("new run_mode: %d / new_wifi_mode %d\n", (int)getPrefsDouble(PREFS_CURRENT_SYSTEM_MODE), getPrefsDouble(PREFS_CURRENT_WIFI_MODE));
       request->redirect("/");
     }
 
@@ -568,8 +568,9 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
   DDD("call +OK");
 
   // aprs_call_ext
-  reg.aprs_call_ext = getWebParam(request, PREFS_APRS_CALL_EX);
-  setPrefsString(PREFS_APRS_CALL_EX, reg.aprs_call_ext);
+  getWebParam(request, PREFS_APRS_CALL_EX, &reg.aprs_call_ext);
+  // reg.aprs_call_ext = getWebParam(request, PREFS_APRS_CALL_EX);
+  // setPrefsString(PREFS_APRS_CALL_EX, reg.aprs_call_ext);
 
   DDD("aprs_ext +OK");
   reg.wx_call_ext = getWebParam(request, PREFS_WX_CALL_EX);
@@ -703,10 +704,7 @@ String ProcessorConfigWifiAP(const String &var) {
 
 void handleRequestConfigAP(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_AP_SSID)) {
-  
-    reg.APCredentials.auth_name = getWebParam(request, PREFS_AP_SSID);
-    setPrefsString(PREFS_AP_SSID, reg.APCredentials.auth_name);
-
+    getWebParam(request, PREFS_AP_SSID, &reg.APCredentials.auth_name);
   }
 
   if (request->hasParam(PREFS_AP_PASS)) {
@@ -1273,32 +1271,32 @@ void sendGPSDataJson(void) {
   // serializeJsonPretty(root, Serial);
 };
 
-// String getWebParam(AsyncWebServerRequest *request, const char *key,
-//                    String prefsvar) {
-//   String new_var = "";
-//   if (request->hasParam(key)) {
-//     new_var = request->getParam(key)->value();
-//     if (new_var.length() > 0 && new_var.length() < 32) {
-//       prefsvar = new_var;
-//       Serial.printf("set new var to reg key=%s value=%s\n", key, new_var);
-//       setPrefsString(key, new_var);
-//     }
-//     return new_var;
-//   } else {
-//     char buf[32] = {0};
-//     snprintf(buf, 32, "ERR> key %s not found in request,  no value written", key);
-//     DDD(buf);
-//     return String("");
-//   }
-//   return new_var;
-// }
+String getWebParam(AsyncWebServerRequest *request, const char *key,
+                   String *prefsvar) {
+  String new_var = "";
+  if (request->hasParam(key)) {
+    new_var = request->getParam(key)->value();
+    if (new_var.length() > 0 && new_var.length() < 32) {
+      *prefsvar = new_var;
+      Serial.printf("set new var to reg key=%s value=%s\n", key, new_var);
+      setPrefsString(key, new_var);
+    }
+    return new_var;
+  } else {
+    char buf[32] = {0};
+    snprintf(buf, 32, "ERR> key %s not found in request,  no value written", key);
+    DDD(buf);
+    return String("");
+  }
+  return new_var;
+}
 
 // String getWebParam(AsyncWebServerRequest *request, const char *key,
-//                    double prefsvar) {
+//                    double *prefsvar) {
 //   String new_var = "";
 //   if (request->hasParam(key)) {
 //     new_var = request->getParam(key)->value();
-//     prefsvar = new_var.toDouble();
+//     *prefsvar = new_var.toDouble();
 //     setPrefsDouble(key, new_var.toDouble());
 //     return new_var;
 //   } else {

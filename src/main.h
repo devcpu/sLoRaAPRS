@@ -9,9 +9,9 @@
 #include <TinyGPS++.h>
 #include <LoRaAPRSConfig.h>
 
-#define DISPLA_DELAY_SHORT 1000
-#define DISPLA_DELAY_MEDIUM 3000
-#define DISPLA_DELAY_LONG 5000
+#define DISPLA_DELAY_SHORT 100
+#define DISPLA_DELAY_MEDIUM 300
+#define DISPLA_DELAY_LONG 500
 
 #ifdef T_BEAM_V1_0
   #include <axp20x.h>

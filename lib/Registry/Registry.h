@@ -128,7 +128,8 @@ void registryWriteInit(void);
 
 
 
-String getPrefsString(String key);
+
+String getPrefsString(const char* key);
 void setPrefsString(const char* key, String  value);
 
 uint16_t getPrefsInt(String key);
