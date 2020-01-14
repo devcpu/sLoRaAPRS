@@ -191,7 +191,6 @@ void write3Line(const char *head, const char *line1, const char *line2, bool toS
   display.clearDisplay();
   writeHead(head);
 
-  DDD(String(strlen(line1)));
   if (strlen(line1)> 10) {
     display.setTextSize(1);   
   } else {
@@ -200,7 +199,6 @@ void write3Line(const char *head, const char *line1, const char *line2, bool toS
   display.setCursor(0,22);
   display.print(line1);
 
-  DDD(String(strlen(line1)))
   if (strlen(line2)> 10) {
     display.setTextSize(1);   
   } else {

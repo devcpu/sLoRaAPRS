@@ -1,12 +1,12 @@
 #include <LoRaHandler.h>
-#include <uxa_debug.h>
 #include <TrackerDisplay.h>
+#include <uxa_debug.h>
 
 
 LoRaRXControl lora_control;
 
 
-bool initLoRa() {
+bool LoRa_init() {
   LoRa.setPins(LoRaCsPin, LoRaResetPin, LoRaIRQPin);
   if (!LoRa.begin(LoRaRXFREQ)) {
     Serial.println("Starting LoRa failed!");
@@ -21,18 +21,28 @@ bool initLoRa() {
   LoRa.setTxPower(LoRaTXdbmW);
   LoRa.enableInvertIQ();
   LoRa.onReceive(onReceive);
+  reciveMessages();
   Serial.println("Init LoRa ready!");
   return true;
 }
 
 void LoRa_tick(void) {
+  if (lora_control.isMessage > 0) {
+    processMessage();
+    lora_control.isMessage = 0;
+  }
   if (!lora_control.isSend) {
     return;
   }
   if (lora_control.msg_wait > millis()) {
     return;
   }
+  reciveMessages();
   Serial.println("set LoRa device to recive");
+
+}
+
+void reciveMessages() {
   LoRa.setFrequency(LoRaRXFREQ);
   LoRa.enableInvertIQ();
   LoRa.receive();
@@ -85,8 +95,14 @@ void sendMessage(char* outgoing, boolean toDigi) {
   // LoRa.receive();
 }
 
-void onReceive(int packetSize) {
-  if (packetSize == 0) return;          // if there's no packet, return
+void onReceive(int packetSize){
+  lora_control.isMessage = packetSize;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+void processMessage(void) {
+  //if (packetSize == 0) return;          // if there's no packet, return
 
   // read packet header bytes:
   int recipient = LoRa.read();          // recipient address
@@ -104,7 +120,7 @@ void onReceive(int packetSize) {
   //   Serial.println("error: message length does not match length");
   //   return;                             // skip rest of function
   // }
-
+  Serial.println("/////////////////////////////////////////////////////////////////////");
   Serial.printf("incomingLength=%d\n", incomingLength);
   Serial.printf("incoming.length():%d\n", incoming.length());
 
@@ -116,5 +132,47 @@ void onReceive(int packetSize) {
   Serial.println("Message: " + incoming);
   Serial.println("RSSI: " + String(LoRa.packetRssi()));
   Serial.println("Snr: " + String(LoRa.packetSnr()));
+  Serial.println("/////////////////////////////////////////////////////////////////////");
   Serial.println();
+
 }
+
+
+
+  // void processMessage(int size) {
+  //   // ISR sperren?
+  //   //if (_hasRxMsg  == 0) return true;          // if there's no packet,
+  //   return
+
+  //   // read packet header bytes:
+  //   int recipient = LoRa.read();          // recipient address
+  //   byte sender = LoRa.read();            // sender address
+  //   byte incomingMsgId = LoRa.read();     // incoming msg ID
+  //   byte incomingLength = LoRa.read();    // incoming msg length
+
+  //   String incoming = "";                 // payload of packet
+
+  //   while (LoRa.available()) {            // can't use readString() in
+  //   callback, so
+  //     incoming += (char)LoRa.read();      // add bytes one by one
+  //   }
+
+  //   // if (incomingLength != incoming.length()) {   // check length for error
+  //   //   Serial.println("error: message length does not match length");
+  //   //   return;                             // skip rest of function
+  //   // }
+
+  //   Serial.printf("incomingLength=%d\n", incomingLength);
+  //   Serial.printf("incoming.length():%d\n", incoming.length());
+
+  //   // if message is for this device, or broadcast, print details:
+  //   Serial.println("Received from: 0x" + String(sender, HEX));
+  //   Serial.println("Sent to: 0x" + String(recipient, HEX));
+  //   Serial.println("Message ID: " + String(incomingMsgId));
+  //   Serial.println("Message length: " + String(incomingLength));
+  //   Serial.println("Message: " + incoming);
+  //   // Serial.println("RSSI: " + String(packetRssi()));
+  //   // Serial.println("Snr: " + String(packetSnr()));
+  //   Serial.println();
+  //   return true;
+  // }

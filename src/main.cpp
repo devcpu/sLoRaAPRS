@@ -29,8 +29,9 @@ extern Registry reg;  // config & system status
 APRS_MSG tx_msg;  // converts all data to APRS messages
 extern TinyGPSPlus gps;  // driver fot GPS
 
-uint32_t waitTxTr = 0L, nextTxTr = 30000L;  // ticker for APRS messages
-uint32_t waitTxDg = 0L, nextTxDg = 45000L;
+uint32_t waitTxTr = 0L, nextTxTr = 10000L, nextTxTrRand = 10;  // ticker for APRS messages
+uint32_t waitTxDg = 0L, nextTxDg = 50000L, nextTxDgRand = 10;
+uint64_t nextRX = 0;
 uint8_t gps_error = 0;
 char txmsg[254];
 
@@ -89,11 +90,15 @@ void setup() {
 
   tx_msg.reset();
 
-if (initLoRa()) {
+
+
+  if (LoRa_init()) {
     write3Line("Init LoRa", "LoDaDevive", "   +OK", true, DISPLA_DELAY_SHORT);
   } else {
     write3Line("Init LoRa", "   -ERR", "check wire", true, DISPLA_DELAY_SHORT);
   }
+  // lora.onReceive(lora.processMessage);
+  // lora.receive();
 
   
 
@@ -133,6 +138,7 @@ if (initLoRa()) {
 }
 
 void loop() {
+  //processMessage();
   // watchdog();
   APRSWebServerTick();
   //iGate_process_udp();
@@ -150,22 +156,26 @@ void loop() {
   LoRa_tick();
   //tracker_display_tick();
 
-  // if (waitTxTr < millis() && !lora_control.isSend) {  // start Tx
-  //    char msg_buf[256] = {0};
-  //   snprintf(msg_buf, 256, "%s>APRS:!5229.16N/01334.52E_359/031/A=000127 uptime [%d] send to tracker", reg_aprsCall().c_str(), millis()/1000UL);
-  //   sendMessage(msg_buf, false);
-  //   waitTxTr = millis() + nextTxTr + random(20000L);
-    
-  // }
+  
+  if (waitTxTr < millis() && !lora_control.isSend) {  // start Tx
+     char msg_buf[256] = {0};
+    snprintf(msg_buf, 256, "%s>APRS:!5229.16N/01334.52E_359/031/A=000127 uptime [%ul] send to tracker", reg_aprsCall().c_str(), millis()/1000);
+    sendMessage(msg_buf, false);
+    //   Serial.printf("sending +OK\n");
+    // } else {
+    //   Serial.printf("sending -NOK\n");
+    // }
+    waitTxTr = millis() + nextTxTr + random(nextTxTrRand) * 1000;
+  }
 
   // if (waitTxDg  < millis()&& !lora_control.isSend) {  // start Tx
   //   uint64_t t0 = millis();
   //   char msg_buf[256] = {0};
-  //   snprintf(msg_buf, 256, "DL7UXA-7>APRS:!5229.16N/01334.52E_359/031/A=000127 uptime [%d] send to digi", millis()/1000UL);
+  //   snprintf(msg_buf, 256, "DL7UXA-7>APRS:!5229.16N/01334.52E_359/031/A=000127 uptime [%ul] send to digi", millis()/1000);
   //   sendMessage(msg_buf, true);
   //   uint64_t t1 = millis();
   //   Serial.printf("sendtime: %d\n", t1 - t0);
-  //   waitTxDg = millis() + nextTxDg + random(30000L);
+  //   waitTxDg = millis() + nextTxDg + random(nextTxDgRand) * 1000;
   // }
 
   smartDelay(100);
