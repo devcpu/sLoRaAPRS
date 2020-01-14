@@ -12,7 +12,6 @@
 #include <APRSWebServer.h>
 #include <APRSWiFi.h>
 #include <APRS_MSG.h>
-#include <EEPROM.h>
 #include <Esp.h>
 #include <LoRaAPRSConfig.h>
 #include <LoRaHandler.h>
@@ -28,9 +27,10 @@ extern Registry reg;  // config & system status
 
 // @TODO APRS_MSG deprecated?
 APRS_MSG tx_msg;  // converts all data to APRS messages
-TinyGPSPlus gps;  // driver fot GPS
+extern TinyGPSPlus gps;  // driver fot GPS
 
-uint32_t lastTx = 0L, nextTx = 20000L;  // ticker for APRS messages
+uint32_t waitTxTr = 0L, nextTxTr = 30000L;  // ticker for APRS messages
+uint32_t waitTxDg = 0L, nextTxDg = 45000L;
 uint8_t gps_error = 0;
 char txmsg[254];
 
@@ -41,6 +41,7 @@ OneButton button(BUTTON, true);
 
 
 void setup() {
+  randomSeed(ESP.getCycleCount());
   // ESP.deepSleep(1, WAKE_RF_DISABLED);
   Serial.begin(115200);
   delay(1000);
@@ -101,8 +102,8 @@ if (initLoRa()) {
   initOneButton();
   write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
 
-  reg.current_wifi_mode = wifi_client;
-
+  //reg.current_wifi_mode = wifi_client;
+  reg.current_wifi_mode = wifi_ap;
   write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
   write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
 
@@ -145,90 +146,31 @@ void loop() {
   //   Serial.println("########################");
   // }
 
-  //button.tick();
+  button.tick();
+  LoRa_tick();
   //tracker_display_tick();
-  // odd++;
-  // // Serial.printf("++++++++++   Starte neue Loop-Runde  Zeit: %s-%s-%d
-  // // ++++++++++\n", tx_msg._gps_hour, tx_msg._gps_minute, gps.time.second());
-  if ((lastTx + nextTx) < millis()) {  // start Tx
-    // Serial.printf("%s-%s-%s age: %d \n", tx_msg._gps_year,
-    // tx_msg._gps_month,
-    // tx_msg._gps_day, gps.date.age());
-    uint64_t t0 = millis();
-    char msg_buf[256] = {0};
-    snprintf(msg_buf, 256, "DL7UXA-1>APRS:!5229.16N/01334.52E_359/031/A=000127 uptime [%d]", millis()/1000);
-    sendMessage(msg_buf);
-    uint64_t t1 = millis();
-    Serial.printf("Zeit für Zeichen %d\n", t1 - t0);
-    Serial.printf("\nTime: %d ", millis()/1000UL);
-    Serial.printf("\nsatellites: %d ", gps.satellites.value());
-    Serial.printf("hdop: %03.1f\n", gps.hdop.hdop());
 
-    gps_error = setAllGPSData();
-    // if (!gps_error) {
-      Serial.printf("%s-%s-%s age: %d \n", tx_msg._gps_year, tx_msg._gps_month, tx_msg._gps_day, gps.date.age());
-      Serial.printf("%s:%s:%s \n", tx_msg._gps_hour, tx_msg._gps_minute, tx_msg._gps_second);
-  //     // sendMessage(tx_msg.getAPRSTxPos(txmsg));
-  //     sendMessage(tx_msg.getAPRSTxTrackInfo(txmsg));
-    // } else {
-    //   Serial.printf("GPS not ready %d\n", gps_error);
-    // }
-    lastTx = millis();  // gps not ok we wait also
-    smartDelay(50);
-  }
+  // if (waitTxTr < millis() && !lora_control.isSend) {  // start Tx
+  //    char msg_buf[256] = {0};
+  //   snprintf(msg_buf, 256, "%s>APRS:!5229.16N/01334.52E_359/031/A=000127 uptime [%d] send to tracker", reg_aprsCall().c_str(), millis()/1000UL);
+  //   sendMessage(msg_buf, false);
+  //   waitTxTr = millis() + nextTxTr + random(20000L);
+    
+  // }
 
+  // if (waitTxDg  < millis()&& !lora_control.isSend) {  // start Tx
+  //   uint64_t t0 = millis();
+  //   char msg_buf[256] = {0};
+  //   snprintf(msg_buf, 256, "DL7UXA-7>APRS:!5229.16N/01334.52E_359/031/A=000127 uptime [%d] send to digi", millis()/1000UL);
+  //   sendMessage(msg_buf, true);
+  //   uint64_t t1 = millis();
+  //   Serial.printf("sendtime: %d\n", t1 - t0);
+  //   waitTxDg = millis() + nextTxDg + random(30000L);
+  // }
+
+  smartDelay(100);
 }
 
-uint8_t setAllGPSData(void) {
-  uint8_t gps_error = 0;
-  if (gps.time.isValid()) {
-    tx_msg.setHour(gps.time.hour());
-    tx_msg.setMinute(gps.time.minute());
-    tx_msg.setSecond(gps.time.second());
-  } else {
-    Serial.println("gps time not ready");
-    gps_error = 1;
-  }
-  if (gps.date.isValid()) {
-    tx_msg.setYear(gps.date.year());
-    tx_msg.setMonth(gps.date.month());
-    tx_msg.setDay(gps.date.day());
-  } else {
-    Serial.println("gps date not ready");
-    gps_error = gps_error + 3;
-  }
-  if (gps.location.isValid()) {
-    tx_msg.setLat(gps.location.lat());
-    tx_msg.setLng(gps.location.lng());
-  } else {
-    Serial.println("gps location not ready");
-    gps_error = gps_error + 7;
-  }
-
-  if (gps.altitude.isValid()) {
-    tx_msg.setAltitudeFeed(gps.altitude.feet());
-  } else {
-    Serial.println("gps altitude not ready");
-    gps_error = gps_error + 15;
-  }
-  if (gps.course.isValid()) {
-    tx_msg.setCourse(gps.course.deg());
-  } else {
-    Serial.println("gps course not ready");
-    gps_error = gps_error + 31;
-  }
-
-  if (gps.speed.isValid()) {
-    tx_msg.setSpeedmph(gps.speed.mph());
-  } else {
-    Serial.println("gps speed not ready");
-    gps_error = gps_error + 63;
-  }
-
-  // Serial.printf("lat:%s lng:%s\n", tx_msg._aprs_lat, tx_msg._aprs_lng);
-
-  return gps_error;
-};
 
 bool initAXP() {
   if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) {
@@ -308,4 +250,21 @@ void Scanner() {
   Serial.print("Found ");
   Serial.print(count, DEC);  // numbers of devices
   Serial.println(" device(s).");
+}
+
+
+void setGPSInfo(void) {
+  if (gps.location.isValid()) {
+    reg.gps_location.latitude = gps.location.lat();
+    reg.gps_location.longitude = gps.location.lng();
+  }
+  if (gps.altitude.isValid()) {
+    reg.gps_location.altitude = gps.altitude.meters();
+  }
+  if (gps.speed.isValid()) {
+    reg.gps_move.speed = gps.speed.kmph();
+  }
+  if (gps.course.isValid()) {
+    reg.gps_move.course = gps.course.deg();
+  }
 }

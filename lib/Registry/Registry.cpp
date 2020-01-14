@@ -1,5 +1,4 @@
 #include <uxa_debug.h>
-#include <EEPROM.h>
 #include <LoRaAPRSConfig.h>
 #include <Registry.h>
 #include <Preferences.h>
@@ -61,7 +60,7 @@ void RegistryInit(void) {
   if (reg.call == "CHANGEME") {
     reg.current_wifi_mode = wifi_ap;
     reg.current_system_mode = mode_tracker;
-   
+    registryWriteInit();
   }
 #ifdef MODDEBUG
   RegistryToString();
@@ -303,3 +302,6 @@ String getRunMode() {
     break;
   }
 }
+
+String reg_wxCall(void) { return reg.call + String("-") + reg.wx_call_ext; };
+String reg_aprsCall(void) { return reg.call + String("-") + reg.aprs_call_ext; };

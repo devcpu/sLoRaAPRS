@@ -2,6 +2,7 @@
 #include <LoRaAPRSConfig.h>
 #include <Registry.h>
 #include <TrackerDisplay.h>
+#include <Arduino.h>
 
 
 extern Registry reg; 
@@ -9,6 +10,8 @@ extern Registry reg;
 #ifdef ESP32
 #elif defined(ESP8266)
 #endif
+
+String APRSWiFI_SSID = "";
 
 void WifiAPInit(void) {
   WifiDisconnect();  // after flash it will not connect without
@@ -37,18 +40,19 @@ WiFi.softAP(reg.APCredentials[0], reg.APCredentials[1]);
     Serial.println("++++++++++   Password: " + reg.APCredentials.auth_tocken +
                    "         ++++++++++");
     Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
-    write3Line(" WIFI AP", reg.APCredentials.auth_name.c_str(), reg.APCredentials.auth_tocken.c_str(), false, 10000);
+    write3Line(" WIFI AP", reg.APCredentials.auth_name.c_str(), reg.APCredentials.auth_tocken.c_str(), false, 3000);
   } else {
     Serial.print("AP IP address: ");
     Serial.println(myIP);
     Serial.println("SSID: " + reg.APCredentials.auth_name);
-    write3Line(" WIFI AP", "  SSID:", reg.APCredentials.auth_name.c_str(), true, 10000);
+    write3Line(" WIFI AP", "  SSID:", reg.APCredentials.auth_name.c_str(), true, 3000);
   }
 }
 
 void WifiConnect(void) {
+  WiFi.onEvent(WiFiStationConnected, SYSTEM_EVENT_STA_CONNECTED);
   WifiDisconnect();  // after flash it will not connect without it
-
+  
   // WiFi.mode(WIFI_STA);
   delay(1000);
   Serial.println("Trying Connecting to WiFi ..");
@@ -63,10 +67,11 @@ void WifiConnect(void) {
     Serial.print(count);
     Serial.println(". try");
   }
+  
   Serial.println(WiFi.localIP());
   IPAddress myIP = WiFi.localIP();
   reg.SERVER_IP = myIP.toString();
-  write3Line("WiFiclient", reg.APCredentials.auth_name.c_str(), myIP.toString().c_str(), true, 10000);
+  write3Line("WiFiclient", APRSWiFI_SSID.c_str(), myIP.toString().c_str(), true, 3000);
 
 }
 
@@ -85,3 +90,35 @@ void WifiDisconnect(void) {
   delay(100);
 }
 
+void WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info)
+{
+    Serial.println("Connected to AP!");
+
+    char buf[32] = {0};
+ 
+    Serial.print("SSID Length: ");
+    Serial.println(info.connected.ssid_len);
+ 
+    Serial.print("SSID: ");
+    for(int i=0; i<info.connected.ssid_len; i++){
+      Serial.print((char) info.connected.ssid[i]);
+      buf[i] = (char) info.connected.ssid[i];
+    }
+    APRSWiFI_SSID = buf;
+
+ 
+    Serial.print("\nBSSID: ");
+    for(int i=0; i<6; i++){
+      Serial.printf("%02X", info.connected.bssid[i]);
+ 
+      if(i<5){
+        Serial.print(":");
+      }
+    }
+     
+    Serial.print("\nChannel: ");
+    Serial.println(info.connected.channel);
+ 
+    Serial.print("Auth mode: ");
+    Serial.println(info.connected.authmode);  
+} 

@@ -27,7 +27,8 @@ void tracker_display_tick(void);
 void writeUTC();
 void writeGPS();
 void writeWX();
-void writeHead(char* head);
+void writeHead(const char* head);
+void writeTX(const char *to);
 
 void write3Line(const char *head, const char *line1, const char *line2, bool toSerial, u_long sleep);
 void write3toSerial(const char *head, const char *line1, const char *line2, u_long sleep);

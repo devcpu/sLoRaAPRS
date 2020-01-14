@@ -71,16 +71,23 @@ struct WXData {
   float humidity = 0;
 };
 
-struct PositionData {
+struct Location {
   double latitude;
   double longitude;
   double altitude;
+};
+
+struct Move {
+  double speed;
+  double course;
 };
 
 struct Credentials {
   String auth_name;
   String auth_tocken;
 };
+
+
 
 struct Registry {
   String Version = "";
@@ -91,9 +98,6 @@ struct Registry {
   String call = "CHANGEME";
   String wx_call_ext = "3";
   String aprs_call_ext = "9";
-  String wxCall(void) { return call + "-" + wx_call_ext; };
-  String aprsCall(void) { return call + "-" + aprs_call_ext; };
-
   Credentials WifiCrendentials[4];
   Credentials APCredentials;
   Credentials WebCredentials;
@@ -108,8 +112,10 @@ struct Registry {
   boolean wx_sensor_dht = false;
   boolean gps = false;
   boolean oled = false;
-  PositionData pos;
-  PositionData posfix;
+  Location gps_location;
+  Move gps_move;
+  Location posfix;
+
   String SERVER_IP;
   APRSMessage TxMsg;
   APRSMessage RxMsg;
@@ -127,6 +133,8 @@ void registryWriteInit(void);
 
 
 
+String reg_wxCall(void);
+String reg_aprsCall(void);
 
 
 String getPrefsString(const char* key);
@@ -138,7 +146,7 @@ void setPrefsUInt(const char* key, uint16_t value);
 double getPrefsDouble(const char *key);
 void setPrefsDouble(const char *key, double value);
 
-char getPrefsChar(String key);
+char getPrefsChar(const char *key);
 void setPrefsChar(const char* key, char value);
 
 void RegistryToString(void);

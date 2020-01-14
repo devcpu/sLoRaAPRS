@@ -10,7 +10,10 @@
 #include <Preferences.h>
 #include <SPIFFSEditor.h>
 
+
 #include <Ticker.h>
+
+TinyGPSPlus gps;
 
 extern Preferences preferences;
 
@@ -101,7 +104,7 @@ void WebserverStart(void) {
   WebServer->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("/");
     // first run wizard
-    if (reg.call == "CHANGEME") {
+    if (reg.call == "CHANGEME") { // first run wizard
       request->redirect("/cc");
     }
     request->send(SPIFFS, "/main.html", "text/html", false, ProcessorDefault);
@@ -121,7 +124,7 @@ void WebserverStart(void) {
     if (request->params() > 0) {
       DDD("/cc");
       handleRequestConfigCall(request);
-      if (reg.APCredentials.auth_tocken == "letmein42") {
+      if (reg.APCredentials.auth_tocken == "letmein42") { // first run wizard
         request->redirect("/ca");
       }
       request->redirect("/");
@@ -544,46 +547,35 @@ String ProcessorConfigCall(const String &var) {
 };
 
 void handleRequestConfigCall(AsyncWebServerRequest *request) {
-  DDD("handleRequestConfigCall");
-
   // call
-
   if (request->hasParam(PREFS_CALL)) {
     String new_call = "";
     new_call = getWebParam(request, PREFS_CALL);
-    DDD(new_call);
     if (new_call.length() > 2 && new_call.length() < 16) {
       new_call.toUpperCase();
-      DDD(new_call)
       reg.call = new_call;
-      DDD("to_reg.call");
       setPrefsString(PREFS_CALL, new_call);
-      DDD("setPrefsString");
     } else {
       html_error.ErrorMsg = String("call to short or to long");
       Serial.println("ERR: call not valide! " + new_call);
     }
   }
 
-  DDD("call +OK");
-
   // aprs_call_ext
   getWebParam(request, PREFS_APRS_CALL_EX, &reg.aprs_call_ext);
-  // reg.aprs_call_ext = getWebParam(request, PREFS_APRS_CALL_EX);
-  // setPrefsString(PREFS_APRS_CALL_EX, reg.aprs_call_ext);
-
-  DDD("aprs_ext +OK");
-  reg.wx_call_ext = getWebParam(request, PREFS_WX_CALL_EX);
-  setPrefsString(PREFS_WX_CALL_EX, reg.wx_call_ext);
+  getWebParam(request, PREFS_WX_CALL_EX, &reg.wx_call_ext);
 
   DDD("wx_ext +OK");
 
   String new_aprs_symbol = "";
   if (request->hasParam(PREFS_APRS_SYMBOL)) {
     new_aprs_symbol = getWebParam(request, PREFS_APRS_SYMBOL);
-    reg.aprs_symbol = new_aprs_symbol.indexOf(0);
-    DDD(new_aprs_symbol);
-    setPrefsChar(PREFS_APRS_SYMBOL, new_aprs_symbol.indexOf(0));
+    DDE("String new_aprs_symbol", new_aprs_symbol);
+    DDE("charAt(0) new_aprs_symbol", String((char)new_aprs_symbol.charAt(0)));
+    reg.aprs_symbol = (char)new_aprs_symbol.charAt(0);
+    DDE("reg.pars_symbol", reg.aprs_symbol);
+    setPrefsChar(PREFS_APRS_SYMBOL, new_aprs_symbol.charAt(0));
+    DDE("new_aprs_symbol from NVS", getPrefsChar(PREFS_APRS_SYMBOL));
   } else {
     Serial.println("ERR: APRS Symbol not valide!" + new_aprs_symbol);
   }
@@ -591,25 +583,15 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
   ////////////////////////////////////////////////////////////////////////////////
 
   if (request->hasParam(PREFS_POS_LAT_FIX)) {
-    String new_lat =
-        getWebParam(request, PREFS_POS_LAT_FIX);
-    DDD(new_lat);
-    reg.posfix.latitude = new_lat.toDouble();
-    setPrefsDouble(PREFS_POS_LAT_FIX, reg.posfix.latitude);
+    getWebParam(request, PREFS_POS_LAT_FIX, &reg.posfix.latitude);
   }
 
   if (request->hasParam(PREFS_POS_LNG_FIX)) {
-    String new_lng =
-        getWebParam(request, PREFS_POS_LNG_FIX);
-    reg.posfix.longitude = new_lng.toDouble();
-    setPrefsDouble(PREFS_POS_LNG_FIX, reg.posfix.longitude);
+    getWebParam(request, PREFS_POS_LNG_FIX, &reg.posfix.longitude);
   }
 
   if (request->hasParam(PREFS_POS_ALT_FIX)) {
-    String new_alt =
-        getWebParam(request, PREFS_POS_ALT_FIX);
-    reg.posfix.altitude = new_alt.toDouble();
-    setPrefsDouble(PREFS_POS_ALT_FIX, reg.posfix.altitude);
+    getWebParam(request, PREFS_POS_ALT_FIX, &reg.posfix.altitude);
 
   }
 }
@@ -708,18 +690,15 @@ void handleRequestConfigAP(AsyncWebServerRequest *request) {
   }
 
   if (request->hasParam(PREFS_AP_PASS)) {
-    reg.APCredentials.auth_tocken = getWebParam(request, PREFS_AP_PASS);
-    setPrefsString(PREFS_AP_PASS, reg.APCredentials.auth_tocken);
+    getWebParam(request, PREFS_AP_PASS, &reg.APCredentials.auth_tocken);
   }
 
   if (request->hasParam(PREFS_WEB_ADMIN)) {
-    reg.WebCredentials.auth_name = getWebParam(request, PREFS_WEB_ADMIN);
-    setPrefsString(PREFS_WEB_ADMIN, reg.WebCredentials.auth_name);
+    getWebParam(request, PREFS_WEB_ADMIN, &reg.WebCredentials.auth_name);
   }
 
   if (request->hasParam(PREFS_WEB_PASS)) {
-    reg.WebCredentials.auth_tocken = getWebParam(request, PREFS_WEB_PASS);
-    setPrefsString(PREFS_WEB_PASS, reg.WebCredentials.auth_tocken);
+    getWebParam(request, PREFS_WEB_PASS, &reg.WebCredentials.auth_tocken);
   }
 
 }
@@ -762,18 +741,15 @@ String ProcessorConfigGateway(const String &var) {
 
 void handleRequestConfigGateway(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_APRS_PASSWORD)) {
-    reg.APRSPassword = getWebParam(request, PREFS_APRS_PASSWORD);
-    setPrefsString(PREFS_APRS_PASSWORD, reg.APRSPassword);
+    getWebParam(request, PREFS_APRS_PASSWORD, &reg.APRSPassword);
   }
 
   if (request->hasParam(PREFS_APRS_SERVER0)) {
-    reg.APRSServer[0] = getWebParam(request, PREFS_APRS_SERVER0);
-    setPrefsString(PREFS_APRS_SERVER0, reg.APRSServer[0]);
+    getWebParam(request, PREFS_APRS_SERVER0, &reg.APRSServer[0]);
   }
 
   if (request->hasParam(PREFS_APRS_SERVER1)) {
-    reg.APRSServer[1] = getWebParam(request, PREFS_APRS_SERVER1);
-    setPrefsString(PREFS_APRS_SERVER1, reg.APRSServer[1]);
+    getWebParam(request, PREFS_APRS_SERVER1, &reg.APRSServer[1]);
   }
 
 }
@@ -889,31 +865,23 @@ String ProcessorConfigWLAN(const String &var) {
 
 void handleRequestConfigWLAN(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_LAN0_SSID)) {
-    reg.WifiCrendentials[0].auth_name = getWebParam(request, PREFS_LAN0_SSID);
-    setPrefsString(PREFS_LAN0_SSID, reg.WifiCrendentials[0].auth_name);
-    reg.WifiCrendentials[0].auth_tocken = getWebParam(request, PREFS_LAN0_AUTH);
-    setPrefsString(PREFS_LAN0_AUTH, reg.WifiCrendentials[0].auth_tocken);
+    getWebParam(request, PREFS_LAN0_SSID, &reg.WifiCrendentials[0].auth_name);
+    getWebParam(request, PREFS_LAN0_AUTH, &reg.WifiCrendentials[0].auth_tocken);
   }
 
   if (request->hasParam(PREFS_LAN1_SSID)) {
-    reg.WifiCrendentials[1].auth_name = getWebParam(request, PREFS_LAN1_SSID);
-    setPrefsString(PREFS_LAN1_SSID, reg.WifiCrendentials[1].auth_name);
-    reg.WifiCrendentials[1].auth_tocken = getWebParam(request, PREFS_LAN1_AUTH);
-    setPrefsString(PREFS_LAN1_AUTH, reg.WifiCrendentials[1].auth_tocken);
+    getWebParam(request, PREFS_LAN1_SSID, &reg.WifiCrendentials[1].auth_name);
+    getWebParam(request, PREFS_LAN1_AUTH, &reg.WifiCrendentials[1].auth_tocken);
   }
 
   if (request->hasParam(PREFS_LAN2_SSID)) {
-    reg.WifiCrendentials[2].auth_name = getWebParam(request, PREFS_LAN2_SSID);
-    setPrefsString(PREFS_LAN2_SSID, reg.WifiCrendentials[2].auth_name);
-    reg.WifiCrendentials[2].auth_tocken = getWebParam(request, PREFS_LAN2_AUTH);
-    setPrefsString(PREFS_LAN2_AUTH, reg.WifiCrendentials[2].auth_tocken);
+    getWebParam(request, PREFS_LAN2_SSID, &reg.WifiCrendentials[2].auth_name);
+    getWebParam(request, PREFS_LAN2_AUTH, &reg.WifiCrendentials[2].auth_tocken);
   }
 
   if (request->hasParam(PREFS_LAN3_SSID)) {
-    reg.WifiCrendentials[3].auth_name = getWebParam(request, PREFS_LAN3_SSID);
-    setPrefsString(PREFS_LAN3_SSID, reg.WifiCrendentials[3].auth_name);
-    reg.WifiCrendentials[3].auth_tocken = getWebParam(request, PREFS_LAN3_AUTH);
-    setPrefsString(PREFS_LAN3_AUTH, reg.WifiCrendentials[3].auth_tocken);
+    getWebParam(request, PREFS_LAN3_SSID, &reg.WifiCrendentials[3].auth_name);
+    getWebParam(request, PREFS_LAN3_AUTH, &reg.WifiCrendentials[3].auth_tocken);
   }
 
 
@@ -1025,43 +993,6 @@ void reboot(AsyncWebServerRequest *request) {
   WifiDisconnect();
   delay(500);
   ESP.restart();
-}
-
-String getContentType(
-    String filename) {  // convert the file extension to the MIME type
-  if (filename.endsWith(".html"))
-    return "text/html";
-  else if (filename.endsWith(".css"))
-    return "text/css";
-  else if (filename.endsWith(".js"))
-    return "application/javascript";
-  else if (filename.endsWith(".ico"))
-    return "image/x-icon";
-  else if (filename.endsWith(".png"))
-    return "image/png";
-  else if (filename.endsWith(".jpeg"))
-    return "image/jpeg";
-  else if (filename.endsWith(".jpg"))
-    return "image/jpg";
-  return "text/plain";
-}
-
-bool handleFileRead(
-    String path) {  // send the right file to the client (if it exists)
-  Serial.println("handleFileRead: " + path);
-  if (path.endsWith("/"))
-    path += "index.html";  // If a folder is requested, send the index file
-  String contentType = getContentType(path);  // Get the MIME type
-  if (SPIFFS.exists(path)) {                  // If the file exists
-    File file = SPIFFS.open(
-        path, "r");  // Open it
-                     //        size_t sent = WebServer->streamFile(file,
-                     //        contentType); // And send it to the client
-    file.close();    // Then close the file again
-    return true;
-  }
-  Serial.println("\tFile Not Found");
-  return false;  // If the file doesn't exist, return false
 }
 
 String table2DGenerator(String data[][2], uint8_t size, boolean bold) {
@@ -1179,31 +1110,6 @@ void showRequest(AsyncWebServerRequest *request) {
   }
 }
 
-boolean validateNumber(String test) {
-  if (!isNumeric(test)) {
-    return false;
-  }
-  if (test.toInt() < 0 || test.toInt() > 15) {
-    return false;
-  }
-  return true;
-}
-
-boolean isNumeric(String str) {
-  unsigned int stringLength = str.length();
-
-  if (stringLength == 0) {
-    return false;
-  }
-  for (unsigned int i = 0; i < stringLength; ++i) {
-    if (isDigit(str.charAt(i))) {
-      continue;
-    } else {
-      return false;
-    }
-  }
-  return true;
-}
 
 void APRSWebServerTick(void) {
   if (globalClient != NULL && globalClient->status() == WS_CONNECTED) {
@@ -1211,7 +1117,7 @@ void APRSWebServerTick(void) {
     //      globalClient->text(randomNumber);
     static uint32_t last = 0;
     uint32_t i = millis();
-    if (i > last + 5000) {
+    if (i > last + 1000) {
       last = i;
       // globalClient->text("Uptime: " + String(last / 1000) + " Sekunden");
       sendGPSDataJson();
@@ -1219,19 +1125,6 @@ void APRSWebServerTick(void) {
   }
 };
 
-void resetHTMLError(void) {
-  html_error.ErrorMsg = "";
-  html_error.isSended = false;
-}
-
-void HTMLSendError(String msg, AsyncWebServerRequest *request) {
-  Serial.println("send HTML error: " + msg);
-  html_error.ErrorMsg = msg;
-  html_error.isSended = false;
-  Serial.print("request->url(): ");
-  Serial.println(request->url());
-  request->redirect(request->url());
-}
 
 void sendGPSDataJson(void) {
   // StaticJsonDocument<10000> doc;
@@ -1239,16 +1132,52 @@ void sendGPSDataJson(void) {
   // AsyncJsonResponse * response = new AsyncJsonResponse();
   // JsonVariant& root = response->getRoot();
   globalClient->server()->cleanupClients();
-
+  char tmpbuf[32] = {0};
   StaticJsonDocument<1024> root;
-  root["isValidTime"] = 1;
-  root["isValidGPS"] = 1;
-  root["time"] = millis() / 1000;
-  root["date"] = "2020-01-04";
-  root["lat"] = "52.4711";
-  root["lng"] = "13.2142";
-  root["speed"] = 0;
-  root["direction"] = "";
+  root["isValidTime"] = gps.time.isValid();
+  root["isValidGPS"] = gps.date.isValid();
+
+  if (gps.time.isValid()) {
+    snprintf(tmpbuf, 12, "%02d:%02d:%02d", gps.time.hour(), gps.time.minute(),gps.time.second());
+  } else {
+    strncpy(tmpbuf, "--:--:--", 9);
+  }
+  root["time"] = tmpbuf;
+  
+  
+  if (gps.date.isValid()) {
+    snprintf(tmpbuf, 12, "%4d-%02d-%02d", gps.date.year(), gps.date.month(),gps.date.day());  
+  } else {
+    strncpy(tmpbuf, "---- -- --", 12);
+  }
+  root["date"] = tmpbuf;
+  
+  if (gps.location.isValid()) {
+    root["lat"] = gps.location.lat();
+    root["lng"] = gps.location.lng();
+  } else {
+    root["lat"] = "-------";
+    root["lng"] = "--------";
+  }
+
+  if (gps.altitude.isValid()) {
+    root["alt"] = gps.altitude.meters();
+  } else {
+    root["alt"] = "-----";
+  }
+  if (gps.course.isValid()) {
+    root["course"] = gps.course.deg();
+  } else {
+    root["course"] =  "---";
+  }
+
+  if (gps.speed.isValid()) {
+    root["speed"] = gps.speed.kmph();
+  } else {
+    root["speed"] = "----";
+  }
+
+
   root["temp"] = 21.3;
   root["humidity"] = 51;
   root["pressure"] = 1024;
@@ -1278,7 +1207,7 @@ String getWebParam(AsyncWebServerRequest *request, const char *key,
     new_var = request->getParam(key)->value();
     if (new_var.length() > 0 && new_var.length() < 32) {
       *prefsvar = new_var;
-      Serial.printf("set new var to reg key=%s value=%s\n", key, new_var);
+      Serial.printf("set new var to reg key=%s value=%s\n", key, new_var.c_str());
       setPrefsString(key, new_var);
     }
     return new_var;
@@ -1291,22 +1220,23 @@ String getWebParam(AsyncWebServerRequest *request, const char *key,
   return new_var;
 }
 
-// String getWebParam(AsyncWebServerRequest *request, const char *key,
-//                    double *prefsvar) {
-//   String new_var = "";
-//   if (request->hasParam(key)) {
-//     new_var = request->getParam(key)->value();
-//     *prefsvar = new_var.toDouble();
-//     setPrefsDouble(key, new_var.toDouble());
-//     return new_var;
-//   } else {
-//     char buf[32] = {0};
-//     snprintf(buf, 32, "key %s not found in request, no value written", key);
-//     DDD(buf);
-//     return String("");
-//   }
-//   return new_var;
-// }
+String getWebParam(AsyncWebServerRequest *request, const char *key,
+                   double *prefsvar) {
+  String new_var = "";
+  if (request->hasParam(key)) {
+    new_var = request->getParam(key)->value();
+    new_var.replace(',', '.');
+    *prefsvar = new_var.toDouble();
+    setPrefsDouble(key, new_var.toDouble());
+    return new_var;
+  } else {
+    char buf[32] = {0};
+    snprintf(buf, 32, "key %s not found in request, no value written", key);
+    DDD(buf);
+    return String("");
+  }
+  return new_var;
+}
 
 String getWebParam(AsyncWebServerRequest *request, const char *key) {
   String new_var = "";

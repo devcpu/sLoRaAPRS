@@ -25,8 +25,6 @@
 
 // @TODO ifdef GPS
 HardwareSerial ss(1);        // TTGO has HW serial to GPS // 1 = first UART
-uint8_t setAllGPSData();
-
 extern void WifiDisconnect(void);
 
 bool initAXP();

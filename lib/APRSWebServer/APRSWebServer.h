@@ -14,8 +14,6 @@ void WebserverStart(void);
 
 static const char kMonthNamesEnglish[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
 
-String getContentType(String filename);
-
 String ProcessorDefault(const String& var);
 
 String systemInfoProcessor(const String& var);
@@ -53,8 +51,8 @@ void reboot(AsyncWebServerRequest *request);
 String optionsFeldGenerator(uint8_t selected, const char *name, String data[][2], uint8_t size);
 
 void showRequest(AsyncWebServerRequest *request);
-boolean validateNumber(String test);
-boolean isNumeric(String str);
+// boolean validateNumber(String test);
+// boolean isNumeric(String str);
 
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 void APRSWebServerTick(void);

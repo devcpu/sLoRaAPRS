@@ -42,7 +42,7 @@ ws.onmessage = function (evt) {
     if (data.isValidGPS == 1 && gps_lat) {
         gps_lat.innerHTML = data.lat;
         gps_lng.innerHTML = data.lng;
-        gps_direction.innerHTML = data.directionection;
+        gps_course.innerHTML = data.course;
         gps_speed.innerHTML = data.speed;
         gps_sat.innerHTML = data.sat;
         gps_hdop.innerHTML = data.hdop;

@@ -1,6 +1,8 @@
 #ifndef LORA_ARPS_CONFIG_H
 #define LORA_ARPS_CONFIG_H
 
+#include <Arduino.h>
+
 #define T_BEAM_V1_0    // use this for older Boards AKA Rev1 (second board release)
 // #define T_BEAM_V0_7    // use this for older Boards AKA Rev0 (first board release)
 
@@ -30,7 +32,7 @@
 
 
 #define LoRaTXFREQ  433775000      // Transmit frequency in MHz
-#define LoRaTXdbmW  18           // Transmit power in dBm PA needs 23 /18 normal
+#define LoRaTXdbmW  12          // Transmit power in dBm PA needs 23 /18 normal
 #define LoRaTXenablePA  0        // switch internal power amplifier on (1) or off (0)
 
 #define LoRaRXFREQ  433900000     // Transmit frequency in MHz

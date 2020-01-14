@@ -1,4 +1,5 @@
 #include <TrackerDisplay.h>
+#include <uxa_debug.h>
 
 Adafruit_SSD1306 display(128, 64, &Wire, OLED_RESET);
 
@@ -189,9 +190,22 @@ void write_no_vaild_data() {
 void write3Line(const char *head, const char *line1, const char *line2, bool toSerial, u_long sleep){
   display.clearDisplay();
   writeHead(head);
-  display.setTextSize(2); 
+
+  DDD(String(strlen(line1)));
+  if (strlen(line1)> 10) {
+    display.setTextSize(1);   
+  } else {
+    display.setTextSize(2); 
+  }
   display.setCursor(0,22);
   display.print(line1);
+
+  DDD(String(strlen(line1)))
+  if (strlen(line2)> 10) {
+    display.setTextSize(1);   
+  } else {
+    display.setTextSize(2); 
+  }
   display.setCursor(0,44);
   display.print(line2);
   display.display();
@@ -205,11 +219,21 @@ void write3Line(const char *head, const char *line1, const char *line2, bool toS
 }
 
 void write3toSerial(const char *head, const char *line1, const char *line2, u_long sleep){
-    Serial.println("\n+------------");
+    Serial.println("\n+----------------------");
     Serial.printf("| %s\n", head);
-    Serial.println("+------------");
+    Serial.println("+----------------------");
     Serial.printf("| %s\n", line1);
     Serial.printf("| %s\n", line2);
-    Serial.println("+------------\n\n");
+    Serial.println("+----------------------\n\n");
     delay(sleep);
+}
+
+void writeTX(const char *to) {
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setCursor(0,22);
+  display.print(" << TX >> ");
+  display.setCursor(0,44);
+  display.print(to);
+  display.display();
 }

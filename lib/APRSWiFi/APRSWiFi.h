@@ -23,7 +23,7 @@ void WIFIAP_stop();
 void WifiConnect(void);
 void WifiDisconnect(void);
 
-
+void WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info);
 
 
 
