@@ -516,8 +516,7 @@ String ProcessorConfigCall(const String &var) {
   }
 
   if (var == PREFS_APRS_SYMBOL) {
-    DDD(reg.aprs_symbol);
-    return String(reg.aprs_symbol);
+    return String(reg.aprs_symbol.symbol);
   }
 
   if (var == "aprs_ext_options") {
@@ -570,12 +569,8 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
   String new_aprs_symbol = "";
   if (request->hasParam(PREFS_APRS_SYMBOL)) {
     new_aprs_symbol = getWebParam(request, PREFS_APRS_SYMBOL);
-    DDE("String new_aprs_symbol", new_aprs_symbol);
-    DDE("charAt(0) new_aprs_symbol", String((char)new_aprs_symbol.charAt(0)));
-    reg.aprs_symbol = (char)new_aprs_symbol.charAt(0);
-    DDE("reg.pars_symbol", reg.aprs_symbol);
+    reg.aprs_symbol.symbol = (char)new_aprs_symbol.charAt(0);
     setPrefsChar(PREFS_APRS_SYMBOL, new_aprs_symbol.charAt(0));
-    DDE("new_aprs_symbol from NVS", getPrefsChar(PREFS_APRS_SYMBOL));
   } else {
     Serial.println("ERR: APRS Symbol not valide!" + new_aprs_symbol);
   }
@@ -1178,12 +1173,12 @@ void sendGPSDataJson(void) {
   }
 
 
-  root["temp"] = 21.3;
-  root["humidity"] = 51;
-  root["pressure"] = 1024;
-  root["sensor"] = "HDT11";
-  root["sat"] = 7;
-  root["hdop"] = 1;
+  root["temp"] = reg.WXdata.temp;
+  root["humidity"] = reg.WXdata.humidity;
+  root["pressure"] = reg.WXdata.pressure;
+  root["sensor"] = "BME280";
+  root["sat"] = gps.satellites.value();
+  root["hdop"] = gps.hdop.value();
   uint16_t len = measureJson(root);
   // Serial.println(len);
   // serializeJson(root, Serial);

@@ -97,6 +97,7 @@ void sendMessage(char* outgoing, boolean toDigi) {
 
 void onReceive(int packetSize){
   lora_control.isMessage = packetSize;
+  Serial.println("fire spi");
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////

@@ -25,7 +25,7 @@ void RegistryInit(void) {
   reg.call = preferences.getString(PREFS_CALL, CHANGE_ME);
   reg.aprs_call_ext = preferences.getString(PREFS_APRS_CALL_EX, "3");
   reg.wx_call_ext = preferences.getString(PREFS_WX_CALL_EX, "13");
-  reg.aprs_symbol = preferences.getChar(PREFS_APRS_SYMBOL, '[');
+  reg.aprs_symbol.symbol = preferences.getChar(PREFS_APRS_SYMBOL, '[');
 
   reg.WebCredentials.auth_name = preferences.getString(PREFS_WEB_ADMIN, "admin");
   reg.WebCredentials.auth_tocken = preferences.getString(PREFS_WEB_PASS, DEFAULT_PASSWORD);
@@ -83,7 +83,7 @@ void registryWriteInit(void){
   preferences.putString(PREFS_CALL, reg.call);
   preferences.putString(PREFS_APRS_CALL_EX, reg.aprs_call_ext);
   preferences.putString(PREFS_WX_CALL_EX, reg.wx_call_ext);
-  preferences.putChar(PREFS_APRS_SYMBOL, reg.aprs_symbol);
+  preferences.putChar(PREFS_APRS_SYMBOL, reg.aprs_symbol.symbol);
 
   preferences.putString(PREFS_WEB_ADMIN, reg.WebCredentials.auth_name);
   preferences.putString(PREFS_WEB_PASS, reg.WebCredentials.auth_tocken);

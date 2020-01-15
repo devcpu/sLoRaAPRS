@@ -20,10 +20,10 @@
 #include <TrackerDisplay.h>
 #include <BMEHandler.h>
 #include <fap.h>
+
 //#include <iGate.h>
 
 extern Registry reg;  // config & system status
-
 
 // @TODO APRS_MSG deprecated?
 APRS_MSG tx_msg;  // converts all data to APRS messages
@@ -31,6 +31,7 @@ extern TinyGPSPlus gps;  // driver fot GPS
 
 uint32_t waitTxTr = 0L, nextTxTr = 10000L, nextTxTrRand = 10;  // ticker for APRS messages
 uint32_t waitTxDg = 0L, nextTxDg = 50000L, nextTxDgRand = 10;
+uint32_t wait_wx_update = 0, next_wx_update = 10000;
 uint64_t nextRX = 0;
 uint8_t gps_error = 0;
 char txmsg[254];
@@ -88,9 +89,6 @@ void setup() {
   ss.begin(GPS_BAUD, SERIAL_8N1, TXPin, RXPin);
   write3Line("Init UART", " GPS UART", "   +OK", true, DISPLA_DELAY_SHORT);
 
-  tx_msg.reset();
-
-
 
   if (LoRa_init()) {
     write3Line("Init LoRa", "LoDaDevive", "   +OK", true, DISPLA_DELAY_SHORT);
@@ -107,8 +105,8 @@ void setup() {
   initOneButton();
   write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
 
-  //reg.current_wifi_mode = wifi_client;
-  reg.current_wifi_mode = wifi_ap;
+  reg.current_wifi_mode = wifi_client;
+  //reg.current_wifi_mode = wifi_ap;
   write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
   write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
 
@@ -134,11 +132,14 @@ void setup() {
 
   write3Line("sLoRaAPRS", "  up &", " running", true, 2000);
   write3Line("  Enjoy", "   the", "   day", true, 2000);
-
+  setWXData();
 }
 
 void loop() {
-  //processMessage();
+  if (wait_wx_update < millis()) {
+    setWXData();
+    wait_wx_update = next_wx_update + millis();
+  }
   // watchdog();
   APRSWebServerTick();
   //iGate_process_udp();
@@ -152,6 +153,7 @@ void loop() {
   //   Serial.println("########################");
   // }
 
+
   button.tick();
   LoRa_tick();
   //tracker_display_tick();
@@ -159,7 +161,16 @@ void loop() {
   
   if (waitTxTr < millis() && !lora_control.isSend) {  // start Tx
      char msg_buf[256] = {0};
-    snprintf(msg_buf, 256, "%s>APRS:!5229.16N/01334.52E_359/031/A=000127 uptime [%ul] send to tracker", reg_aprsCall().c_str(), millis()/1000);
+     char aprs_buf[32] = {0};
+     char wx_buf[128] = {0};
+     char track_buf[128] = {0};
+    snprintf(msg_buf, 256, "%s>APRS:!%s%s %s uptime [%u] send to tracker", 
+      reg_aprsCall().c_str(), 
+      APRS_MSG::computeAPRSPos(aprs_buf), 
+      APRS_MSG::computeTrackInfo(track_buf),
+      APRS_MSG::computeWXField(wx_buf),
+      millis()/1000);
+      
     sendMessage(msg_buf, false);
     //   Serial.printf("sending +OK\n");
     // } else {

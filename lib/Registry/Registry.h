@@ -87,7 +87,10 @@ struct Credentials {
   String auth_tocken;
 };
 
-
+struct APRSSymbol {
+  char table = '/';
+  char symbol = '_';
+};
 
 struct Registry {
   String Version = "";
@@ -101,7 +104,7 @@ struct Registry {
   Credentials WifiCrendentials[4];
   Credentials APCredentials;
   Credentials WebCredentials;
-  char aprs_symbol = '[';
+  APRSSymbol aprs_symbol;
   String APRSPassword;
   String APRSServer[2];
   wifi_mode current_wifi_mode = wifi_ap;

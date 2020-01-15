@@ -105,7 +105,7 @@ void writeUTC(){
   if (gps.time.isValid() && gps.date.isValid()) {
     char date[25], time[25];
     snprintf(date, 25, "%04d-%02d-%02d", gps.date.year(), gps.date.month(), gps.date.day());
-    snprintf(time, 25, " %02d:%02d:%02d", gps.time.hour(), gps.time.minute(), gps.time.second());
+    snprintf(time, 25, "  %02d:%02d", gps.time.hour(), gps.time.minute());
 
     display.setTextSize(2);
     display.setCursor(0,22);
