@@ -8,32 +8,9 @@
 extern TinyGPSPlus gps;
 
 
-// void APRS_MSG::reset() {
-//     //Serial.printf("call APRS_MSG::reset\n");
-//     _aprs_symbol_table = primary;
-//     //@FIXME has to come from registy
-//     _aprs_symbol = '[';
-//     strncpy(_call, "DL7UXA-3", CALL_LENGHT + 1);
-//     // @FIXME has to come from registry
-//     strncpy(_wxcall, "DL7UXA-5", CALL_LENGHT + 1);
-//     strcpy(_wx_winddirection, "...");
-//     strcpy(_wx_windspeed ,"...");
-//     strcpy(_wx_gust ,"...");
-//     strcpy(_wx_rainfalllasthourhinch ,"...");
-//     strcpy(_wx_rainfalllast24h ,"...");
-//     strcpy(_wx_rainfallsinceMidnight ,"...");
-//     strcpy(_wx_temp ,"...");
-//     strcpy(_wx_humidity ,"..");
-//     strcpy(_wx_pressure ,"....");
-//     strcpy(_aprs_lat ,"........");
-//     strcpy(_aprs_lng ,"........");
-//     strcpy(_aprs_speed ,"...");
-//     strcpy(_aprs_course ,"...");
-    
-// }
-
-
 // ".../...g...t...r...p...P...h..b...."
+
+
 char*  APRS_MSG::computeWXField(char *rv) {
     char hum_buf[16] = {0};
     snprintf(rv, 54, "%s/%sg%st%03dr%sp%sP%sh%sb%04d %s",

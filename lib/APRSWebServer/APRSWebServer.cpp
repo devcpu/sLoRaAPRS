@@ -982,7 +982,16 @@ String GetBuildDateAndTime(void) {
   return String(bdt);  // 2017-03-07T11:08:02
 }
 
-// @FIXME remove to main
+/**
+ * reboot device
+ *
+ * @author	Unknown
+ * @since	v0.0.1
+ * @version	v1.0.0	Wednesday, January 15th, 2020.
+ * @global
+ * @param	asyncwebserverrequest	*request	
+ * @return	void
+ */
 void reboot(AsyncWebServerRequest *request) {
   request->redirect("/rebootinfo");
   delay(3000);
@@ -991,6 +1000,18 @@ void reboot(AsyncWebServerRequest *request) {
   ESP.restart();
 }
 
+/**
+ * table2DGenerator.
+ *
+ * @author	Unknown
+ * @since	v0.0.1
+ * @version	v1.0.0	Thursday, January 16th, 2020.
+ * @global
+ * @param	string 	data[][2]	
+ * @param	uint8_t	size     	
+ * @param	boolean	bold     	
+ * @return	mixed
+ */
 String table2DGenerator(String data[][2], uint8_t size, boolean bold) {
   String tdstart("<tr><td>");
   String tdmittle("</td><td>");

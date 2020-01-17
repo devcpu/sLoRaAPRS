@@ -36,10 +36,9 @@ extern TinyGPSPlus gps;  // driver fot GPS
 
 QueueHandle_t LoRaTXQueue, LoRaRXQueue, WWWTXQueue, WWWRXQueue;
 
+uint32_t waitTxTr = 0L, nextTxTr = 50000L, nextTxTrRand = 15;  // ticker for APRS messages
+uint32_t waitTxDg = 0L, nextTxDg = 50000L, nextTxDgRand = 15;
 
-
-uint32_t waitTxTr = 0L, nextTxTr = 10000L, nextTxTrRand = 10;  // ticker for APRS messages
-uint32_t waitTxDg = 0L, nextTxDg = 50000L, nextTxDgRand = 10;
 uint32_t wait_wx_update = 0, next_wx_update = 10000;
 uint64_t nextRX = 0;
 uint8_t gps_error = 0;
@@ -114,8 +113,8 @@ void setup() {
   initOneButton();
   write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
 
-  reg.current_wifi_mode = wifi_client;
-  //reg.current_wifi_mode = wifi_ap;
+  //reg.current_wifi_mode = wifi_client;
+  reg.current_wifi_mode = wifi_ap;
   write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
   write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
 
@@ -173,40 +172,51 @@ void loop() {
   //tracker_display_tick();
 
   
-  if (waitTxTr < millis() && !lora_control.isSend) {  // start Tx
-     char msg_buf[256] = {0};
+  // if (waitTxTr < millis() && !lora_control.isSend) {  // start Tx
+  //    char msg_buf[256] = {0};
+  //    char aprs_buf[32] = {0};
+  //    char wx_buf[128] = {0};
+  //    char track_buf[128] = {0};
+  //   snprintf(msg_buf, 256, "%s>APRS:!%s%s %s uptime [%u] send to tracker", 
+  //     reg_aprsCall().c_str(), 
+  //     APRS_MSG::computeAPRSPos(aprs_buf), 
+  //     APRS_MSG::computeTrackInfo(track_buf),
+  //     APRS_MSG::computeWXField(wx_buf),
+  //     millis()/1000);
+  //   waitTxTr = millis() + nextTxTr + random(nextTxTrRand) * 1000;
+  // }
+
+  if (waitTxDg  < millis()&& !lora_control.isSend) {  // start Tx
+    uint64_t t0 = millis();
      char aprs_buf[32] = {0};
      char wx_buf[128] = {0};
      char track_buf[128] = {0};
-    snprintf(msg_buf, 256, "%s>APRS:!%s%s %s uptime [%u] send to tracker", 
+    char msg_buf[256] = {0};
+    snprintf(msg_buf, 256, "%s>APRS:!%s%s %s uptime [%u] send to digi", 
       reg_aprsCall().c_str(), 
       APRS_MSG::computeAPRSPos(aprs_buf), 
       APRS_MSG::computeTrackInfo(track_buf),
       APRS_MSG::computeWXField(wx_buf),
       millis()/1000);
-      
-    sendMessage(msg_buf, false);
-    //   Serial.printf("sending +OK\n");
-    // } else {
-    //   Serial.printf("sending -NOK\n");
-    // }
-    waitTxTr = millis() + nextTxTr + random(nextTxTrRand) * 1000;
+    sendMessage(msg_buf, true);
+    uint64_t t1 = millis();
+    Serial.printf("sendtime: %d\n", t1 - t0);
+    waitTxDg = millis() + nextTxDg + random(nextTxDgRand) * 1000;
   }
-
-  // if (waitTxDg  < millis()&& !lora_control.isSend) {  // start Tx
-  //   uint64_t t0 = millis();
-  //   char msg_buf[256] = {0};
-  //   snprintf(msg_buf, 256, "DL7UXA-7>APRS:!5229.16N/01334.52E_359/031/A=000127 uptime [%ul] send to digi", millis()/1000);
-  //   sendMessage(msg_buf, true);
-  //   uint64_t t1 = millis();
-  //   Serial.printf("sendtime: %d\n", t1 - t0);
-  //   waitTxDg = millis() + nextTxDg + random(nextTxDgRand) * 1000;
-  // }
 
   smartDelay(100);
 }
 
 
+/**
+ * initAXP.
+ *
+ * @author	Unknown
+ * @since	v0.0.1
+ * @version	v1.0.0	Wednesday, January 15th, 2020.
+ * @global
+ * @return	boolean
+ */
 bool initAXP() {
   if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) {
     Serial.println("AXP192 Begin PASS");

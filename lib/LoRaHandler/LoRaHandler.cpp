@@ -6,6 +6,15 @@
 LoRaRXControl lora_control;
 
 
+/**
+ * LoRa_init.
+ *
+ * @author	Unknown
+ * @since	v0.0.1
+ * @version	v1.0.0	Thursday, January 16th, 2020.
+ * @global
+ * @return	boolean
+ */
 bool LoRa_init() {
   LoRa.setPins(LoRaCsPin, LoRaResetPin, LoRaIRQPin);
   if (!LoRa.begin(LoRaRXFREQ)) {
@@ -26,6 +35,16 @@ bool LoRa_init() {
   return true;
 }
 
+/**
+ * LoRa_tick.
+ *
+ * @author	Unknown
+ * @since	v0.0.1
+ * @version	v1.0.0	Thursday, January 16th, 2020.
+ * @global
+ * @param	mixed	void	
+ * @return	void
+ */
 void LoRa_tick(void) {
   if (lora_control.isMessage > 0) {
     processMessage();

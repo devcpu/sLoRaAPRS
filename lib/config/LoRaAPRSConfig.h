@@ -35,7 +35,7 @@
 #define LoRaTXdbmW  12          // Transmit power in dBm PA needs 23 /18 normal
 #define LoRaTXenablePA  0        // switch internal power amplifier on (1) or off (0)
 
-#define LoRaRXFREQ  433900000     // Transmit frequency in MHz
+#define LoRaRXFREQ  433775000     // Transmit frequency in MHz
 
 #define LoRaCsPin       18          // LoRa radio chip select
 #define LoRaResetPin    23       // LoRa radio reset
