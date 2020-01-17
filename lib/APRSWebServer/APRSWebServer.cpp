@@ -321,7 +321,6 @@ String getSystemInfoTable(void) {
                           // 6 bytes).
 #endif
 
-  //  (ideSize != realSize) ? ""
   FlashMode_t ideMode = ESP.getFlashChipMode();
 
   String systemdata[][2] = {
@@ -347,10 +346,12 @@ String getSystemInfoTable(void) {
       {"FreeHeap: ", String(ESP.getFreeHeap() / 1024) + "kB"},
       {"MaxAllocHeap: ", String(ESP.getMaxAllocHeap() / 1024) + "kB"},
       {"MinFreeHeap: ", String(ESP.getMinFreeHeap() / 1024) + "kB"},
-      {"PsramSize: ", String(ESP.getPsramSize() / 1024) + "kB"},
-      {"FreePsram", String(ESP.getFreePsram() / 1024) + "kB"},
-      {"MaxAllocPsram: ", String(ESP.getMaxAllocPsram() / 1024) + "kB"},
-      {"MinFreePsram", String(ESP.getMinFreePsram() / 1024) + "kB"},
+
+      // {"PsramSize: ", String(ESP.getPsramSize() / 1024) + "kB"},
+      // {"FreePsram", String(ESP.getFreePsram() / 1024) + "kB"},
+      // {"MaxAllocPsram: ", String(ESP.getMaxAllocPsram() / 1024) + "kB"},
+      // {"MinFreePsram", String(ESP.getMinFreePsram() / 1024) + "kB"},
+
 #elif defined(ESP8266)
       {"Flash real id:", String(ESP.getFlashChipId(), HEX)},
       {"Flash real size:", String(ESP.getFlashChipRealSize() / 1024) + "kB"},
@@ -1122,6 +1123,8 @@ void APRSWebServerTick(void) {
 
 
 void sendGPSDataJson(void) {
+  
+  
   // StaticJsonDocument<10000> doc;
 
   // AsyncJsonResponse * response = new AsyncJsonResponse();
@@ -1132,47 +1135,17 @@ void sendGPSDataJson(void) {
   root["isValidTime"] = gps.time.isValid();
   root["isValidGPS"] = gps.date.isValid();
 
-  if (gps.time.isValid()) {
-    snprintf(tmpbuf, 12, "%02d:%02d:%02d", gps.time.hour(), gps.time.minute(),gps.time.second());
-  } else {
-    strncpy(tmpbuf, "--:--:--", 9);
-  }
+  snprintf(tmpbuf, 12, "%02d:%02d:%02d", gps.time.hour(), gps.time.minute(),gps.time.second());
   root["time"] = tmpbuf;
   
-  
-  if (gps.date.isValid()) {
-    snprintf(tmpbuf, 12, "%4d-%02d-%02d", gps.date.year(), gps.date.month(),gps.date.day());  
-  } else {
-    strncpy(tmpbuf, "---- -- --", 12);
-  }
+  snprintf(tmpbuf, 12, "%4d-%02d-%02d", gps.date.year(), gps.date.month(),gps.date.day());  
   root["date"] = tmpbuf;
-  
-  if (gps.location.isValid()) {
-    root["lat"] = gps.location.lat();
-    root["lng"] = gps.location.lng();
-  } else {
-    root["lat"] = "-------";
-    root["lng"] = "--------";
-  }
-
-  if (gps.altitude.isValid()) {
-    root["alt"] = gps.altitude.meters();
-  } else {
-    root["alt"] = "-----";
-  }
-  if (gps.course.isValid()) {
-    root["course"] = gps.course.deg();
-  } else {
-    root["course"] =  "---";
-  }
-
-  if (gps.speed.isValid()) {
-    root["speed"] = gps.speed.kmph();
-  } else {
-    root["speed"] = "----";
-  }
-
-
+ 
+  root["lat"] = gps.location.lat();
+  root["lng"] = gps.location.lng();
+  root["alt"] = gps.altitude.meters();
+  root["course"] = gps.course.deg();
+  root["speed"] = gps.speed.kmph();
   root["temp"] = reg.WXdata.temp;
   root["humidity"] = reg.WXdata.humidity;
   root["pressure"] = reg.WXdata.pressure;
@@ -1182,8 +1155,6 @@ void sendGPSDataJson(void) {
   uint16_t len = measureJson(root);
   // Serial.println(len);
   // serializeJson(root, Serial);
-
-  // ws.cleanupClients(); !!!
 
   AsyncWebSocketMessageBuffer *buffer = globalClient->server()->makeBuffer(
       len);  //  creates a buffer (len + 1) for you.

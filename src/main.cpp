@@ -19,6 +19,11 @@
 #include <SPI.h>
 #include <TrackerDisplay.h>
 #include <BMEHandler.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/queue.h>
+#include <freertos/semphr.h>
+#include <AsyncTCP.h>
 #include <fap.h>
 
 //#include <iGate.h>
@@ -28,6 +33,10 @@ extern Registry reg;  // config & system status
 // @TODO APRS_MSG deprecated?
 APRS_MSG tx_msg;  // converts all data to APRS messages
 extern TinyGPSPlus gps;  // driver fot GPS
+
+QueueHandle_t LoRaTXQueue, LoRaRXQueue, WWWTXQueue, WWWRXQueue;
+
+
 
 uint32_t waitTxTr = 0L, nextTxTr = 10000L, nextTxTrRand = 10;  // ticker for APRS messages
 uint32_t waitTxDg = 0L, nextTxDg = 50000L, nextTxDgRand = 10;
@@ -129,6 +138,11 @@ void setup() {
   // dumpEEPROM();
 
   //Scanner();
+
+  LoRaTXQueue = xQueueCreate(3, sizeof(char) * 256);
+  LoRaRXQueue = xQueueCreate(3, sizeof(char) * 256);
+  WWWTXQueue  = xQueueCreate(3, sizeof(char) * 256);
+  WWWRXQueue  = xQueueCreate(3, sizeof(char) * 256);
 
   write3Line("sLoRaAPRS", "  up &", " running", true, 2000);
   write3Line("  Enjoy", "   the", "   day", true, 2000);
