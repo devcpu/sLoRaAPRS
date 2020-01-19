@@ -12,6 +12,7 @@
 
 bool BMEHandlerInit(void);
 void setWXData(void);
+void Sensor_tick();
 
 extern Adafruit_BME280 bme;
 

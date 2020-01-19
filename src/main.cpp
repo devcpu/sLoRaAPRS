@@ -25,6 +25,7 @@
 #include <freertos/semphr.h>
 #include <AsyncTCP.h>
 #include <fap.h>
+#include <GPSSensor.h>
 
 //#include <iGate.h>
 
@@ -62,7 +63,7 @@ void setup() {
     write3toSerial("Init I2C", "   -ERR", "check wire", DISPLA_DELAY_LONG);
   }
 
-  if (initDisplay()) {
+  if (DisplayInit()) {
     write3Line("Init Disp.", "Display", "   +OK", true, DISPLA_DELAY_SHORT);  
   } else {
     write3Line("Init Disp.", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);  
@@ -72,8 +73,10 @@ void setup() {
 #ifdef T_BEAM_V1_0
     if (initAXP()) {
       write3Line("Init AXP", " AXP 192", "   +OK", true, DISPLA_DELAY_SHORT);
+      reg.hardware.AXP192 = true;
     } else {
       write3Line("Init AXP", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);
+      reg.hardware.AXP192 = false;
     }
 #endif
 
@@ -83,8 +86,10 @@ void setup() {
 
   if (BMEHandlerInit()) {
     write3Line("Init BME", "  BME280", "   +OK", true, DISPLA_DELAY_SHORT);
+    reg.hardware.BME280 = true;
   } else {
     write3Line("Init BME", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);
+    reg.hardware.BME280 = false;
   }
 
   if (ESPFSInit()) {
@@ -113,8 +118,9 @@ void setup() {
   initOneButton();
   write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
 
-  //reg.current_wifi_mode = wifi_client;
-  reg.current_wifi_mode = wifi_ap;
+  reg.current_wifi_mode = wifi_client;
+  //reg.current_wifi_mode = wifi_ap;
+  
   write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
   write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
 
@@ -149,6 +155,7 @@ void setup() {
 }
 
 void loop() {
+  setGPSData();
   if (wait_wx_update < millis()) {
     setWXData();
     wait_wx_update = next_wx_update + millis();
@@ -169,8 +176,8 @@ void loop() {
 
   button.tick();
   LoRa_tick();
-  //tracker_display_tick();
-
+  tracker_display_tick();
+  Sensor_tick();
   
   // if (waitTxTr < millis() && !lora_control.isSend) {  // start Tx
   //    char msg_buf[256] = {0};
@@ -192,7 +199,7 @@ void loop() {
      char wx_buf[128] = {0};
      char track_buf[128] = {0};
     char msg_buf[256] = {0};
-    snprintf(msg_buf, 256, "%s>APRS:!%s%s %s uptime [%u] send to digi", 
+    snprintf(msg_buf, 256, "%s>APRS:!%s%s %s uptime [%lu] send to digi", 
       reg_aprsCall().c_str(), 
       APRS_MSG::computeAPRSPos(aprs_buf), 
       APRS_MSG::computeTrackInfo(track_buf),

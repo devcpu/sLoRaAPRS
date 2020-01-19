@@ -17,12 +17,12 @@ char*  APRS_MSG::computeWXField(char *rv) {
     "...", //winddirection 0-360
     "...", // windspeed in mph
     "...", // gust
-    (int)APRS_MSG::c2f(reg.WXdata.temp), // temperature
+    (int)round(APRS_MSG::c2f(reg.WXdata.temp)), // temperature
     "...", // rainfalllasthourhinch
     "...", // rainfalllast24h
     "...", // rainfallsinceMidnight
     APRS_MSG::calcHumidity(hum_buf, reg.WXdata.humidity), // humidity
-    (int)reg.WXdata.pressure, // pressure
+    (int)round(reg.WXdata.pressure), // pressure
     "BME280" // wx sensor
     
     );
@@ -33,7 +33,7 @@ char* APRS_MSG::calcHumidity(char *rv, float humidity){
     if (humidity == 100) {
         snprintf(rv, 3, "%s", "00");
     } else {
-       snprintf(rv, 3, "%02u", (int)humidity);
+       snprintf(rv, 3, "%02u", (int)round(humidity));
     }
     return rv;
 };
@@ -50,9 +50,9 @@ char* APRS_MSG::computeAPRSPos(char *rv) {
     char buf_lat[16] = {0};
     char buf_lng[16] = {0};
     snprintf(rv, 32, "%s%c%s%c",
-        dc2gms(buf_lat, gps.location.lat(), false),
+        dc2gms(buf_lat, reg.gps_location.latitude, false),
         reg.aprs_symbol.table,
-        dc2gms(buf_lng, gps.location.lng(), true),
+        dc2gms(buf_lng, reg.gps_location.longitude, true),
         reg.aprs_symbol.symbol
         );
         return rv;
@@ -63,7 +63,7 @@ char* APRS_MSG::computeAPRSPos(char *rv) {
 char* APRS_MSG::computeTrackInfo(char *rv) {
     snprintf(rv, 64, "%03d/%03d/A=%06d",
         (int)gps.speed.mph(),
-        (int)gps.course.deg(),
+        (int)reg.gps_move.course,
         (int)gps.altitude.feet()
         );
         return rv;

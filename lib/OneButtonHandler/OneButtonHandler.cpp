@@ -16,7 +16,7 @@ void initOneButton() {
 
 void oneClick(){
   Serial.println("one Click");
-  displayCange = !displayCange;
+  displayChange = !displayChange;
 }
 void doubleClick(){
   Serial.println("double Click");

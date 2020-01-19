@@ -11,6 +11,8 @@ extern Registry reg;
 #elif defined(ESP8266)
 #endif
 
+
+
 String APRSWiFI_SSID = "";
 
 void WifiAPInit(void) {
@@ -18,7 +20,8 @@ void WifiAPInit(void) {
   /* You can remove the password parameter if you want the AP to be open. */
   Serial.println("Configuring access point...");
 #ifdef ESP32
-WiFi.softAP(reg.APCredentials.auth_name.c_str(), reg.APCredentials.auth_tocken.c_str());
+//WiFi.softAP(reg.APCredentials.auth_name.c_str(), reg.APCredentials.auth_tocken.c_str());
+WiFi.softAP("sLoRaAPRS", "letmein42");
 Serial.println("WiFi.softAP");
 // @TODO sollte hier nicht nötig sein!
 #elif defined(ESP8266)
@@ -47,6 +50,10 @@ WiFi.softAP(reg.APCredentials[0], reg.APCredentials[1]);
     Serial.println("SSID: " + reg.APCredentials.auth_name);
     write3Line(" WIFI AP", "  SSID:", reg.APCredentials.auth_name.c_str(), true, 3000);
   }
+  reg.lan_status.SSID = WiFi.SSID();
+  reg.lan_status.IP = myIP.toString();
+  reg.lan_status.status = "running";
+  reg.lan_status.mode = wifi_ap;
 }
 
 void WifiConnect(void) {
@@ -72,6 +79,12 @@ void WifiConnect(void) {
   IPAddress myIP = WiFi.localIP();
   reg.SERVER_IP = myIP.toString();
   write3Line("WiFiclient", APRSWiFI_SSID.c_str(), myIP.toString().c_str(), true, 3000);
+
+  reg.lan_status.SSID = WiFi.SSID();
+  reg.lan_status.IP =  myIP.toString();
+  reg.lan_status.status = "connected";
+  reg.lan_status.mode = wifi_client;
+
 
 }
 

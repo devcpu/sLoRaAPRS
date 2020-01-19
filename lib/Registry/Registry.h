@@ -82,6 +82,16 @@ struct Move {
   double course;
 };
 
+struct DateTime {
+  uint16_t year = 0;
+  uint8_t month = 0;
+  uint8_t day = 0;
+  uint8_t hour = 0;
+  uint8_t minute = 0;
+  uint8_t second = 0;
+ 
+};
+
 struct Credentials {
   String auth_name;
   String auth_tocken;
@@ -92,11 +102,31 @@ struct APRSSymbol {
   char symbol = '_';
 };
 
+struct HardWare {
+  boolean OLED = false;
+  boolean BME280 = false;
+  boolean DHT22 = false;
+  boolean AXP192 = false;
+  boolean GPS = false;
+};
+
+struct ControlData {
+  boolean gps_update = false;
+  boolean new_mode = false;
+  boolean newTxMesg = false;
+  boolean newRxMesg = false;
+};
+
+struct LanStatus {
+  wifi_mode mode = wifi_off;
+  String SSID = "";
+  String status = "";
+  String IP = "";
+};
+
 struct Registry {
   String Version = "";
   String Release = "";
-  boolean newTxMesg = false;
-  boolean newRxMesg = false;
   
   String call = "CHANGEME";
   String wx_call_ext = "3";
@@ -107,38 +137,35 @@ struct Registry {
   APRSSymbol aprs_symbol;
   String APRSPassword;
   String APRSServer[2];
+  uint32_t boot_count = 0;
+
   wifi_mode current_wifi_mode = wifi_ap;
   system_mode current_system_mode = mode_tracker;
-  boolean new_mode = false;
-  uint32_t boot_count = 0;
-  boolean wx_sensor_bme280 = false;
-  boolean wx_sensor_dht = false;
-  boolean gps = false;
-  boolean oled = false;
+  
+  LanStatus lan_status;
+  
+  HardWare hardware;
+
   Location gps_location;
   Move gps_move;
+  DateTime gps_time;
   Location posfix;
 
   String SERVER_IP;
   APRSMessage TxMsg;
   APRSMessage RxMsg;
   WXData WXdata;
+  ControlData contral_data;
 };
-
-  // String LngFIX = "01357.56E";
-  // String LatFIX = "5248.47N";
 
 
 void RegistryInit(void);
 
 void registryWriteInit(void);
 
-
-
-
 String reg_wxCall(void);
-String reg_aprsCall(void);
 
+String reg_aprsCall(void);
 
 String getPrefsString(const char* key);
 void setPrefsString(const char* key, String  value);

@@ -2,6 +2,7 @@
 #include <BMEHandler.h>
 #include <Registry.h>
 #include <uxa_debug.h>
+#include <LoRaAPRSConfig.h>
 
 extern Registry reg;  // config & system status
 
@@ -60,4 +61,14 @@ void setWXData(void) {
   reg.WXdata.humidity = humidity;
   reg.WXdata.temp = temperature;
   reg.WXdata.pressure = pressure;
+}
+
+void Sensor_tick() {
+  static uint64_t next_sensor_update = 0;
+  if (next_sensor_update > millis()) {
+    return;
+  } else {
+    setWXData();
+    next_sensor_update = SENSOR_UPDATE_INTERVAL + millis();
+  }
 }

@@ -23,6 +23,13 @@
 #define WX_BMC280_SENSOR_ADDR 0x76
 #endif
 
+#define SENSOR_UPDATE_INTERVAL 1000 * 60 * 20
+
+// update every xx in meter recommended is 1.300 km
+#define APRS_UPDATE_DISTANCE 500
+#define APRS_UPDATE_ANGLE 10
+#define APRS_UPDATE_INTERVAL 1000 * 60 * 10
+
 /********** LoRa params **********/
 
 #define LoRaSpreadingFactor 12

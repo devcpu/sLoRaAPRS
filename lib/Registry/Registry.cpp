@@ -164,7 +164,7 @@ void setPrefsString(const char* key, String  value){
   if (old_value != value) {
     Serial.printf("write %s\n", value.c_str());
     long rv =  preferences.putString(key, value);
-    Serial.printf("write of key=%s value=%s returns: %d\n", key, value, rv);
+    Serial.printf("write of key=%s value=%s returns: %lu\n", key, value, rv);
     String new_var = preferences.getString(key);
     Serial.printf("got var from NVS: %s\n", new_var.c_str());
 
@@ -177,10 +177,14 @@ void setPrefsUInt(const char* key, uint16_t value) {
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
   uint16_t old_value = getPrefsInt(key);
+  DDE("new value: %d", value);
+  DDE("old value: %d", old_value);
   if (old_value != value) {
     preferences.putUInt(key, value);
+    DDD("update");
   }
   preferences.end();
+  DDD("setPrefsUInt END");
 }
 
 
@@ -219,8 +223,11 @@ void RegistryToString(void) {
   Serial.printf("Release: %s\n", reg.Release.c_str());
 
   Serial.printf("call: %s\n", reg.call.c_str());
-  Serial.printf("aprs_call_ext: %s\n", reg.aprs_call_ext);
-  Serial.printf("wx_call_ext: %s\n", reg.wx_call_ext);
+  Serial.printf("aprs_call_ext: %s\n", reg.aprs_call_ext.c_str());
+  Serial.printf("wx_call_ext: %s\n", reg.wx_call_ext.c_str());
+
+  Serial.printf("run_mode: %d\n", (int)reg.current_system_mode);
+  Serial.printf("wifi_mode: %d\n", (int)reg.current_wifi_mode);
 
   Serial.printf("web admin %s\n", reg.WebCredentials.auth_name.c_str());
   Serial.printf("web pass %s\n", reg.WebCredentials.auth_tocken.c_str());

@@ -3,7 +3,7 @@
 
 #include <OneButton.h>
 
-extern bool displayCange;
+extern bool displayChange;
 
 extern OneButton button;
 

@@ -30,7 +30,7 @@ AsyncWebSocketClient *globalClient = NULL;
 String mainmenue(
     "<form action='.' method='get'><button>Main Menue</button></form><br />");
 
-typedef struct HTML_Error {
+struct HTML_Error {
   String ErrorMsg;
   boolean isSended;
 
@@ -156,7 +156,7 @@ void WebserverStart(void) {
       DDD(request->params());
       handleRequestChangeMode(request);
       Serial.printf("new run_mode: %d / new_wifi_mode %d\n", (int)reg.current_system_mode, (int)reg.current_wifi_mode);
-      Serial.printf("new run_mode: %d / new_wifi_mode %d\n", (int)getPrefsDouble(PREFS_CURRENT_SYSTEM_MODE), getPrefsDouble(PREFS_CURRENT_WIFI_MODE));
+      Serial.printf("new run_mode: %d / new_wifi_mode %d\n", (int)getPrefsDouble(PREFS_CURRENT_SYSTEM_MODE), (int)getPrefsDouble(PREFS_CURRENT_WIFI_MODE));
       request->redirect("/");
     }
 
@@ -382,10 +382,10 @@ String getSystemInfoTable(void) {
   };
 
   String hwdata[][2] = {
-      {"GPS:", String(reg.gps)},
-      {"OLED:", String(reg.oled)},
-      {"DHT:", String(reg.wx_sensor_dht)},
-      {"BME280", String(reg.wx_sensor_bme280)},
+      {"GPS:", String(reg.hardware.GPS)},
+      {"OLED:", String(reg.hardware.OLED)},
+      {"DHT:", String(reg.hardware.DHT22)},
+      {"BME280", String(reg.hardware.BME280)},
   };
 
   return table2DGenerator(systemdata, 32, true) +
@@ -939,8 +939,8 @@ void handleRequestChangeMode(AsyncWebServerRequest *request) {
   DDD("handleRequestChangeMode");
   if (request->hasParam(PREFS_CURRENT_SYSTEM_MODE)) {
     String new_system_mode = getWebParam(request, PREFS_CURRENT_SYSTEM_MODE);
-    setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE, new_system_mode.toInt());
-    reg.current_system_mode = (system_mode) new_system_mode.toInt();
+    setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE, (int)new_system_mode.toInt());
+    reg.current_system_mode = (system_mode) (int)new_system_mode.toInt();
   }
 
   if (request->hasParam(PREFS_CURRENT_WIFI_MODE)) {
@@ -1156,17 +1156,17 @@ void sendGPSDataJson(void) {
   root["isValidTime"] = gps.time.isValid();
   root["isValidGPS"] = gps.date.isValid();
 
-  snprintf(tmpbuf, 12, "%02d:%02d:%02d", gps.time.hour(), gps.time.minute(),gps.time.second());
+  snprintf(tmpbuf, 12, "%02d:%02d:%02d", reg.gps_time.hour, reg.gps_time.minute, reg.gps_time.second);
   root["time"] = tmpbuf;
   
-  snprintf(tmpbuf, 12, "%4d-%02d-%02d", gps.date.year(), gps.date.month(),gps.date.day());  
+  snprintf(tmpbuf, 12, "%4d-%02d-%02d", reg.gps_time.year, reg.gps_time.month, reg.gps_time.day);  
   root["date"] = tmpbuf;
  
-  root["lat"] = gps.location.lat();
-  root["lng"] = gps.location.lng();
-  root["alt"] = gps.altitude.meters();
-  root["course"] = gps.course.deg();
-  root["speed"] = gps.speed.kmph();
+  root["lat"] = reg.gps_location.latitude;
+  root["lng"] = reg.gps_location.longitude;
+  root["alt"] = reg.gps_location.altitude;
+  root["course"] = reg.gps_move.course;
+  root["speed"] = reg.gps_move.speed;
   root["temp"] = reg.WXdata.temp;
   root["humidity"] = reg.WXdata.humidity;
   root["pressure"] = reg.WXdata.pressure;
