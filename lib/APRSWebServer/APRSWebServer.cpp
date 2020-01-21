@@ -1171,8 +1171,8 @@ void sendGPSDataJson(void) {
   root["humidity"] = reg.WXdata.humidity;
   root["pressure"] = reg.WXdata.pressure;
   root["sensor"] = "BME280";
-  root["sat"] = gps.satellites.value();
-  root["hdop"] = gps.hdop.value();
+  root["sat"] = reg.gps_meta.sat;
+  root["hdop"] = reg.gps_meta.hdop;
   uint16_t len = measureJson(root);
   // Serial.println(len);
   // serializeJson(root, Serial);

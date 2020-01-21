@@ -13,7 +13,7 @@ extern TinyGPSPlus gps;
 
 char*  APRS_MSG::computeWXField(char *rv) {
     char hum_buf[16] = {0};
-    snprintf(rv, 54, "%s/%sg%st%03dr%sp%sP%sh%sb%04d %s",
+    snprintf(rv, 54, "%s/%sg%st%03dr%sp%sP%sh%sb%05d %s",
     "...", //winddirection 0-360
     "...", // windspeed in mph
     "...", // gust
@@ -22,8 +22,8 @@ char*  APRS_MSG::computeWXField(char *rv) {
     "...", // rainfalllast24h
     "...", // rainfallsinceMidnight
     APRS_MSG::calcHumidity(hum_buf, reg.WXdata.humidity), // humidity
-    (int)round(reg.WXdata.pressure), // pressure
-    "BME280" // wx sensor
+    (int)round(reg.WXdata.pressure*10), // pressure
+    "Sensor: BME280" // wx sensor
     
     );
     return rv;
@@ -33,7 +33,7 @@ char* APRS_MSG::calcHumidity(char *rv, float humidity){
     if (humidity == 100) {
         snprintf(rv, 3, "%s", "00");
     } else {
-       snprintf(rv, 3, "%02u", (int)round(humidity));
+       snprintf(rv, 3, "%02u", static_cast<uint8_t>(round(humidity)));
     }
     return rv;
 };
@@ -61,12 +61,18 @@ char* APRS_MSG::computeAPRSPos(char *rv) {
 
 
 char* APRS_MSG::computeTrackInfo(char *rv) {
-    snprintf(rv, 64, "%03d/%03d/A=%06d",
-        (int)gps.speed.mph(),
-        (int)reg.gps_move.course,
-        (int)gps.altitude.feet()
+    snprintf(rv, 64, "%03.0f/%03.0f/A=%06.0f",
+        reg.gps_move.speed,
+        reg.gps_move.course,
+        reg.gps_location.altitude
         );
         return rv;
+}
+
+char* APRS_MSG::computeTimestamp(char *rv) {
+    // day/hour/minute
+    snprintf(rv, 12, "@%02d%02d%02dz",reg.gps_time.day, reg.gps_time.hour, reg.gps_time.minute);
+    return rv;
 }
 
 

@@ -48,12 +48,12 @@ bool BMEHandlerInit() {
   humidity = bme.readHumidity();
   altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
 
-  Serial.println("++++++++++++++++++++++++++++++++++++++++");
-  Serial.printf("+   Temperature: %2.3f°C\n", temperature);
-  Serial.printf("+   Humidity: %3.4f%\n", humidity);
-  Serial.printf("+   Pressure: %4.6fhPa\n", pressure);
-  Serial.printf("+   Approx. Altitude: %5.5fm\n", altitude);
-  Serial.println("++++++++++++++++++++++++++++++++++++++++");
+  // Serial.println("++++++++++++++++++++++++++++++++++++++++");
+  // Serial.printf("+   Temperature: %2.3f°C\n", temperature);
+  // Serial.printf("+   Humidity: %3.4f%%\n", humidity);
+  // Serial.printf("+   Pressure: %4.6fhPa\n", pressure);
+  // Serial.printf("+   Approx. Altitude: %5.5fm\n", altitude);
+  // Serial.println("++++++++++++++++++++++++++++++++++++++++");
   return true;
 }
 

@@ -6,7 +6,11 @@
 
 Registry reg;
 
+
 void RegistryInit(void) {
+
+  reg.controler.button_state = new ButtonNeutral();
+
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
   
@@ -63,7 +67,7 @@ void RegistryInit(void) {
     registryWriteInit();
   }
 #ifdef MODDEBUG
-  RegistryToString();
+  //RegistryToString();
 #endif
   Serial.println("Registry init ready\n");
 }
@@ -164,7 +168,7 @@ void setPrefsString(const char* key, String  value){
   if (old_value != value) {
     Serial.printf("write %s\n", value.c_str());
     long rv =  preferences.putString(key, value);
-    Serial.printf("write of key=%s value=%s returns: %lu\n", key, value, rv);
+    Serial.printf("write of key=%s value=%s returns: %lu\n", key, value.c_str(), rv);
     String new_var = preferences.getString(key);
     Serial.printf("got var from NVS: %s\n", new_var.c_str());
 
@@ -312,3 +316,22 @@ String getRunMode() {
 
 String reg_wxCall(void) { return reg.call + String("-") + reg.wx_call_ext; };
 String reg_aprsCall(void) { return reg.call + String("-") + reg.aprs_call_ext; };
+
+
+void singleClick_CB(void){
+  reg.controler.singleClick();
+}
+
+void doubleClick_CB(void){
+  
+  reg.controler.doubleClick();
+}
+
+void longClick_CB(void){
+  reg.controler.longClick();
+}
+
+void kinoTimer_CB(TimerHandle_t xExpiredTimer){
+  Serial.printf("\ncall of kinoTimer_CB\n");
+  reg.controler.button_state->kino();
+}

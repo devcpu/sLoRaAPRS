@@ -28,5 +28,7 @@ void write3Line(const char *head, const char *line1, const char *line2, bool toS
 void write3toSerial(const char *head, const char *line1, const char *line2, u_long sleep);
 void write_no_vaild_data(void);
 void write2Display(String head, String line1, String line2, String line3);
+void write2Display(String head, String line1, String line2, String line3, String line4);
+void write2Display(const char* head, const char* line1, const char* line2, const char* line3, const char* line4);
 
 #endif

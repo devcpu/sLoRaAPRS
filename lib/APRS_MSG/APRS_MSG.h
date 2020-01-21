@@ -35,6 +35,7 @@ class APRS_MSG {
     static char* computeWXField(char *rv);
     static char* computeTrackInfo(char *rv);
     static char* calcHumidity(char *rv, float humidity);
+    static char* computeTimestamp(char *rv);
     /**
      * @brief converts given miles/hour to km/h (imperial2metric)
      * 

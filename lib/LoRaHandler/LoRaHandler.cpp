@@ -93,7 +93,7 @@ void sendMessage(char* outgoing, boolean toDigi) {
   LoRa.write(destination);   // add destination address
   LoRa.write(localAddress);  // add sender address
   LoRa.write(0x01);          // head end?
-  LoRa.write(msgCount);                 // add message ID
+  //LoRa.write(msgCount);                 // add message ID
 
   /*
     LoRa.print adds some cryptic char to head,
@@ -128,7 +128,7 @@ void processMessage(void) {
   int recipient = LoRa.read();          // recipient address
   byte sender = LoRa.read();            // sender address
   byte incomingMsgId = LoRa.read();     // incoming msg ID
-  byte incomingLength = LoRa.read();    // incoming msg length
+  //byte incomingLength = LoRa.read();    // incoming msg length
 
   String incoming = "";                 // payload of packet
 
@@ -141,14 +141,14 @@ void processMessage(void) {
   //   return;                             // skip rest of function
   // }
   Serial.println("/////////////////////////////////////////////////////////////////////");
-  Serial.printf("incomingLength=%d\n", incomingLength);
+  //Serial.printf("incomingLength=%d\n", incomingLength);
   Serial.printf("incoming.length():%d\n", incoming.length());
 
   // if message is for this device, or broadcast, print details:
   Serial.println("Received from: 0x" + String(sender, HEX));
   Serial.println("Sent to: 0x" + String(recipient, HEX));
   Serial.println("Message ID: " + String(incomingMsgId));
-  Serial.println("Message length: " + String(incomingLength));
+  //Serial.println("Message length: " + String(incomingLength));
   Serial.println("Message: " + incoming);
   Serial.println("RSSI: " + String(LoRa.packetRssi()));
   Serial.println("Snr: " + String(LoRa.packetSnr()));

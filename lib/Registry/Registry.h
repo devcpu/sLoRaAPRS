@@ -2,6 +2,11 @@
 #define APRS_REGISTRY_H
 
 #include <Arduino.h>
+#include "APRSControler.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/timers.h"
+
+
 
 #define NVS_APP_NAME_SPACE "sla"
 #define SYSTEM_STRING "sLoRaAPRS"
@@ -92,6 +97,11 @@ struct DateTime {
  
 };
 
+struct GPSMeta {
+  uint32_t sat = 0;
+  double hdop = 0;
+};
+
 struct Credentials {
   String auth_name;
   String auth_tocken;
@@ -110,12 +120,6 @@ struct HardWare {
   boolean GPS = false;
 };
 
-struct ControlData {
-  boolean gps_update = false;
-  boolean new_mode = false;
-  boolean newTxMesg = false;
-  boolean newRxMesg = false;
-};
 
 struct LanStatus {
   wifi_mode mode = wifi_off;
@@ -124,10 +128,19 @@ struct LanStatus {
   String IP = "";
 };
 
+struct OLEDMessage {
+  boolean active = false;
+  String head = "";
+  String line1 = "";
+  String line2 = "";
+  String line3 = "";
+  String line4 = "";
+};
+
 struct Registry {
   String Version = "";
   String Release = "";
-  
+  OLEDMessage oled_message;
   String call = "CHANGEME";
   String wx_call_ext = "3";
   String aprs_call_ext = "9";
@@ -149,15 +162,21 @@ struct Registry {
   Location gps_location;
   Move gps_move;
   DateTime gps_time;
+  GPSMeta gps_meta;
   Location posfix;
 
   String SERVER_IP;
   APRSMessage TxMsg;
   APRSMessage RxMsg;
   WXData WXdata;
-  ControlData contral_data;
+  APRSControler controler;
 };
 
+
+void singleClick_CB(void);
+void doubleClick_CB(void);
+void longClick_CB(void);
+void kinoTimer_CB(TimerHandle_t xExpiredTimer);
 
 void RegistryInit(void);
 

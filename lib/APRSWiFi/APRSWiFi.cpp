@@ -57,7 +57,7 @@ WiFi.softAP(reg.APCredentials[0], reg.APCredentials[1]);
 }
 
 void WifiConnect(void) {
-  WiFi.onEvent(WiFiStationConnected, SYSTEM_EVENT_STA_CONNECTED);
+  //WiFi.onEvent(WiFiStationConnected, SYSTEM_EVENT_STA_CONNECTED);
   WifiDisconnect();  // after flash it will not connect without it
   
   // WiFi.mode(WIFI_STA);

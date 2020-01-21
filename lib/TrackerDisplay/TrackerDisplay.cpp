@@ -4,13 +4,6 @@
 
 Adafruit_SSD1306 display(128, 64, &Wire, OLED_RESET);
 
-enum {
-  displayModeUTC,
-  displayModeGPS,
-  displayModeWX,
-  displayModeWiFiStatus,
-  displayModeEND
-};
 
 /**
  * @brief if true text on display will changed continous
@@ -68,16 +61,41 @@ void write2Display(String head = "", String line1 = "", String line2 = "",
   write2Display(head, line1, line2, line3, "");
 }
 
+void write2Display(const char* head, const char* line1, const char* line2, const char* line3, const char* line4) {
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+  display.setTextSize(2);
+  display.setCursor(0, 0);
+  display.print(head);
+  display.setTextSize(1);
+  display.setCursor(0, 20);
+  display.print(line1);
+  display.setCursor(0, 32);
+  display.print(line2);
+  display.setCursor(0, 44);
+  display.print(line3);
+  display.setCursor(0, 56);  // TextSize 1 needs 8 pixel minimum
+  display.print(line4);
+  display.display();
+};
+
+
 void tracker_display_tick(void) {
-  static uint64_t next_display = 0;
-  if (next_display > millis()) {
+  DisplayMode dm = displayModeUTC;
+  if (!reg.controler.display_update) {
     return;
   }
-  if (!displayChange) {
+  if (reg.controler.next_display_time > millis()) {
     return;
   }
-  next_display = millis() + tracker_display_time;
-  switch (tracker_display_switch()) {
+
+  reg.controler.next_display_time = millis() + tracker_display_time;
+  if (reg.controler.display_change) {
+    dm = reg.controler.getNextDisplayMode();
+  } else {
+    dm = reg.controler.getCurrentDisplayMode();
+  }
+  switch (dm) {
     case displayModeGPS:
       writeGPS();
       break;
@@ -100,16 +118,19 @@ void tracker_display_tick(void) {
   }
 }
 
-uint8_t tracker_display_switch(void) {
-  static uint8_t current = 0;
-  uint8_t max = displayModeEND - 1;
-  if (current < max) {
-    current++;
-  } else {
-    current = 0;
-  }
-  return current;
-}
+// uint8_t tracker_display_switch(void) {
+//   static uint8_t current = 0;
+//   if (!displayChange) {
+//     return current;
+//   }
+//   uint8_t max = displayModeEND - 1;
+//   if (current < max) {
+//     current++;
+//   } else {
+//     current = 0;
+//   }
+//   return current;
+// }
 
 void writeUTC() {
   display.clearDisplay();
@@ -117,9 +138,9 @@ void writeUTC() {
 
   if (gps.time.isValid() && gps.date.isValid()) {
     char date[25], time[25];
-    snprintf(date, 25, "%04d-%02d-%02d", gps.date.year(), gps.date.month(),
-             gps.date.day());
-    snprintf(time, 25, "  %02d:%02d", gps.time.hour(), gps.time.minute());
+    snprintf(date, 25, "%04d-%02d-%02d", reg.gps_time.year, reg.gps_time.month,
+             reg.gps_time.day);
+    snprintf(time, 25, "  %02d:%02d", reg.gps_time.hour, reg.gps_time.minute);
 
     display.setTextSize(2);
     display.setCursor(0, 22);
@@ -137,12 +158,12 @@ void writeGPS() {
 
   if (gps.location.isValid()) {
     char lat[22], lng[22], speed_course[22], alt_hdop[22];
-    snprintf(lat, 22, "lat: %8.6f", gps.location.lat());
-    snprintf(lng, 22, "lng: %9.6f", gps.location.lng());
-    snprintf(speed_course, 22, "kmh: %05.1f  dir: %03d*", gps.speed.kmph(),
-             int(gps.course.value()));
-    snprintf(alt_hdop, 22, "alt: %05dm sat: %d", int(gps.altitude.meters()),
-             int(gps.satellites.value()));
+    snprintf(lat, 22, "lat: %8.4f", reg.gps_location.latitude);
+    snprintf(lng, 22, "lng: %9.4f", reg.gps_location.longitude);
+    snprintf(speed_course, 22, "kmh: %4.1f  dir: %3.1f*", reg.gps_move.speed,
+             reg.gps_move.course);
+    snprintf(alt_hdop, 22, "alt: %5.1fm sat: %d", reg.gps_location.altitude,
+             reg.gps_meta.sat);
 
     display.setTextSize(1);
     display.setCursor(0, 20);
@@ -215,18 +236,20 @@ void writeWiFiStatus() {
 
 // fuer Erweiterungen in der Hauptzeile z.B. ttl next tx
 void writeHead(const char *head) {
-  char headx[11];
   char sat[3];
   char hdop[3];
 
   if (gps.satellites.isValid() && gps.hdop.isValid()) {
-    snprintf(sat, 3, "%d", int(gps.satellites.value()));
-    snprintf(hdop, 3, "%d", int(gps.hdop.hdop()));
+    // snprintf(sat, 3, "%d", int(gps.satellites.value()));
+    // snprintf(hdop, 3, "%d", int(gps.hdop.hdop()));
+    snprintf(sat, 3, "%d", reg.gps_meta.sat);
+    snprintf(hdop, 3, "%d", int(round(reg.gps_meta.hdop)));
   } else {
-    strcpy(sat, "--");
-    strcpy(hdop, "--");
+    strcpy(sat, "");
+    strcpy(hdop, "");
   }
 
+  display.clearDisplay();
   display.setTextColor(WHITE);
   display.setTextSize(2);
   display.setCursor(0, 0);
@@ -239,6 +262,7 @@ void writeHead(const char *head) {
 }
 
 void write_no_vaild_data() {
+  display.clearDisplay();
   display.setCursor(0, 22);
   display.print("no valid");
   display.setCursor(0, 44);

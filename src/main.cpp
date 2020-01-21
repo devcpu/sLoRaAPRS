@@ -7,37 +7,39 @@
 #include <iostream>
 #endif
 
-#include <main.h>
-#include <Wire.h>
 #include <APRSWebServer.h>
 #include <APRSWiFi.h>
+#include <APRSControler.h>
+#include <ButtonState.h>
 #include <APRS_MSG.h>
+#include <AsyncTCP.h>
+#include <BMEHandler.h>
 #include <Esp.h>
+#include <GPSSensor.h>
 #include <LoRaAPRSConfig.h>
 #include <LoRaHandler.h>
 #include <OneButtonHandler.h>
 #include <SPI.h>
 #include <TrackerDisplay.h>
-#include <BMEHandler.h>
+#include <Wire.h>
+#include <fap.h>
 #include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
-#include <AsyncTCP.h>
-#include <fap.h>
-#include <GPSSensor.h>
-
+#include <freertos/task.h>
+#include <main.h>
 //#include <iGate.h>
 
 extern Registry reg;  // config & system status
 
 // @TODO APRS_MSG deprecated?
-APRS_MSG tx_msg;  // converts all data to APRS messages
+APRS_MSG tx_msg;         // converts all data to APRS messages
 extern TinyGPSPlus gps;  // driver fot GPS
 
 QueueHandle_t LoRaTXQueue, LoRaRXQueue, WWWTXQueue, WWWRXQueue;
 
-uint32_t waitTxTr = 0L, nextTxTr = 50000L, nextTxTrRand = 15;  // ticker for APRS messages
+uint32_t waitTxTr = 0L, nextTxTr = 50000L,
+         nextTxTrRand = 15;  // ticker for APRS messages
 uint32_t waitTxDg = 0L, nextTxDg = 50000L, nextTxDgRand = 15;
 
 uint32_t wait_wx_update = 0, next_wx_update = 10000;
@@ -48,79 +50,81 @@ char txmsg[254];
 uint8_t odd = 0;
 char satbuf[24] = "";
 
+char* input;
+unsigned int input_len;
+fap_packet_t* packet;
+
 OneButton button(BUTTON, true);
 
 
+
 void setup() {
+
+
   randomSeed(ESP.getCycleCount());
   // ESP.deepSleep(1, WAKE_RF_DISABLED);
   Serial.begin(115200);
   delay(1000);
 
   if (Wire.begin(SDA, SCL)) {
-    write3toSerial("Init I2C", "  System", "   +OK", DISPLA_DELAY_SHORT);  
+    // write3toSerial("Init I2C", "  System", "   +OK", DISPLA_DELAY_SHORT);
   } else {
-    write3toSerial("Init I2C", "   -ERR", "check wire", DISPLA_DELAY_LONG);
+    // write3toSerial("Init I2C", "   -ERR", "check wire", DISPLA_DELAY_LONG);
   }
 
   if (DisplayInit()) {
-    write3Line("Init Disp.", "Display", "   +OK", true, DISPLA_DELAY_SHORT);  
+    // write3Line("Init Disp.", "Display", "   +OK", true, DISPLA_DELAY_SHORT);
   } else {
-    write3Line("Init Disp.", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);  
+    // write3Line("Init Disp.", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);
   }
 
-  //write3Line({{""}, {""}, {""}}, true, 1);
+  // write3Line({{""}, {""}, {""}}, true, 1);
 #ifdef T_BEAM_V1_0
-    if (initAXP()) {
-      write3Line("Init AXP", " AXP 192", "   +OK", true, DISPLA_DELAY_SHORT);
-      reg.hardware.AXP192 = true;
-    } else {
-      write3Line("Init AXP", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);
-      reg.hardware.AXP192 = false;
-    }
+  if (initAXP()) {
+    // write3Line("Init AXP", " AXP 192", "   +OK", true, DISPLA_DELAY_SHORT);
+    reg.hardware.AXP192 = true;
+  } else {
+    // write3Line("Init AXP", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);
+    reg.hardware.AXP192 = false;
+  }
 #endif
 
-
   RegistryInit();
-  write3Line("Init Pref.", "Prefernces", "   +OK", true, DISPLA_DELAY_SHORT);
+  // write3Line("Init Pref.", "Prefernces", "   +OK", true, DISPLA_DELAY_SHORT);
 
   if (BMEHandlerInit()) {
-    write3Line("Init BME", "  BME280", "   +OK", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init BME", "  BME280", "   +OK", true, DISPLA_DELAY_SHORT);
     reg.hardware.BME280 = true;
   } else {
-    write3Line("Init BME", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);
+    // write3Line("Init BME", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);
     reg.hardware.BME280 = false;
   }
 
   if (ESPFSInit()) {
-    write3Line("Init SPIFS", "  SPIFFS", "   +OK", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init SPIFS", "  SPIFFS", "   +OK", true, DISPLA_DELAY_SHORT);
   } else {
-    write3Line("Init SPIFS", "   -ERR", "check chip", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init SPIFS", "   -ERR", "check chip", true, DISPLA_DELAY_SHORT);
   }
 
-
   ss.begin(GPS_BAUD, SERIAL_8N1, TXPin, RXPin);
-  write3Line("Init UART", " GPS UART", "   +OK", true, DISPLA_DELAY_SHORT);
-
+  // write3Line("Init UART", " GPS UART", "   +OK", true, DISPLA_DELAY_SHORT);
 
   if (LoRa_init()) {
-    write3Line("Init LoRa", "LoDaDevive", "   +OK", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init LoRa", "LoDaDevive", "   +OK", true, DISPLA_DELAY_SHORT);
   } else {
-    write3Line("Init LoRa", "   -ERR", "check wire", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init LoRa", "   -ERR", "check wire", true, DISPLA_DELAY_SHORT);
   }
   // lora.onReceive(lora.processMessage);
   // lora.receive();
 
-  
-
   pinMode(TXLED, OUTPUT);
 
   initOneButton();
-  write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
+  // write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
 
   reg.current_wifi_mode = wifi_client;
-  //reg.current_wifi_mode = wifi_ap;
-  
+  // reg.current_wifi_mode = wifi_ap;
+
   write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
   write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
 
@@ -142,27 +146,37 @@ void setup() {
   // ESP8266
   // dumpEEPROM();
 
-  //Scanner();
+  // Scanner();
 
   LoRaTXQueue = xQueueCreate(3, sizeof(char) * 256);
   LoRaRXQueue = xQueueCreate(3, sizeof(char) * 256);
-  WWWTXQueue  = xQueueCreate(3, sizeof(char) * 256);
-  WWWRXQueue  = xQueueCreate(3, sizeof(char) * 256);
+  WWWTXQueue = xQueueCreate(3, sizeof(char) * 256);
+  WWWRXQueue = xQueueCreate(3, sizeof(char) * 256);
 
-  write3Line("sLoRaAPRS", "  up &", " running", true, 2000);
-  write3Line("  Enjoy", "   the", "   day", true, 2000);
+  write3Line("sLoRaAPRS", "  up &", " running", true, 0);
+  smartDelay(2000);
+  write3Line("  Enjoy", "   the", "   day", true, 0);
+  smartDelay(2000);
   setWXData();
+
+  //fap_init();
 }
 
 void loop() {
   setGPSData();
+  if (reg.oled_message.active == true) {
+    write2Display(reg.oled_message.head, reg.oled_message.line1, reg.oled_message.line2, reg.oled_message.line3, reg.oled_message.line4);
+    reg.oled_message.active = false;
+  }
+
+
   if (wait_wx_update < millis()) {
     setWXData();
     wait_wx_update = next_wx_update + millis();
   }
   // watchdog();
   APRSWebServerTick();
-  //iGate_process_udp();
+  // iGate_process_udp();
   // if (reg.TxMsg.newmessage) {
   //   Serial.println("########################");
   //   Serial.println("to: " + reg.TxMsg.to);
@@ -173,47 +187,43 @@ void loop() {
   //   Serial.println("########################");
   // }
 
-
   button.tick();
   LoRa_tick();
   tracker_display_tick();
   Sensor_tick();
-  
+
   // if (waitTxTr < millis() && !lora_control.isSend) {  // start Tx
   //    char msg_buf[256] = {0};
   //    char aprs_buf[32] = {0};
   //    char wx_buf[128] = {0};
   //    char track_buf[128] = {0};
-  //   snprintf(msg_buf, 256, "%s>APRS:!%s%s %s uptime [%u] send to tracker", 
-  //     reg_aprsCall().c_str(), 
-  //     APRS_MSG::computeAPRSPos(aprs_buf), 
+  //   snprintf(msg_buf, 256, "%s>APRS:!%s%s %s uptime [%u] send to tracker",
+  //     reg_aprsCall().c_str(),
+  //     APRS_MSG::computeAPRSPos(aprs_buf),
   //     APRS_MSG::computeTrackInfo(track_buf),
   //     APRS_MSG::computeWXField(wx_buf),
   //     millis()/1000);
   //   waitTxTr = millis() + nextTxTr + random(nextTxTrRand) * 1000;
   // }
 
-  if (waitTxDg  < millis()&& !lora_control.isSend) {  // start Tx
-    uint64_t t0 = millis();
-     char aprs_buf[32] = {0};
-     char wx_buf[128] = {0};
-     char track_buf[128] = {0};
-    char msg_buf[256] = {0};
-    snprintf(msg_buf, 256, "%s>APRS:!%s%s %s uptime [%lu] send to digi", 
-      reg_aprsCall().c_str(), 
-      APRS_MSG::computeAPRSPos(aprs_buf), 
-      APRS_MSG::computeTrackInfo(track_buf),
-      APRS_MSG::computeWXField(wx_buf),
-      millis()/1000);
-    sendMessage(msg_buf, true);
-    uint64_t t1 = millis();
-    Serial.printf("sendtime: %d\n", t1 - t0);
-    waitTxDg = millis() + nextTxDg + random(nextTxDgRand) * 1000;
-  }
+  // if (waitTxDg < millis() && !lora_control.isSend) {  // start Tx
+  //   uint64_t t0 = millis();
+  //   char aprs_buf[32] = {0};
+  //   char wx_buf[128] = {0};
+  //   char track_buf[128] = {0};
+  //   char msg_buf[256] = {0};
+  //   snprintf(msg_buf, 256, "%s>APRS:!%s%s %s uptime [%lu] send to digi",
+  //            reg_aprsCall().c_str(), APRS_MSG::computeAPRSPos(aprs_buf),
+  //            APRS_MSG::computeTrackInfo(track_buf),
+  //            APRS_MSG::computeWXField(wx_buf), millis() / 1000);
+  //   sendMessage(msg_buf, true);
+  //   uint64_t t1 = millis();
+  //   Serial.printf("sendtime: %llu\n", t1 - t0);
+  //   waitTxDg = millis() + nextTxDg + random(nextTxDgRand) * 1000;
+  // }
 
   smartDelay(100);
 }
-
 
 /**
  * initAXP.
@@ -281,7 +291,6 @@ void restart(void) {
   ESP.restart();
 }
 
-
 void Scanner() {
   Serial.println();
   Serial.println("I2C scanner. Scanning ...");
@@ -303,7 +312,6 @@ void Scanner() {
   Serial.print(count, DEC);  // numbers of devices
   Serial.println(" device(s).");
 }
-
 
 void setGPSInfo(void) {
   if (gps.location.isValid()) {
