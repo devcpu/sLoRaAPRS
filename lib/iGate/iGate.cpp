@@ -92,7 +92,6 @@ void clienttcp(void* c) {
       Serial.printf("\nProblema Problema, %d\n", __LINE__);
     }
 
-    // c->close();
   });
   client.connect(host, port);
   while (true) {
@@ -110,6 +109,9 @@ void clienttcp(void* c) {
       client.send();
     }
   }
+
+  vTaskDelete( NULL );
+
 }
 
 void loop() {
@@ -127,6 +129,8 @@ void loop() {
   //     __LINE__, pos); SendToServer(pos);
   //     //SendToServer("DB0ABC>APRS,TCPIP*:> Hallo Test");
   //   }
+
+  // vTaskStartScheduler();
 
   vTaskDelay(10);
   char missatge[255];

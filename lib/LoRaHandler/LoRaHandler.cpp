@@ -136,6 +136,7 @@ void processMessage(void) {
     incoming += (char)LoRa.read();      // add bytes one by one
   }
 
+
   // if (incomingLength != incoming.length()) {   // check length for error
   //   Serial.println("error: message length does not match length");
   //   return;                             // skip rest of function
@@ -157,42 +158,22 @@ void processMessage(void) {
 
 }
 
+/*
+  zerlege msg from/datum/uhrzeit/nachricht
+  2json
+  generate filename
+  open file 
+  wite content
+  close file
+  schreibe text zum client wenn connected via socket
+*/
 
+  // Serial.println("Received from: 0x" + String(sender, HEX));
+  // Serial.println("Sent to: 0x" + String(recipient, HEX));
+  // Serial.println("Message ID: " + String(incomingMsgId));
+  // Serial.println("Message length: " + String(incomingLength));
+  // Serial.println("Message: " + incoming);
+  // Serial.println("RSSI: " + String(LoRa.packetRssi()));
 
-  // void processMessage(int size) {
-  //   // ISR sperren?
-  //   //if (_hasRxMsg  == 0) return true;          // if there's no packet,
-  //   return
+}
 
-  //   // read packet header bytes:
-  //   int recipient = LoRa.read();          // recipient address
-  //   byte sender = LoRa.read();            // sender address
-  //   byte incomingMsgId = LoRa.read();     // incoming msg ID
-  //   byte incomingLength = LoRa.read();    // incoming msg length
-
-  //   String incoming = "";                 // payload of packet
-
-  //   while (LoRa.available()) {            // can't use readString() in
-  //   callback, so
-  //     incoming += (char)LoRa.read();      // add bytes one by one
-  //   }
-
-  //   // if (incomingLength != incoming.length()) {   // check length for error
-  //   //   Serial.println("error: message length does not match length");
-  //   //   return;                             // skip rest of function
-  //   // }
-
-  //   Serial.printf("incomingLength=%d\n", incomingLength);
-  //   Serial.printf("incoming.length():%d\n", incoming.length());
-
-  //   // if message is for this device, or broadcast, print details:
-  //   Serial.println("Received from: 0x" + String(sender, HEX));
-  //   Serial.println("Sent to: 0x" + String(recipient, HEX));
-  //   Serial.println("Message ID: " + String(incomingMsgId));
-  //   Serial.println("Message length: " + String(incomingLength));
-  //   Serial.println("Message: " + incoming);
-  //   // Serial.println("RSSI: " + String(packetRssi()));
-  //   // Serial.println("Snr: " + String(packetSnr()));
-  //   Serial.println();
-  //   return true;
-  // }
