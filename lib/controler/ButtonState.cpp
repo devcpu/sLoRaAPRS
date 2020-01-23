@@ -213,7 +213,7 @@ void ButtonConfigSelector::kino(void) {
 
 void ButtonConfigSelector::doubleClick(APRSControler& aprs_controler) {
   DDD("ButtonConfigSelector.doubleClick");
-  // timer stop
+  xTimerStop( _tmr, 0 );
   _tmp.trim();
   _toChange = &_tmp;
   setState(aprs_controler, new ButtonConfig());
@@ -225,14 +225,13 @@ void ButtonConfigSelector::_showText(const char* line0, const char* line1) {
   write2Display("hallo", "Welt", "alles", "schick", "oder");
 }
 
-// @FIXME replace with xTask
-void ButtonConfigSelector::_xdelay(uint16_t w) {
-  uint32_t wait_until = millis() + w;
-  while (wait_until > millis()) {
-    delay(50);
-    button.tick();
-  }
+void ButtonConfigSelector::longClick(APRSControler& aprs_controler) {
+  xTimerStop( _tmr, 0 );
+  aprs_controler.display_change = true;
+  aprs_controler.display_update = true;
+  setState(aprs_controler, new ButtonNeutral());
 }
+
 
 /***************************************************************************/
 

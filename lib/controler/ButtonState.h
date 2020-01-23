@@ -57,8 +57,9 @@ class ButtonConfig : public AbstracButtonState {
 class ButtonConfigSelector : public AbstracButtonState {
  public:
   ButtonConfigSelector(char* head,  const char* select_list, String* toChange);
-  virtual void singleClick(APRSControler&);
-  virtual void doubleClick(APRSControler&);
+  virtual void singleClick(APRSControler& aprs_controler);
+  virtual void doubleClick(APRSControler& aprs_controler);
+  virtual void longClick(APRSControler& aprs_controler);
   void kino(void);
 
  private:
