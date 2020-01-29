@@ -1,10 +1,9 @@
-//#pragma once
 #ifndef APRS_CONTROLER_H
 #define APRS_CONTROLER_H
 
-
-#include <Arduino.h>
 #include <ButtonState.h>
+#include <Arduino.h>
+
 
   enum DisplayMode {
     displayModeUTC,

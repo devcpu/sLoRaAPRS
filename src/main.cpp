@@ -23,10 +23,10 @@
 #include <TrackerDisplay.h>
 #include <Wire.h>
 #include <fap.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/queue.h>
-#include <freertos/semphr.h>
-#include <freertos/task.h>
+// #include <freertos/FreeRTOS.h>
+// #include <freertos/queue.h>
+// #include <freertos/semphr.h>
+// #include <freertos/task.h>
 #include <main.h>
 //#include <iGate.h>
 
@@ -122,8 +122,8 @@ void setup() {
   initOneButton();
   // write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
 
-  reg.current_wifi_mode = wifi_client;
-  // reg.current_wifi_mode = wifi_ap;
+  //reg.current_wifi_mode = wifi_client;
+  reg.current_wifi_mode = wifi_ap;
 
   write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
   write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);

@@ -30,9 +30,9 @@
 */
 
 
-#include "helpers2.h"
-#include "fap.h"
-#include "regs.h"
+#include <helpers2.h>
+#include <fap.h>
+#include <regs.h>
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif

@@ -1,9 +1,13 @@
-#pragma once
+#ifndef BUTTON_STATE_H
+#define BUTTON_STATE_H
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/timers.h>
+
+
 #include <APRSControler.h>
 #include <Arduino.h>
 #include <uxa_debug.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/timers.h"
 
 class APRSControler;
 
@@ -95,3 +99,6 @@ class ButtonConfigSelector : public AbstracButtonState {
 //     virtual void doubleClick(APRSControler&);
 
 // };
+
+
+#endif

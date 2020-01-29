@@ -17,7 +17,7 @@ TinyGPSPlus gps;
 
 extern Preferences preferences;
 
-//#include "CallBackList.h"
+//#include <CallBackList.h>
 
 // @TODO remove together with restart()
 
@@ -235,6 +235,18 @@ void WebserverStart(void) {
     showRequest(request);
     // handle Request in /ca
   });
+
+
+// Config Web Admin
+  WebServer->on("/APRSSymbol", HTTP_GET, [](AsyncWebServerRequest *request) {
+    Serial.println("/APRSSymbol");
+    showRequest(request);
+    request->send(SPIFFS, "/APRS_Symbol_Chart.pdf", "application/pdf", false);
+    
+  });
+
+
+  
 
   WebServer->on("/bb", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("/bb");
