@@ -1,36 +1,8 @@
-#ifdef ARDUINO
-#include <Arduino.h>
-#endif
-
-#ifndef ARDUINO
-#include <tgmath.h>
-#include <iostream>
-#endif
-
-#include <APRSWebServer.h>
-#include <APRSWiFi.h>
-#include <APRSControler.h>
-#include <ButtonState.h>
-#include <APRS_MSG.h>
-#include <AsyncTCP.h>
-#include <BMEHandler.h>
-#include <Esp.h>
-#include <GPSSensor.h>
-#include <LoRaAPRSConfig.h>
-#include <LoRaHandler.h>
-#include <OneButtonHandler.h>
-#include <SPI.h>
-#include <TrackerDisplay.h>
-#include <Wire.h>
-#include <fap.h>
-// #include <freertos/FreeRTOS.h>
-// #include <freertos/queue.h>
-// #include <freertos/semphr.h>
-// #include <freertos/task.h>
 #include <main.h>
-//#include <iGate.h>
 
 extern Registry reg;  // config & system status
+
+APRSControler maincontroler;
 
 // @TODO APRS_MSG deprecated?
 APRS_MSG tx_msg;         // converts all data to APRS messages
@@ -65,6 +37,8 @@ void setup() {
   // ESP.deepSleep(1, WAKE_RF_DISABLED);
   Serial.begin(115200);
   delay(1000);
+
+  maincontroler.button_state = new ButtonNeutral();
 
   if (Wire.begin(SDA, SCL)) {
     // write3toSerial("Init I2C", "  System", "   +OK", DISPLA_DELAY_SHORT);

@@ -1,6 +1,9 @@
 #include <Registry.h>
 #include <TrackerDisplay.h>
 #include <uxa_debug.h>
+#include <APRSControler.h>
+
+extern APRSControler maincontroler;
 
 Adafruit_SSD1306 display(128, 64, &Wire, OLED_RESET);
 
@@ -82,18 +85,18 @@ void write2Display(const char* head, const char* line1, const char* line2, const
 
 void tracker_display_tick(void) {
   DisplayMode dm = displayModeUTC;
-  if (!reg.controler.display_update) {
+  if (!maincontroler.display_update) {
     return;
   }
-  if (reg.controler.next_display_time > millis()) {
+  if (maincontroler.next_display_time > millis()) {
     return;
   }
 
-  reg.controler.next_display_time = millis() + tracker_display_time;
-  if (reg.controler.display_change) {
-    dm = reg.controler.getNextDisplayMode();
+  maincontroler.next_display_time = millis() + tracker_display_time;
+  if (maincontroler.display_change) {
+    dm = maincontroler.getNextDisplayMode();
   } else {
-    dm = reg.controler.getCurrentDisplayMode();
+    dm = maincontroler.getCurrentDisplayMode();
   }
   switch (dm) {
     case displayModeGPS:

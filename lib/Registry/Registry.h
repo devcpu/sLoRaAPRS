@@ -1,11 +1,10 @@
 #ifndef APRS_REGISTRY_H
 #define APRS_REGISTRY_H
 
+//#include <APRSControler.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/timers.h"
 #include <Arduino.h>
-#include <APRSControler.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/timers.h>
-
 
 
 #define NVS_APP_NAME_SPACE "sla"
@@ -47,6 +46,7 @@
 #define MSG_FORM_MSG "msg"
 
 
+
 enum wifi_mode { 
   wifi_off, 
   wifi_ap, 
@@ -60,14 +60,6 @@ enum system_mode {
   mode_repeater,
   mode_gateway,
   mode_repeater_gateway
-};
-
-struct APRSMessage {
-  String msg;
-  String wide;
-  String to;
-  boolean processed;
-  boolean newmessage;
 };
 
 struct WXData {
@@ -166,10 +158,8 @@ struct Registry {
   Location posfix;
 
   String SERVER_IP;
-  APRSMessage TxMsg;
-  APRSMessage RxMsg;
   WXData WXdata;
-  APRSControler controler;
+//  APRSControler controler;
 };
 
 

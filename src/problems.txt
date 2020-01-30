@@ -1,0 +1,4 @@
+Warning! Circular dependencies detected between `/home/janusz/git/afu/sLoRaAPRS/lib/TrackerDisplay` and `/home/janusz/git/afu/sLoRaAPRS/lib/APRSControler`
+Warning! Circular dependencies detected between `/home/janusz/git/afu/sLoRaAPRS/lib/ButtonState` and `/home/janusz/git/afu/sLoRaAPRS/lib/APRSControler`
+Warning! Circular dependencies detected between `/home/janusz/git/afu/sLoRaAPRS/lib/OneButtonHandler` and `/home/janusz/git/afu/sLoRaAPRS/lib/APRSControler`
+

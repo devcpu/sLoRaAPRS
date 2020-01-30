@@ -5,8 +5,9 @@
 #include <uxa_debug.h>
 #include <APRSControler.h>
 
+
 extern Registry reg;
-extern APRSControler controler;
+extern APRSControler maincontroler;
 
 
 
@@ -24,15 +25,15 @@ void initOneButton() {
 
 void oneClick() {
   Serial.println("one Click");
-  if (!reg.controler.config_mode) {
-    if (reg.controler.display_change == false) {
+  if (!maincontroler.config_mode) {
+    if (maincontroler.display_change == false) {
       DDD("set nextDisplayMode()");
-      reg.controler.nextDisplayMode();
-      reg.controler.next_display_time = 0;
+      maincontroler.nextDisplayMode();
+      maincontroler.next_display_time = 0;
     }
-    if (reg.controler.display_change == true) {
+    if (maincontroler.display_change == true) {
       DDD("set display_change = false");
-      reg.controler.display_change = false;
+      maincontroler.display_change = false;
     }
   }
 }
@@ -40,9 +41,9 @@ void oneClick() {
 
 void doubleClick() {
   Serial.println("double Click");
-  if (!reg.controler.config_mode) {
-    if (reg.controler.display_change == false) {
-      reg.controler.display_change = true;
+  if (!maincontroler.config_mode) {
+    if (maincontroler.display_change == false) {
+      maincontroler.display_change = true;
     }
   }
 }

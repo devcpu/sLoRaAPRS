@@ -3,9 +3,11 @@
 #include <Registry.h>
 #include <TinyGPS++.h>
 #include <LoRaAPRSConfig.h>
+#include <APRSControler.h>
 
 extern Registry reg;
 extern TinyGPSPlus gps;
+extern APRSControler maincontroler;
 
 void setGPSData() {
   static double lat = 0;
@@ -53,34 +55,34 @@ if (gps.date.isValid()) {
   }
 
   if (distance > APRS_UPDATE_DISTANCE) {
-    reg.controler.gps_update = true;
+    maincontroler.gps_update = true;
   }
 
   // @TODO @see https://www.aprs-berlin.de/
   if (course < 180 && reg.gps_move.course > 180) {
     tmp = course + 180;
     if ((course - reg.gps_move.course) > APRS_UPDATE_ANGLE)
-    reg.controler.gps_update = true;
+    maincontroler.gps_update = true;
   }
   if (reg.gps_move.course < 180 && course > 180) {
     tmp = reg.gps_move.course + 180;
     if ((reg.gps_move.course - course) > APRS_UPDATE_ANGLE)
-    reg.controler.gps_update = true;
+    maincontroler.gps_update = true;
   }
   if (abs(course - reg.gps_move.course) > APRS_UPDATE_ANGLE ) {
-    reg.controler.gps_update = true;
+    maincontroler.gps_update = true;
   }
 
   if (reg.gps_move.course > course && reg.gps_move.course - course > APRS_UPDATE_ANGLE) {
-    reg.controler.gps_update = true;
+    maincontroler.gps_update = true;
 
   }
 
   if (last_update < millis() ) {
-    reg.controler.gps_update = true;
+    maincontroler.gps_update = true;
   }
 
-  if (reg.controler.gps_update == true) {
+  if (maincontroler.gps_update == true) {
     lat = reg.gps_location.latitude;
     lng = reg.gps_location.longitude;
     course = reg.gps_move.course;

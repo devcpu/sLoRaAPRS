@@ -9,8 +9,6 @@ Registry reg;
 
 void RegistryInit(void) {
 
-  reg.controler.button_state = new ButtonNeutral();
-
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
   
@@ -316,22 +314,3 @@ String getRunMode() {
 
 String reg_wxCall(void) { return reg.call + String("-") + reg.wx_call_ext; };
 String reg_aprsCall(void) { return reg.call + String("-") + reg.aprs_call_ext; };
-
-
-void singleClick_CB(void){
-  reg.controler.singleClick();
-}
-
-void doubleClick_CB(void){
-  
-  reg.controler.doubleClick();
-}
-
-void longClick_CB(void){
-  reg.controler.longClick();
-}
-
-void kinoTimer_CB(TimerHandle_t xExpiredTimer){
-  Serial.printf("\ncall of kinoTimer_CB\n");
-  reg.controler.button_state->kino();
-}

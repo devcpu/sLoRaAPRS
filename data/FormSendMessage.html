@@ -2,19 +2,19 @@
 <form action="/sm">
     <fieldset>
       <legend>Send Message</legend>
-      <label id="sendig">
+      <!-- <label id="sendig">
       <progress id="fortschritt" value="0" max="3"></progress><br />
-    </label>
+    </label> -->
       <label>
         To:
       <input type="text" maxlength="12" name="to" value="%to%" placeholder="DL7..." required><br />
     </label><br />
     <label>
       via Gateway(s):
-    <input id="viacheckbox" type="checkbox" name="path" value="viaGateway" onclick="showGateway()">
+    <input id="viacheckbox" type="checkbox" name="gateway" value="viaGateway" onclick="showGateway()">
   </label>
   <label id="via" style="display:none">
-      <input id="viagateways" type="text" maxlength="64" name="wide" value="%wide%" placeholder="wide1-1 wide2-2"><br />
+    %wide%
     </label><br />
     <label>
       Message (max. 200):

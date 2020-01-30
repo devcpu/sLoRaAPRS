@@ -1,7 +1,7 @@
 #ifndef APRS_CONTROLER_H
 #define APRS_CONTROLER_H
 
-#include <ButtonState.h>
+//#include <ButtonState.h>
 #include <Arduino.h>
 
 
@@ -17,7 +17,7 @@
 class AbstracButtonState;
 
 class APRSControler {
-  friend class AbstracButtonState;
+  //friend class AbstracButtonState;
 
  public:
 
