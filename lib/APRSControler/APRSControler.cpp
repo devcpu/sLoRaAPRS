@@ -36,7 +36,6 @@ void APRSControler::longClick(void) {
 };
 
 
-
 void singleClick_CB(void){
   maincontroler.singleClick();
 }

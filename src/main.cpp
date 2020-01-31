@@ -93,8 +93,10 @@ void setup() {
 
   pinMode(TXLED, OUTPUT);
 
-  initOneButton();
-  // write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
+  button.attachClick(singleClick_CB);
+  button.attachDoubleClick(doubleClick_CB);
+  button.attachLongPressStop(longClick_CB);
+
 
   //reg.current_wifi_mode = wifi_client;
   reg.current_wifi_mode = wifi_ap;
@@ -121,6 +123,8 @@ void setup() {
   // dumpEEPROM();
 
   // Scanner();
+
+
 
   LoRaTXQueue = xQueueCreate(3, sizeof(char) * 256);
   LoRaRXQueue = xQueueCreate(3, sizeof(char) * 256);

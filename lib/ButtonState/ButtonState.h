@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
-#include <APRSControler.h>
+//#include <APRSControler.h>
 #include <uxa_debug.h>
 
 

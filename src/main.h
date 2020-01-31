@@ -16,7 +16,7 @@
 #include <Esp.h>
 #include <GPSSensor.h>
 #include <LoRaHandler.h>
-#include <OneButtonHandler.h>
+#include <OneButton.h>
 #include <SPI.h>
 #include <TrackerDisplay.h>
 #include <Wire.h>
@@ -53,6 +53,13 @@ static void smartDelay(uint32_t ms);
 void restart(void);
 static void watchdog(void);
 
+
+
+// void oneClick();
+// void doubleClick();
+// void longPressStart();
+// void longPressStop();
+// void longPress();
 
 
 void Scanner(void);

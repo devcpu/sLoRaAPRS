@@ -5,6 +5,8 @@
 
 TimerHandle_t _tmr;
 
+
+
 AbstracButtonState::~AbstracButtonState() {
   DDD("AbstracButtonState::~AbstracButtonState");
 }
@@ -264,3 +266,36 @@ void ButtonConfigSelector::longClick(APRSControler& aprs_controler) {
 // }
 
 /***************************************************************************/
+
+
+// void initOneButton() {
+//   Serial.println("Init OneButton");
+// }
+
+// void oneClick() {
+//   Serial.println("one Click");
+//   if (!maincontroler.config_mode) {
+//     if (maincontroler.display_change == false) {
+//       DDD("set nextDisplayMode()");
+//       maincontroler.nextDisplayMode();
+//       maincontroler.next_display_time = 0;
+//     }
+//     if (maincontroler.display_change == true) {
+//       DDD("set display_change = false");
+//       maincontroler.display_change = false;
+//     }
+//   }
+// }
+
+
+void doubleClick() {
+  Serial.println("double Click");
+  if (!maincontroler.config_mode) {
+    if (maincontroler.display_change == false) {
+      maincontroler.display_change = true;
+    }
+  }
+}
+void longPressStart() { Serial.println("longPressStart"); }
+void longPressStop() { Serial.println("longPressStop"); }
+void longPress() { Serial.println("longPress"); }
