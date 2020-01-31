@@ -1,7 +1,10 @@
+#include <OneButton.h>
 #include <ButtonState.h>
-#include <OneButtonHandler.h>
 #include <TrackerDisplay.h>
 #include <uxa_debug.h>
+
+
+extern OneButton button;
 
 TimerHandle_t _tmr;
 

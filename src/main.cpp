@@ -1,12 +1,4 @@
-#ifdef ARDUINO
 #include <Arduino.h>
-#endif
-
-#ifndef ARDUINO
-#include <tgmath.h>
-#include <iostream>
-#endif
-
 #include <APRSWebServer.h>
 #include <APRSWiFi.h>
 #include <APRSControler.h>
@@ -18,11 +10,11 @@
 #include <GPSSensor.h>
 #include <LoRaAPRSConfig.h>
 #include <LoRaHandler.h>
-#include <OneButtonHandler.h>
+#include <OneButton.h>
 #include <SPI.h>
 #include <TrackerDisplay.h>
 #include <Wire.h>
-#include <fap.h>
+//#include <fap.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
@@ -52,7 +44,7 @@ char satbuf[24] = "";
 
 char* input;
 unsigned int input_len;
-fap_packet_t* packet;
+//fap_packet_t* packet;
 
 OneButton button(BUTTON, true);
 
@@ -119,7 +111,9 @@ void setup() {
 
   pinMode(TXLED, OUTPUT);
 
-  initOneButton();
+  button.attachClick(singleClick_CB);
+  button.attachDoubleClick(doubleClick_CB);
+  button.attachLongPressStop(longClick_CB);
   // write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
 
   reg.current_wifi_mode = wifi_client;
