@@ -3,16 +3,6 @@
 
 #include <Arduino.h>
 
-// #ifdef ARDUINO
-// #include <Arduino.h>
-// #endif
-
-// #ifndef ARDUINO
-// #include <iostream>
-// #include <tgmath.h>
-// #endif
-
-
 #include <LoRaAPRSConfig.h>
 #include <TinyGPS++.h>
 #include <Registry.h>

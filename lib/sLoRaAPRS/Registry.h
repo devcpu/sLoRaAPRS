@@ -173,11 +173,6 @@ struct Registry {
 };
 
 
-void singleClick_CB(void);
-void doubleClick_CB(void);
-void longClick_CB(void);
-void kinoTimer_CB(TimerHandle_t xExpiredTimer);
-
 void RegistryInit(void);
 
 void registryWriteInit(void);

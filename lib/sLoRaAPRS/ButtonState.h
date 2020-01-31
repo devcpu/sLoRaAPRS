@@ -1,9 +1,13 @@
-#pragma once
-#include <APRSControler.h>
+#ifndef BUTTON_STATE_H
+#define BUTTON_STATE_H
+
 #include <Arduino.h>
 #include <uxa_debug.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
+#include <APRSControler.h>
+#include <uxa_debug.h>
+
 
 class APRSControler;
 
@@ -57,8 +61,9 @@ class ButtonConfig : public AbstracButtonState {
 class ButtonConfigSelector : public AbstracButtonState {
  public:
   ButtonConfigSelector(char* head,  const char* select_list, String* toChange);
-  virtual void singleClick(APRSControler&);
-  virtual void doubleClick(APRSControler&);
+  virtual void singleClick(APRSControler& aprs_controler);
+  virtual void doubleClick(APRSControler& aprs_controler);
+  virtual void longClick(APRSControler& aprs_controler);
   void kino(void);
 
  private:
@@ -94,3 +99,6 @@ class ButtonConfigSelector : public AbstracButtonState {
 //     virtual void doubleClick(APRSControler&);
 
 // };
+
+
+#endif

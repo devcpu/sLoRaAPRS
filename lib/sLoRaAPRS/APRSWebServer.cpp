@@ -16,6 +16,7 @@
 TinyGPSPlus gps;
 
 extern Preferences preferences;
+extern QueueHandle_t LoRaTXQueue;
 
 //#include "CallBackList.h"
 
@@ -55,6 +56,8 @@ struct SendMsgForm {
   String to = "";
   String wide = "0";
   String msg = "";
+  String path = "";
+  String gateway = "";
 };
 
 SendMsgForm send_msg_form_tmp;
@@ -235,6 +238,18 @@ void WebserverStart(void) {
     showRequest(request);
     // handle Request in /ca
   });
+
+
+// Config Web Admin
+  WebServer->on("/APRSSymbol", HTTP_GET, [](AsyncWebServerRequest *request) {
+    Serial.println("/APRSSymbol");
+    showRequest(request);
+    request->send(SPIFFS, "/APRS_Symbol_Chart.pdf", "application/pdf", false);
+    
+  });
+
+
+  
 
   WebServer->on("/bb", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("/bb");
@@ -767,12 +782,21 @@ String ProcessorSendMessage(const String &var) {
     return html_error.getErrorMsg();
   }
 
-  if (var == MSG_FORM_TO) {
+    if (var == MSG_FORM_TO) {
     return send_msg_form_tmp.to;
   }
 
   if (var == MSG_FORM_WIDE) {
-    return send_msg_form_tmp.wide;
+    String options[][2] = {
+        { "local", "0"},
+        {"WIDE1-1", "1" },
+        {"WIDE2-2", "2" },
+        {"WIDE3-3", "3" }
+    };
+
+    return optionsFeldGenerator(send_msg_form_tmp.wide.toInt(), MSG_FORM_WIDE, options,
+                                4);
+    
   }
 
   if (var == MSG_FORM_MSG) {
@@ -791,14 +815,20 @@ void handleRequestSendMessage(AsyncWebServerRequest *request) {
   String to = getWebParam(request, MSG_FORM_TO);
   String wide = getWebParam(request, MSG_FORM_WIDE);
 
+  SendMsgForm sform;
+
   if (msg.length() > 0 && msg.length() < 256 && to.length() > 4) {
-    reg.TxMsg.msg = msg;
-    reg.TxMsg.to = to;
+    sform.msg = msg;
+    sform.to = to;
   } else {
     html_error.setErrorMsg("Error wrong parameter");
   }
   if (wide.length() > 0) {
-    reg.TxMsg.wide = wide;
+    sform.wide = wide;    
+  }
+
+  if (xQueueSend(LoRaTXQueue, (SendMsgForm*)&sform, (TickType_t)100) != pdPASS) {
+    Serial.printf("ERROR: Can't put APRS msg to LoRaTXQueue\n to:%s msg:%s", sform.to.c_str(), sform.msg.c_str());
   }
   reg.TxMsg.to = to;
 };

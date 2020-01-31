@@ -24,6 +24,8 @@
 
 extern Registry reg;  // config & system status
 
+APRSControler maincontroler;
+
 // @TODO APRS_MSG deprecated?
 APRS_MSG tx_msg;         // converts all data to APRS messages
 extern TinyGPSPlus gps;  // driver fot GPS
@@ -57,6 +59,8 @@ void setup() {
   // ESP.deepSleep(1, WAKE_RF_DISABLED);
   Serial.begin(115200);
   delay(1000);
+
+  maincontroler.button_state = new ButtonNeutral();
 
   if (Wire.begin(SDA, SCL)) {
     // write3toSerial("Init I2C", "  System", "   +OK", DISPLA_DELAY_SHORT);
@@ -114,7 +118,7 @@ void setup() {
   button.attachClick(singleClick_CB);
   button.attachDoubleClick(doubleClick_CB);
   button.attachLongPressStop(longClick_CB);
-  // write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
+  write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
 
   reg.current_wifi_mode = wifi_client;
   // reg.current_wifi_mode = wifi_ap;
