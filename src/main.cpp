@@ -60,7 +60,7 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  maincontroler.button_state = new ButtonNeutral();
+  maincontroler.button_state = new StateDefault();
 
   if (Wire.begin(SDA, SCL)) {
     // write3toSerial("Init I2C", "  System", "   +OK", DISPLA_DELAY_SHORT);
@@ -152,6 +152,8 @@ void setup() {
   WWWRXQueue = xQueueCreate(3, sizeof(char) * 256);
 
   write3Line("sLoRaAPRS", "  up &", " running", true, 0);
+  smartDelay(2000);
+  write3Line("  Hello", (String("  ") + reg.call).c_str(), "  nice to be back", true, 0);
   smartDelay(2000);
   write3Line("  Enjoy", "   the", "   day", true, 0);
   smartDelay(2000);

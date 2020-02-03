@@ -2,14 +2,12 @@
 #include <LoRaAPRSConfig.h>
 #include <Registry.h>
 #include <Preferences.h>
-
+#include <apptypes.h>
 
 Registry reg;
 
 
 void RegistryInit(void) {
-
-  reg.controler.button_state = new ButtonNeutral();
 
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
@@ -23,7 +21,7 @@ void RegistryInit(void) {
   preferences.putULong64(PREFS_BOOT_COUNT, reg.boot_count);
 
   reg.current_wifi_mode = (wifi_mode) preferences.getUInt(PREFS_CURRENT_WIFI_MODE, int(wifi_ap));
-  reg.current_system_mode = (system_mode) preferences.getUInt(PREFS_CURRENT_SYSTEM_MODE, int(mode_tracker));
+  reg.current_run_mode = (run_mode) preferences.getUInt(PREFS_CURRENT_SYSTEM_MODE, int(mode_tracker));
   
   
   reg.call = preferences.getString(PREFS_CALL, CHANGE_ME);
@@ -63,7 +61,7 @@ void RegistryInit(void) {
   
   if (reg.call == "CHANGEME") {
     reg.current_wifi_mode = wifi_ap;
-    reg.current_system_mode = mode_tracker;
+    reg.current_run_mode = mode_tracker;
     registryWriteInit();
   }
 #ifdef MODDEBUG
@@ -82,7 +80,7 @@ void registryWriteInit(void){
 
   
   preferences.putUInt(PREFS_CURRENT_WIFI_MODE, (uint8_t) reg.current_wifi_mode);
-  preferences.putUInt(PREFS_CURRENT_SYSTEM_MODE, reg.current_system_mode);
+  preferences.putUInt(PREFS_CURRENT_SYSTEM_MODE, reg.current_run_mode);
    
   preferences.putString(PREFS_CALL, reg.call);
   preferences.putString(PREFS_APRS_CALL_EX, reg.aprs_call_ext);
@@ -230,7 +228,7 @@ void RegistryToString(void) {
   Serial.printf("aprs_call_ext: %s\n", reg.aprs_call_ext.c_str());
   Serial.printf("wx_call_ext: %s\n", reg.wx_call_ext.c_str());
 
-  Serial.printf("run_mode: %d\n", (int)reg.current_system_mode);
+  Serial.printf("run_mode: %d\n", (int)reg.current_run_mode);
   Serial.printf("wifi_mode: %d\n", (int)reg.current_wifi_mode);
 
   Serial.printf("web admin %s\n", reg.WebCredentials.auth_name.c_str());
@@ -282,7 +280,7 @@ String getWifiMode() {
 }
 
 String getRunMode() {
-  switch (reg.current_system_mode)
+  switch (reg.current_run_mode)
   {
   case mode_tracker:
     return String(" tracker");
@@ -296,7 +294,7 @@ String getRunMode() {
     return String("  WX FIX");
     break;
 
-  case mode_repeater:
+  case mode_digi:
     return String(" repeater");
     break;
 
@@ -304,7 +302,7 @@ String getRunMode() {
     return String(" Gateway");
     break;
 
-  case mode_repeater_gateway:
+  case mode_digi_gateway:
     return String(" RPT & GW");
     break;
 

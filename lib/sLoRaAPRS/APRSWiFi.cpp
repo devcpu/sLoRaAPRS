@@ -1,5 +1,6 @@
 #include <APRSWiFi.h>
 #include <LoRaAPRSConfig.h>
+#include <apptypes.h>
 #include <Registry.h>
 #include <TrackerDisplay.h>
 #include <Arduino.h>

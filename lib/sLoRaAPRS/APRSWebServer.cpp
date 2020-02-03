@@ -5,6 +5,7 @@
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
 #include <AsyncJson.h>
+#include <apptypes.h>
 #include <Registry.h>
 #include <TinyGPS++.h>
 #include <Preferences.h>
@@ -158,7 +159,7 @@ void WebserverStart(void) {
     if (request->params() == 2) {
       DDD(request->params());
       handleRequestChangeMode(request);
-      Serial.printf("new run_mode: %d / new_wifi_mode %d\n", (int)reg.current_system_mode, (int)reg.current_wifi_mode);
+      Serial.printf("new run_mode: %d / new_wifi_mode %d\n", (int)reg.current_run_mode, (int)reg.current_wifi_mode);
       Serial.printf("new run_mode: %d / new_wifi_mode %d\n", (int)getPrefsDouble(PREFS_CURRENT_SYSTEM_MODE), (int)getPrefsDouble(PREFS_CURRENT_WIFI_MODE));
       request->redirect("/");
     }
@@ -931,18 +932,18 @@ String ProcessorChangeMode(const String &var) {
   }
 
   if (var == PREFS_CURRENT_SYSTEM_MODE) {
-    // enum system_mode {mode_tracker, mode_wxtracker, mode_wxfix,
-    // mode_repeater, mode_gateway, mode_repeater_gateway};
+    // enum run_mode {mode_tracker, mode_wxtracker, mode_wxfix,
+    // mode_digi, mode_gateway, mode_digi_gateway};
     String options[][2] = {
         {"GPS Tracker", "0"},
         {"WX Tracker", "1"},
         {"WX Fix Position (no GPS)", "2"},
         {"APRS LoRa Repeater", "3"},
         {"APRS Gateway", "4"},
-        {"APRS LoRa Repeater & APRS Gateway", String(mode_repeater_gateway)},
+        {"APRS LoRa Repeater & APRS Gateway", String(mode_digi_gateway)},
     };
 
-    return optionsFeldGenerator(reg.current_system_mode,
+    return optionsFeldGenerator(reg.current_run_mode,
                                 PREFS_CURRENT_SYSTEM_MODE, options, 6);
   }
 
@@ -968,9 +969,9 @@ String ProcessorChangeMode(const String &var) {
 void handleRequestChangeMode(AsyncWebServerRequest *request) {
   DDD("handleRequestChangeMode");
   if (request->hasParam(PREFS_CURRENT_SYSTEM_MODE)) {
-    String new_system_mode = getWebParam(request, PREFS_CURRENT_SYSTEM_MODE);
-    setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE, (int)new_system_mode.toInt());
-    reg.current_system_mode = (system_mode) (int)new_system_mode.toInt();
+    String new_run_mode = getWebParam(request, PREFS_CURRENT_SYSTEM_MODE);
+    setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE, (int)new_run_mode.toInt());
+    reg.current_run_mode = (run_mode) (int)new_run_mode.toInt();
   }
 
   if (request->hasParam(PREFS_CURRENT_WIFI_MODE)) {

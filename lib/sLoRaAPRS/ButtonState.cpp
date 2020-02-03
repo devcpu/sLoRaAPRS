@@ -2,9 +2,25 @@
 #include <ButtonState.h>
 #include <TrackerDisplay.h>
 #include <uxa_debug.h>
+#include <Registry.h>
 
 
 extern OneButton button;
+
+char wifi_mode_txt[3][16] = {
+  "OFF",
+  "AP",
+  "STA"
+};
+char run_mode_txt[6][16] = {
+  "Tracker",
+  "WXTracker",
+  "WX Fix",
+  "Digi",
+  "Gateway",
+  "GW-Digi"
+};
+
 
 TimerHandle_t _tmr;
 
@@ -24,61 +40,57 @@ void AbstracButtonState::kino(void) {}
 void AbstracButtonState::longClick(APRSControler& aprs_controler) {
   aprs_controler.display_change = true;
   aprs_controler.display_update = true;
-  setState(aprs_controler, new ButtonNeutral());
+  setState(aprs_controler, new StateDefault());
 }
 
 /* -------------------------------------------------------------------------- */
+/*   Display Mode   */
+/* -------------------------------------------------------------------------- */
 
-void ButtonDisplayMode::singleClick(APRSControler& aprs_controler) {
-  DDD("ButtonDisplayMode.singleClick");
+void StateDisplayMode::singleClick(APRSControler& aprs_controler) {
+  DDD("StateDisplayMode.singleClick");
   aprs_controler.nextDisplayMode();
   aprs_controler.next_display_time = 0;
 }
-void ButtonDisplayMode::doubleClick(APRSControler& aprs_controler) {
-  DDD("ButtonDisplayMode.doubleClick");
+void StateDisplayMode::doubleClick(APRSControler& aprs_controler) {
+  DDD("StateDisplayMode.doubleClick");
   aprs_controler.display_change = true;
   aprs_controler.nextDisplayMode();
   aprs_controler.next_display_time = 0;
-  setState(aprs_controler, new ButtonNeutral());
+  setState(aprs_controler, new StateDefault());
 }
 
 /* -------------------------------------------------------------------------- */
+/*   Default   */
+/* -------------------------------------------------------------------------- */
 
-void ButtonNeutral::singleClick(APRSControler& aprs_controler) {
-  DDD("ButtonNeutral.singleClick");
+
+void StateDefault::singleClick(APRSControler& aprs_controler) {
+  DDD("StateDefault.singleClick");
   aprs_controler.display_change = false;
-  setState(aprs_controler, new ButtonDisplayMode());
+  setState(aprs_controler, new StateDisplayMode());
 }
 
-void ButtonNeutral::doubleClick(APRSControler& aprs_controler) {
-  DDD("ButtonNeutral.doubleClick");
+void StateDefault::doubleClick(APRSControler& aprs_controler) {
+  DDD("StateDefault.doubleClick");
 }
 
-void ButtonNeutral::longClick(APRSControler& aprs_controler) {
-  DDD("ButtonNeutral.longClick()");
+void StateDefault::longClick(APRSControler& aprs_controler) {
+  DDD("StateDefault.longClick()");
   aprs_controler.display_change = false;
   aprs_controler.display_update = false;
-  setState(aprs_controler, new ButtonConfig());
-  write3Line("Cnfg Mode", "single click for next", "double click to enter",
+  setState(aprs_controler, new StateConfigMenue());
+  write3Line("Cnfg Mode", "1clck nxt, 2clck entr", "long click exit",
              false, 0);
 }
 
-/***************************************************************************/
+/* -------------------------------------------------------------------------- */
+/*   Config Menue   */
+/* -------------------------------------------------------------------------- */
 
-void ButtonConfigCall::singleClick(APRSControler& aprs_controler) {
-  DDD("ButtonConfigCall.singleClick");
-}
-
-void ButtonConfigCall::doubleClick(APRSControler& aprs_controler) {
-  DDD("ButtonConfigCall.doubleClick");
-  write3Line("Cnfg Call", "not implemented yet", "I'm so sad!", false, 0);
-}
-
-/***************************************************************************/
-
-void ButtonConfig::singleClick(APRSControler& aprs_controler) {
-  DDD("ButtonConfig.singleClick");
-  uint8_t max_items = 2;
+void StateConfigMenue::singleClick(APRSControler& aprs_controler) {
+  DDD("StateConfigMenue.singleClick");
+  uint8_t max_items = 3; // count menue items
   if (button_config_mode < max_items - 1) {
     button_config_mode++;
   } else {
@@ -90,19 +102,23 @@ void ButtonConfig::singleClick(APRSControler& aprs_controler) {
                  0);
       break;
     case 1:
-      write3Line("Cnfg Mode", "configure run mode", "double click to enter",
+      write3Line("Cfg WiFi", "configure WiFi mode", "double click to enter",
+                 false, 0);
+      break;
+    case 2:
+      write3Line("Cfg Run", "configure run mode", "double click to enter",
                  false, 0);
       break;
     default:
       write3Line("ERROR", "something wars going wrong", "please try again",
                  false, 2000);
-      setState(aprs_controler, new ButtonConfig());
+      setState(aprs_controler, new StateConfigMenue());
       break;
   }
 }
 
-void ButtonConfig::doubleClick(APRSControler& aprs_controler) {
-  DDD("ButtonConfig.doubleClick");
+void StateConfigMenue::doubleClick(APRSControler& aprs_controler) {
+  DDD("StateConfigMenue.doubleClick");
   const char select_list_call[40] = {
       ' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
       'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
@@ -110,40 +126,34 @@ void ButtonConfig::doubleClick(APRSControler& aprs_controler) {
 
   switch (button_config_mode) {
     case 0:
-      setState(aprs_controler, new ButtonConfigSelector(
-                                   "Cfg Call", select_list_call, &reg.call));
+      setState(aprs_controler, new ConfigStringSelector(
+                                   "Cfg Call", select_list_call, &reg.call)); // @FIXME
       break;
     case 1:
-      setState(aprs_controler, new ButtonConfigMode());
-      write3Line("Cfg Mode", "geht auch noch nicht", "Schade, so schade", false,
-                 0);
+      setState(aprs_controler, new StateConfigWiFi("Cfg WiFi"));
       break;
+
+    case 2:
+      setState(aprs_controler, new StateConfigRun("Cfg Run"));
+      break;
+
 
     default:
       write3Line("ERROR", "something wars going wrong", "please try again",
                  false, 2000);
-      setState(aprs_controler, new ButtonConfig());
+      setState(aprs_controler, new StateConfigMenue());
       break;
   }
 }
 
-/***************************************************************************/
+/* -------------------------------------------------------------------------- */
+/* String Selector (Abstrakt String Config)   */
+/* -------------------------------------------------------------------------- */
 
-void ButtonConfigMode::singleClick(APRSControler& aprs_controler) {
-  DDD("ButtonConfigMode.singleClick");
-  write3Line("Cnfg Mode", "not implemented yet", "I'm so sad!", false, 0);
-}
 
-void ButtonConfigMode::doubleClick(APRSControler& aprs_controler) {
-  DDD("ButtonConfigMode.doubleClick");
-  write3Line("Cnfg Mode", "not implemented yet", "I'm so sad!", false, 0);
-}
-
-/***************************************************************************/
-
-ButtonConfigSelector::ButtonConfigSelector(char* head, const char* select_list,
+ConfigStringSelector::ConfigStringSelector(char* head, const char* select_list,
                                            String* toChange) {
-  DDD("ButtonConfigSelector::ButtonConfigSelector");
+  DDD("ConfigStringSelector::ConfigStringSelector");
 
   strncpy(_select_list, select_list, 40);
   _toChange = toChange;
@@ -169,8 +179,8 @@ ButtonConfigSelector::ButtonConfigSelector(char* head, const char* select_list,
   }
 }
 
-void ButtonConfigSelector::singleClick(APRSControler& aprs_controler) {
-  DDD("ButtonConfigSelector.singleClick");
+void ConfigStringSelector::singleClick(APRSControler& aprs_controler) {
+  DDD("ConfigStringSelector.singleClick");
   _pos++;
   if (_pos > 7) {
     _pos = 0;
@@ -185,7 +195,7 @@ void ButtonConfigSelector::singleClick(APRSControler& aprs_controler) {
   _count = false;
 }
 
-void ButtonConfigSelector::kino(void) {
+void ConfigStringSelector::kino(void) {
   Serial.printf("select_list: %s\n", _select_list);
   Serial.printf("_actual: %c\n", _actual);
   Serial.printf("_pos: %d\n", _pos);
@@ -214,55 +224,117 @@ void ButtonConfigSelector::kino(void) {
   _count = true;
 }
 
-void ButtonConfigSelector::doubleClick(APRSControler& aprs_controler) {
-  DDD("ButtonConfigSelector.doubleClick");
+void ConfigStringSelector::doubleClick(APRSControler& aprs_controler) {
+  DDD("ConfigStringSelector.doubleClick");
   xTimerStop( _tmr, 0 );
   _tmp.trim();
   _toChange = &_tmp;
-  setState(aprs_controler, new ButtonConfig());
+  setState(aprs_controler, new StateConfigMenue());
   Serial.printf("new call: %s\n", reg.call.c_str());
-  // write to nvs
+  setPrefsString(PREFS_CALL, reg.call);
 }
 
-void ButtonConfigSelector::_showText(const char* line0, const char* line1) {
+void ConfigStringSelector::_showText(const char* line0, const char* line1) {
   write2Display("hallo", "Welt", "alles", "schick", "oder");
 }
 
-void ButtonConfigSelector::longClick(APRSControler& aprs_controler) {
+void ConfigStringSelector::longClick(APRSControler& aprs_controler) {
   xTimerStop( _tmr, 0 );
   aprs_controler.display_change = true;
   aprs_controler.display_update = true;
-  setState(aprs_controler, new ButtonNeutral());
+  setState(aprs_controler, new StateDefault());
+}
+
+/* -------------------------------------------------------------------------- */
+/*   Config Mode Selector   */
+/* -------------------------------------------------------------------------- */
+
+StateConfigWiFi::StateConfigWiFi(char *head) {
+  DDD("StateConfigMenu.StateConfigMenu");
+  _head = head;
+  _show();
+}
+
+void StateConfigWiFi::singleClick(APRSControler& aprs_controler) {
+  DDD("StateConfigWiFi.singleClick");
+  DDD(String(reg.current_wifi_mode));
+  if (reg.current_wifi_mode > 1) {
+    reg.current_wifi_mode = wifi_off;
+  } else {
+    uint8_t mode = reg.current_wifi_mode;
+    mode++;
+    reg.current_wifi_mode = static_cast<wifi_mode>(mode);
+  }
+  _show();
+}
+
+void StateConfigWiFi::doubleClick(APRSControler& aprs_controler) {
+  DDD("StateConfigWiFi.doubleClick");
+  setState(aprs_controler, new StateConfigMenue());
+  ESP.restart();
+}
+
+void StateConfigWiFi::_show(void) {
+  char buf[12] = {0};
+  strncat(buf, "  ", 12);
+  strncat(buf, wifi_mode_txt[reg.current_wifi_mode], 12);
+  write3Line(_head, buf, "1clck nxt, 2clck ok", false, 0);
+}
+
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
+
+
+StateConfigRun::StateConfigRun(char *head) {
+  DDD("StateConfigMenu.StateConfigMenu");
+  _head = head;
+  _show();
+}
+
+void StateConfigRun::singleClick(APRSControler& aprs_controler) {
+  DDD("StateConfigRun.singleClick");
+  DDD(String(reg.current_run_mode));
+  if (reg.current_run_mode > 4) {
+    reg.current_run_mode = mode_tracker;
+  } else {
+    uint8_t mode = reg.current_run_mode;
+    mode++;
+    reg.current_run_mode = static_cast<run_mode>(mode);
+  }
+  _show();
+}
+
+void StateConfigRun::doubleClick(APRSControler& aprs_controler) {
+  DDD("StateConfigRun.doubleClick");
+  setState(aprs_controler, new StateConfigMenue());
+  ESP.restart();
+}
+
+void StateConfigRun::_show(void) {
+  char buf[12] = {0};
+  strcat(buf, " ");
+  strcat(buf, run_mode_txt[reg.current_run_mode]);
+  write3Line(_head, buf, "1clck nxt, 2clck ok", false, 0);
 }
 
 /***************************************************************************/
 
-// void ButtonConfig::singleClick(APRSControler& aprs_controler) {
-//   DDD("ButtonConfig.singleClick");
+// void StateConfigMenue::singleClick(APRSControler& aprs_controler) {
+//   DDD("StateConfigMenue.singleClick");
 // }
 
-// void ButtonConfig::doubleClick(APRSControler& aprs_controler) {
-//   DDD("ButtonConfig.doubleClick");
-// }
-
-/***************************************************************************/
-
-// void ButtonConfig::singleClick(APRSControler& aprs_controler) {
-//   DDD("ButtonConfig.singleClick");
-// }
-
-// void ButtonConfig::doubleClick(APRSControler& aprs_controler) {
-//   DDD("ButtonConfig.doubleClick");
+// void StateConfigMenue::doubleClick(APRSControler& aprs_controler) {
+//   DDD("StateConfigMenue.doubleClick");
 // }
 
 /***************************************************************************/
 
-// void ButtonConfig::singleClick(APRSControler& aprs_controler) {
-//   DDD("ButtonConfig.singleClick");
+// void StateConfigMenue::singleClick(APRSControler& aprs_controler) {
+//   DDD("StateConfigMenue.singleClick");
 // }
 
-// void ButtonConfig::doubleClick(APRSControler& aprs_controler) {
-//   DDD("ButtonConfig.doubleClick");
+// void StateConfigMenue::doubleClick(APRSControler& aprs_controler) {
+//   DDD("StateConfigMenue.doubleClick");
 // }
 
 /***************************************************************************/
