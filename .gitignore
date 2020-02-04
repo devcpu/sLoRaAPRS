@@ -1,2 +1,4 @@
 .pio
 .vscode/*
+output.map
+per_obj.txt

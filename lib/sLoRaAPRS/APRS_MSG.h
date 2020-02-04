@@ -1,11 +1,11 @@
 #ifndef APRS_MSG_H
 #define APRS_MSG_H
 
+#include <Arduino.h>
 
 #include <LoRaAPRSConfig.h>
 #include <TinyGPS++.h>
 #include <Registry.h>
-#include <Arduino.h>
 
 
 extern Registry reg;

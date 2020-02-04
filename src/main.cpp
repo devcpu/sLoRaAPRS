@@ -1,4 +1,26 @@
+#include <Arduino.h>
+#include <APRSWebServer.h>
+#include <APRSWiFi.h>
+#include <APRSControler.h>
+#include <ButtonState.h>
+#include <APRS_MSG.h>
+#include <AsyncTCP.h>
+#include <BMEHandler.h>
+#include <Esp.h>
+#include <GPSSensor.h>
+#include <LoRaAPRSConfig.h>
+#include <LoRaHandler.h>
+#include <OneButton.h>
+#include <SPI.h>
+#include <TrackerDisplay.h>
+#include <Wire.h>
+//#include <fap.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/queue.h>
+#include <freertos/semphr.h>
+#include <freertos/task.h>
 #include <main.h>
+//#include <iGate.h>
 
 extern Registry reg;  // config & system status
 
@@ -24,7 +46,7 @@ char satbuf[24] = "";
 
 char* input;
 unsigned int input_len;
-fap_packet_t* packet;
+//fap_packet_t* packet;
 
 OneButton button(BUTTON, true);
 
@@ -38,7 +60,7 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  maincontroler.button_state = new ButtonNeutral();
+  maincontroler.button_state = new StateDefault();
 
   if (Wire.begin(SDA, SCL)) {
     // write3toSerial("Init I2C", "  System", "   +OK", DISPLA_DELAY_SHORT);
@@ -96,10 +118,10 @@ void setup() {
   button.attachClick(singleClick_CB);
   button.attachDoubleClick(doubleClick_CB);
   button.attachLongPressStop(longClick_CB);
+  write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
 
-
-  //reg.current_wifi_mode = wifi_client;
-  reg.current_wifi_mode = wifi_ap;
+  reg.current_wifi_mode = wifi_client;
+  // reg.current_wifi_mode = wifi_ap;
 
   write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
   write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
@@ -124,14 +146,14 @@ void setup() {
 
   // Scanner();
 
-
-
   LoRaTXQueue = xQueueCreate(3, sizeof(char) * 256);
   LoRaRXQueue = xQueueCreate(3, sizeof(char) * 256);
   WWWTXQueue = xQueueCreate(3, sizeof(char) * 256);
   WWWRXQueue = xQueueCreate(3, sizeof(char) * 256);
 
   write3Line("sLoRaAPRS", "  up &", " running", true, 0);
+  smartDelay(2000);
+  write3Line("  Hello", (String("  ") + reg.call).c_str(), "  nice to be back", true, 0);
   smartDelay(2000);
   write3Line("  Enjoy", "   the", "   day", true, 0);
   smartDelay(2000);

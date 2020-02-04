@@ -1,6 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <apptypes.h>
 #include <Registry.h>
 #include <Arduino.h>
 #include <APRSWiFi.h>
@@ -8,25 +9,6 @@
 #include <APRS_MSG.h>
 #include <TinyGPS++.h>
 #include <LoRaAPRSConfig.h>
-#include <APRSWebServer.h>
-#include <APRSControler.h>
-#include <ButtonState.h>
-#include <AsyncTCP.h>
-#include <BMEHandler.h>
-#include <Esp.h>
-#include <GPSSensor.h>
-#include <LoRaHandler.h>
-#include <OneButton.h>
-#include <SPI.h>
-#include <TrackerDisplay.h>
-#include <Wire.h>
-#include <fap.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/queue.h"
-#include "freertos/semphr.h"
-#include "freertos/task.h"
-#include <iGate.h>
-
 
 #define DISPLA_DELAY_SHORT 100
 #define DISPLA_DELAY_MEDIUM 300
@@ -53,13 +35,6 @@ static void smartDelay(uint32_t ms);
 void restart(void);
 static void watchdog(void);
 
-
-
-// void oneClick();
-// void doubleClick();
-// void longPressStart();
-// void longPressStop();
-// void longPress();
 
 
 void Scanner(void);

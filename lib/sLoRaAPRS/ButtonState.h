@@ -1,12 +1,15 @@
 #ifndef BUTTON_STATE_H
 #define BUTTON_STATE_H
 
+#include <APRSControler.h>
 #include <Arduino.h>
+#include <apptypes.h>
+#include <uxa_debug.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
-//#include <APRSControler.h>
-#include <uxa_debug.h>
 
+/* https://stackoverflow.com/questions/14676709/c-code-for-state-machine */
+/* https://www.philipphauer.de/study/se/design-pattern/state.php */
 
 class APRSControler;
 
@@ -23,43 +26,40 @@ class AbstracButtonState {
   void setState(APRSControler& aprs_controler, AbstracButtonState* st);
 };
 
-class ButtonDisplayMode : public AbstracButtonState {
+class StateDisplayMode : public AbstracButtonState {
  public:
   virtual void singleClick(APRSControler& aprs_controler);
   virtual void doubleClick(APRSControler& aprs_controler);
 };
 
-class ButtonNeutral : public AbstracButtonState {
+class StateDefault : public AbstracButtonState {
  public:
   virtual void singleClick(APRSControler& aprs_controler);
   virtual void doubleClick(APRSControler& aprs_controler);
   virtual void longClick(APRSControler& aprs_controler);
 };
 
-class ButtonConfigCall : public AbstracButtonState {
+class StateConfigCall : public AbstracButtonState {
  public:
   virtual void singleClick(APRSControler& aprs_controler);
   virtual void doubleClick(APRSControler& aprs_controler);
 };
 
-class ButtonConfigMode : public AbstracButtonState {
- public:
-  virtual void singleClick(APRSControler& aprs_controler);
-  virtual void doubleClick(APRSControler& aprs_controler);
-};
-
-class ButtonConfig : public AbstracButtonState {
+class StateConfigMenue : public AbstracButtonState {
  public:
   virtual void singleClick(APRSControler& aprs_controler);
   virtual void doubleClick(APRSControler& aprs_controler);
 
  private:
+  /**
+   * @var		mixed	-1 switch for config menue
+   */
   int8_t button_config_mode = -1;
 };
 
-class ButtonConfigSelector : public AbstracButtonState {
+class ConfigStringSelector : public AbstracButtonState {
  public:
-  ButtonConfigSelector(char* head,  const char* select_list, String* toChange);
+  ConfigStringSelector(char* head, const char* select_list, String* toChange);
   virtual void singleClick(APRSControler& aprs_controler);
   virtual void doubleClick(APRSControler& aprs_controler);
   virtual void longClick(APRSControler& aprs_controler);
@@ -81,8 +81,26 @@ class ButtonConfigSelector : public AbstracButtonState {
 
   void _showText(const char* line0, const char* line1);
   void _xdelay(uint16_t w);
+};
 
+class StateConfigWiFi : public AbstracButtonState {
+ public:
+  StateConfigWiFi(char *head);
+  virtual void singleClick(APRSControler& aprs_controler);
+  virtual void doubleClick(APRSControler& aprs_controler);
+ private:
+  char* _head;
+  void _show(void);
+};
 
+class StateConfigRun : public AbstracButtonState {
+ public:
+  StateConfigRun(char *head);
+  virtual void singleClick(APRSControler& aprs_controler);
+  virtual void doubleClick(APRSControler& aprs_controler);
+ private:
+  char* _head;
+  void _show(void);
 };
 
 // class  : public AbstracButtonState {
@@ -98,6 +116,5 @@ class ButtonConfigSelector : public AbstracButtonState {
 //     virtual void doubleClick(APRSControler&);
 
 // };
-
 
 #endif

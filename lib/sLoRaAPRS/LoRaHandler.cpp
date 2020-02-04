@@ -175,5 +175,4 @@ void processMessage(void) {
   // Serial.println("Message: " + incoming);
   // Serial.println("RSSI: " + String(LoRa.packetRssi()));
 
-// }
 

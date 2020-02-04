@@ -1,9 +1,6 @@
-#ifndef APRS_REGISTRY_H
-#define APRS_REGISTRY_H
+#ifndef APP_TYPES_H
+#define APP_TYPES_H
 
-//#include <APRSControler.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/timers.h"
 #include <Arduino.h>
 
 
@@ -17,7 +14,7 @@
 #define PREFS_RELASE "Release"
 #define PREFS_BOOT_COUNT "boot_count"
 #define PREFS_CURRENT_WIFI_MODE "c_wifi_mode"
-#define PREFS_CURRENT_SYSTEM_MODE "c_system_mode"
+#define PREFS_CURRENT_SYSTEM_MODE "c_run_mode"
 #define PREFS_CALL "call"
 #define PREFS_APRS_SYMBOL "aprs_symbol"
 #define PREFS_APRS_CALL_EX "aprs_ext"
@@ -46,20 +43,30 @@
 #define MSG_FORM_MSG "msg"
 
 
-
 enum wifi_mode { 
   wifi_off, 
   wifi_ap, 
   wifi_client 
 };
 
-enum system_mode {
+
+enum run_mode {
   mode_tracker,
   mode_wxtracker,
   mode_wxfix,
-  mode_repeater,
+  mode_digi,
   mode_gateway,
-  mode_repeater_gateway
+  mode_digi_gateway
+};
+
+
+
+struct APRSMessage {
+  String msg;
+  String wide;
+  String to;
+  boolean processed;
+  boolean newmessage;
 };
 
 struct WXData {
@@ -145,52 +152,19 @@ struct Registry {
   uint32_t boot_count = 0;
 
   wifi_mode current_wifi_mode = wifi_ap;
-  system_mode current_system_mode = mode_tracker;
-  
+  run_mode current_run_mode = mode_tracker;
   LanStatus lan_status;
-  
   HardWare hardware;
-
   Location gps_location;
   Move gps_move;
   DateTime gps_time;
   GPSMeta gps_meta;
   Location posfix;
-
   String SERVER_IP;
+  APRSMessage TxMsg;
+  APRSMessage RxMsg;
   WXData WXdata;
-//  APRSControler controler;
 };
 
-
-void singleClick_CB(void);
-void doubleClick_CB(void);
-void longClick_CB(void);
-void kinoTimer_CB(TimerHandle_t xExpiredTimer);
-
-void RegistryInit(void);
-
-void registryWriteInit(void);
-
-String reg_wxCall(void);
-
-String reg_aprsCall(void);
-
-String getPrefsString(const char* key);
-void setPrefsString(const char* key, String  value);
-
-uint16_t getPrefsInt(String key);
-void setPrefsUInt(const char* key, uint16_t value);
-
-double getPrefsDouble(const char *key);
-void setPrefsDouble(const char *key, double value);
-
-char getPrefsChar(const char *key);
-void setPrefsChar(const char* key, char value);
-
-void RegistryToString(void);
-
-String getRunMode();
-String getWifiMode();
 
 #endif

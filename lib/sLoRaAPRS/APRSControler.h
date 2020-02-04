@@ -1,18 +1,16 @@
 #ifndef APRS_CONTROLER_H
 #define APRS_CONTROLER_H
 
-#include <ButtonState.h>
 #include <Arduino.h>
+#include <ButtonState.h>
 
-
-  enum DisplayMode {
-    displayModeUTC,
-    displayModeGPS,
-    displayModeWX,
-    displayModeWiFiStatus,
-    displayModeEND
-  };
-
+enum DisplayMode {
+  displayModeUTC,
+  displayModeGPS,
+  displayModeWX,
+  displayModeWiFiStatus,
+  displayModeEND
+};
 
 class AbstracButtonState;
 
@@ -20,7 +18,6 @@ class APRSControler {
   friend class AbstracButtonState;
 
  public:
-
   boolean config_mode = false;
 
   boolean gps_update = false;
@@ -42,13 +39,12 @@ class APRSControler {
   uint8_t display_mode;
 };
 
-// struct ControlData {
-//   boolean gps_update = false;
-//   boolean new_mode = false;
-//   boolean newTxMesg = false;
-//   boolean newRxMesg = false;
-//   DisplayMode current_display_mode;
-//   boolean display_change = true;
-// };
+
+/* -------------------------------------------------------------------------- */
+
+void singleClick_CB(void);
+void doubleClick_CB(void);
+void longClick_CB(void);
+void kinoTimer_CB(TimerHandle_t xExpiredTimer);
 
 #endif
