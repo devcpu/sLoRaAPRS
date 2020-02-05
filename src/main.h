@@ -31,6 +31,8 @@ extern void WifiDisconnect(void);
 bool initAXP();
 static void smartDelay(uint32_t ms);
 
+void button_tick(TimerHandle_t xExpiredTimer);
+void button_tick(void);
 
 void restart(void);
 static void watchdog(void);

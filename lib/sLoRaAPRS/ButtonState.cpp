@@ -5,7 +5,7 @@
 #include <Registry.h>
 
 
-extern OneButton button;
+//extern OneButton button;
 
 char wifi_mode_txt[3][16] = {
   "OFF",
@@ -22,7 +22,8 @@ char run_mode_txt[6][16] = {
 };
 
 
-TimerHandle_t _tmr;
+TimerHandle_t call_config_timer;
+
 
 AbstracButtonState::~AbstracButtonState() {
   DDD("AbstracButtonState::~AbstracButtonState");
@@ -79,14 +80,20 @@ void StateDefault::longClick(APRSControler& aprs_controler) {
   DDD("StateDefault.longClick()");
   aprs_controler.display_change = false;
   aprs_controler.display_update = false;
+  write3Line("Cnfg Mode", "1clck nxt, 2clck entr", "long click exit", false, 0);
   setState(aprs_controler, new StateConfigMenue());
-  write3Line("Cnfg Mode", "1clck nxt, 2clck entr", "long click exit",
-             false, 0);
 }
 
 /* -------------------------------------------------------------------------- */
 /*   Config Menue   */
 /* -------------------------------------------------------------------------- */
+
+
+StateConfigMenue::StateConfigMenue(void) {
+  DDD("StateConfigMenue::StateConfigMenue");
+  //write3Line("Cnfg Mode", "1clck nxt, 2clck entr", "long click exit", false, 0);
+  write3Line("Cnfg Mode", "", "", false, 0);
+}
 
 void StateConfigMenue::singleClick(APRSControler& aprs_controler) {
   DDD("StateConfigMenue.singleClick");
@@ -127,7 +134,7 @@ void StateConfigMenue::doubleClick(APRSControler& aprs_controler) {
   switch (button_config_mode) {
     case 0:
       setState(aprs_controler, new ConfigStringSelector(
-                                   "Cfg Call", select_list_call, &reg.call)); // @FIXME
+                                   "Cfg Call", select_list_call)); // @FIXME
       break;
     case 1:
       setState(aprs_controler, new StateConfigWiFi("Cfg WiFi"));
@@ -151,14 +158,12 @@ void StateConfigMenue::doubleClick(APRSControler& aprs_controler) {
 /* -------------------------------------------------------------------------- */
 
 
-ConfigStringSelector::ConfigStringSelector(char* head, const char* select_list,
-                                           String* toChange) {
+ConfigStringSelector::ConfigStringSelector(const char* head, const char* select_list) {
   DDD("ConfigStringSelector::ConfigStringSelector");
 
   strncpy(_select_list, select_list, 40);
-  _toChange = toChange;
-  _tmp = *toChange;
   _head = head;
+  _tmp = reg.call;
   int id = 1;
   _actual = (char)_tmp.charAt(_pos);
   for (_select_list_idx = 0; _select_list_idx < 36; _select_list_idx++) {
@@ -166,13 +171,13 @@ ConfigStringSelector::ConfigStringSelector(char* head, const char* select_list,
       break;
     }
   }
-  _tmr = xTimerCreate("MyTimer", pdMS_TO_TICKS(1000), pdTRUE, (void*)id,
+  call_config_timer = xTimerCreate("CallConfigTimer", pdMS_TO_TICKS(1000), pdTRUE, (void*)id,
                       &kinoTimer_CB);
-  if (_tmr == NULL) {
+  if (call_config_timer == NULL) {
     Serial.println("Timer can not be created");
   }
 
-  if (xTimerStart(_tmr, 0) == pdPASS) {
+  if (xTimerStart(call_config_timer, 0) == pdPASS) {
     Serial.printf("timer started, start vTaskStartScheduler\n");
   } else {
     Serial.printf("Problem Timer start\n");
@@ -226,9 +231,9 @@ void ConfigStringSelector::kino(void) {
 
 void ConfigStringSelector::doubleClick(APRSControler& aprs_controler) {
   DDD("ConfigStringSelector.doubleClick");
-  xTimerStop( _tmr, 0 );
+  xTimerStop( call_config_timer, 0 );
   _tmp.trim();
-  _toChange = &_tmp;
+  reg.call = _tmp;
   setState(aprs_controler, new StateConfigMenue());
   Serial.printf("new call: %s\n", reg.call.c_str());
   setPrefsString(PREFS_CALL, reg.call);
@@ -239,7 +244,7 @@ void ConfigStringSelector::_showText(const char* line0, const char* line1) {
 }
 
 void ConfigStringSelector::longClick(APRSControler& aprs_controler) {
-  xTimerStop( _tmr, 0 );
+  xTimerStop( call_config_timer, 0 );
   aprs_controler.display_change = true;
   aprs_controler.display_update = true;
   setState(aprs_controler, new StateDefault());
@@ -249,7 +254,7 @@ void ConfigStringSelector::longClick(APRSControler& aprs_controler) {
 /*   Config Mode Selector   */
 /* -------------------------------------------------------------------------- */
 
-StateConfigWiFi::StateConfigWiFi(char *head) {
+StateConfigWiFi::StateConfigWiFi(const char *head) {
   DDD("StateConfigMenu.StateConfigMenu");
   _head = head;
   _show();
@@ -285,7 +290,7 @@ void StateConfigWiFi::_show(void) {
 /* -------------------------------------------------------------------------- */
 
 
-StateConfigRun::StateConfigRun(char *head) {
+StateConfigRun::StateConfigRun(const char *head) {
   DDD("StateConfigMenu.StateConfigMenu");
   _head = head;
   _show();

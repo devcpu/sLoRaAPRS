@@ -13,6 +13,7 @@
 
 class APRSControler;
 
+
 class AbstracButtonState {
  public:
   virtual ~AbstracButtonState();
@@ -47,6 +48,7 @@ class StateConfigCall : public AbstracButtonState {
 
 class StateConfigMenue : public AbstracButtonState {
  public:
+  StateConfigMenue(void);
   virtual void singleClick(APRSControler& aprs_controler);
   virtual void doubleClick(APRSControler& aprs_controler);
 
@@ -59,7 +61,7 @@ class StateConfigMenue : public AbstracButtonState {
 
 class ConfigStringSelector : public AbstracButtonState {
  public:
-  ConfigStringSelector(char* head, const char* select_list, String* toChange);
+  ConfigStringSelector(const char* head, const char* select_list);
   virtual void singleClick(APRSControler& aprs_controler);
   virtual void doubleClick(APRSControler& aprs_controler);
   virtual void longClick(APRSControler& aprs_controler);
@@ -68,14 +70,13 @@ class ConfigStringSelector : public AbstracButtonState {
  private:
   char _select_list[40];
   int8_t _select_list_idx = -1;
-  String* _toChange;
   char _actual = '0';
+  String _tmp;
   uint8_t _pos = 0;
-  String _tmp = "";
   const char* _hint_line0 = "1click: select";
   const char* _hint_line1 = "2click takes";
   uint16_t _wait = 2000;
-  char* _head;
+  const char* _head;
   String _arrow_line = "^";
   boolean _count = false;
 
@@ -85,21 +86,21 @@ class ConfigStringSelector : public AbstracButtonState {
 
 class StateConfigWiFi : public AbstracButtonState {
  public:
-  StateConfigWiFi(char *head);
+  StateConfigWiFi(const char* head);
   virtual void singleClick(APRSControler& aprs_controler);
   virtual void doubleClick(APRSControler& aprs_controler);
  private:
-  char* _head;
+  const char* _head;
   void _show(void);
 };
 
 class StateConfigRun : public AbstracButtonState {
  public:
-  StateConfigRun(char *head);
+  StateConfigRun(const char* head);
   virtual void singleClick(APRSControler& aprs_controler);
   virtual void doubleClick(APRSControler& aprs_controler);
  private:
-  char* _head;
+  const char* _head;
   void _show(void);
 };
 

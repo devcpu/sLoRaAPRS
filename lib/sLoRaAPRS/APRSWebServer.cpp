@@ -11,9 +11,6 @@
 #include <Preferences.h>
 #include <SPIFFSEditor.h>
 
-
-#include <Ticker.h>
-
 TinyGPSPlus gps;
 
 extern Preferences preferences;

@@ -1,11 +1,11 @@
-#include <Arduino.h>
+#include <APRSControler.h>
 #include <APRSWebServer.h>
 #include <APRSWiFi.h>
-#include <APRSControler.h>
-#include <ButtonState.h>
 #include <APRS_MSG.h>
+#include <Arduino.h>
 #include <AsyncTCP.h>
 #include <BMEHandler.h>
+#include <ButtonState.h>
 #include <Esp.h>
 #include <GPSSensor.h>
 #include <LoRaAPRSConfig.h>
@@ -32,6 +32,8 @@ extern TinyGPSPlus gps;  // driver fot GPS
 
 QueueHandle_t LoRaTXQueue, LoRaRXQueue, WWWTXQueue, WWWRXQueue;
 
+TimerHandle_t button_timer;
+
 uint32_t waitTxTr = 0L, nextTxTr = 50000L,
          nextTxTrRand = 15;  // ticker for APRS messages
 uint32_t waitTxDg = 0L, nextTxDg = 50000L, nextTxDgRand = 15;
@@ -46,21 +48,24 @@ char satbuf[24] = "";
 
 char* input;
 unsigned int input_len;
-//fap_packet_t* packet;
+// fap_packet_t* packet;
 
 OneButton button(BUTTON, true);
 
 
 
 void setup() {
-
-
-  randomSeed(ESP.getCycleCount());
-  // ESP.deepSleep(1, WAKE_RF_DISABLED);
   Serial.begin(115200);
   delay(1000);
 
-  maincontroler.button_state = new StateDefault();
+  /* --------------------------------------------------------------------------
+   */
+  /*   hardware check   */
+  /* --------------------------------------------------------------------------
+   */
+
+  RegistryInit();
+  // write3Line("Init Pref.", "Prefernces", "   +OK", true, DISPLA_DELAY_SHORT);
 
   if (Wire.begin(SDA, SCL)) {
     // write3toSerial("Init I2C", "  System", "   +OK", DISPLA_DELAY_SHORT);
@@ -68,10 +73,14 @@ void setup() {
     // write3toSerial("Init I2C", "   -ERR", "check wire", DISPLA_DELAY_LONG);
   }
 
+
   if (DisplayInit()) {
     // write3Line("Init Disp.", "Display", "   +OK", true, DISPLA_DELAY_SHORT);
+    reg.hardware.OLED = true;
   } else {
-    // write3Line("Init Disp.", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);
+    // write3Line("Init Disp.", "   -ERR", "check wire", true,
+    // DISPLA_DELAY_LONG);
+    reg.hardware.OLED = false;
   }
 
   // write3Line({{""}, {""}, {""}}, true, 1);
@@ -85,9 +94,6 @@ void setup() {
   }
 #endif
 
-  RegistryInit();
-  // write3Line("Init Pref.", "Prefernces", "   +OK", true, DISPLA_DELAY_SHORT);
-
   if (BMEHandlerInit()) {
     // write3Line("Init BME", "  BME280", "   +OK", true, DISPLA_DELAY_SHORT);
     reg.hardware.BME280 = true;
@@ -99,29 +105,78 @@ void setup() {
   if (ESPFSInit()) {
     // write3Line("Init SPIFS", "  SPIFFS", "   +OK", true, DISPLA_DELAY_SHORT);
   } else {
-    // write3Line("Init SPIFS", "   -ERR", "check chip", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init SPIFS", "   -ERR", "check chip", true,
+    // DISPLA_DELAY_SHORT);
   }
 
   ss.begin(GPS_BAUD, SERIAL_8N1, TXPin, RXPin);
   // write3Line("Init UART", " GPS UART", "   +OK", true, DISPLA_DELAY_SHORT);
 
   if (LoRa_init()) {
-    // write3Line("Init LoRa", "LoDaDevive", "   +OK", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init LoRa", "LoDaDevive", "   +OK", true,
+    // DISPLA_DELAY_SHORT);
   } else {
-    // write3Line("Init LoRa", "   -ERR", "check wire", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init LoRa", "   -ERR", "check wire", true,
+    // DISPLA_DELAY_SHORT);
   }
   // lora.onReceive(lora.processMessage);
   // lora.receive();
 
+  if (reg.hardware.OLED) {
+    maincontroler.button_state = new StateDefault();
+    button.attachClick(singleClick_CB);
+    button.attachDoubleClick(doubleClick_CB);
+    button.attachLongPressStop(longClick_CB);
+    // write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
+    // int timerid = 2;
+    // button_timer = xTimerCreate("ButtonTimer", pdMS_TO_TICKS(50), pdTRUE, (void*)timerid, &button_tick);
+    // if (NULL == button_timer) {
+    //   Serial.printf("-ERR: can't create ButtonTimer\n");
+    // }
+    // if (xTimerStart(button_timer, 0) == pdFALSE) {
+    //   Serial.printf("-ERR: can't start ButtonTimer! timer-queue full?\n");
+    // }
+  
+  }
   pinMode(TXLED, OUTPUT);
 
-  button.attachClick(singleClick_CB);
-  button.attachDoubleClick(doubleClick_CB);
-  button.attachLongPressStop(longClick_CB);
-  write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
+  /* --------------------------------------------------------------------------
+   */
+  /*   run mode   */
+  /* --------------------------------------------------------------------------
+   */
 
-  reg.current_wifi_mode = wifi_client;
-  // reg.current_wifi_mode = wifi_ap;
+  switch (reg.current_run_mode) {
+    case mode_tracker:
+
+      break;
+
+    case mode_wxtracker:
+
+      break;
+
+    case mode_wxfix:
+
+      break;
+
+    case mode_digi:
+
+      break;
+
+    case mode_gateway:
+
+      break;
+
+    case mode_digi_gateway:
+
+      break;
+
+    default:
+      break;
+  }
+
+  //reg.current_wifi_mode = wifi_client;
+  reg.current_wifi_mode = wifi_ap;
 
   write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
   write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
@@ -153,22 +208,26 @@ void setup() {
 
   write3Line("sLoRaAPRS", "  up &", " running", true, 0);
   smartDelay(2000);
-  write3Line("  Hello", (String("  ") + reg.call).c_str(), "  nice to be back", true, 0);
+  write3Line("  Hello", (String("  ") + reg.call).c_str(), "  nice to be back",
+             true, 0);
   smartDelay(2000);
   write3Line("  Enjoy", "   the", "   day", true, 0);
   smartDelay(2000);
   setWXData();
 
-  //fap_init();
+  // fap_init();
+  // randomSeed(ESP.getCycleCount()); read from GPS if time valide pick up a
+  // good value (ymd+(hour*60*60+min*60)) ESP.deepSleep(1, WAKE_RF_DISABLED);
 }
 
 void loop() {
   setGPSData();
-  if (reg.oled_message.active == true) {
-    write2Display(reg.oled_message.head, reg.oled_message.line1, reg.oled_message.line2, reg.oled_message.line3, reg.oled_message.line4);
-    reg.oled_message.active = false;
-  }
-
+  // if (reg.oled_message.active == true) {
+  //   write2Display(reg.oled_message.head, reg.oled_message.line1,
+  //                 reg.oled_message.line2, reg.oled_message.line3,
+  //                 reg.oled_message.line4);
+  //   reg.oled_message.active = false;
+  // }
 
   if (wait_wx_update < millis()) {
     setWXData();
@@ -187,7 +246,7 @@ void loop() {
   //   Serial.println("########################");
   // }
 
-  button.tick();
+  //button_tick();
   LoRa_tick();
   tracker_display_tick();
   Sensor_tick();
@@ -328,3 +387,12 @@ void setGPSInfo(void) {
     reg.gps_move.course = gps.course.deg();
   }
 }
+
+
+void button_tick(TimerHandle_t xExpiredTimer) {
+  button.tick();
+} 
+
+void button_tick() {
+  button.tick();
+} 

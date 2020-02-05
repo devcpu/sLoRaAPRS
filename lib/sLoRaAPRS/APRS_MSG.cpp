@@ -19,8 +19,8 @@ char*  APRS_MSG::computeWXField(char *rv) {
     "...", // gust
     (int)round(APRS_MSG::c2f(reg.WXdata.temp)), // temperature
     "...", // rainfalllasthourhinch
-    "...", // rainfalllast24h
-    "...", // rainfallsinceMidnight
+    "...", // rainfalllast24hinch
+    "...", // rainfallsinceMidnightinch
     APRS_MSG::calcHumidity(hum_buf, reg.WXdata.humidity), // humidity
     (int)round(reg.WXdata.pressure*10), // pressure
     "Sensor: BME280" // wx sensor

@@ -1,7 +1,7 @@
 #ifndef UXA_DEBUG_H
 #define UXA_DEBUG_H
 
-//#define MODDEBUG
+#define MODDEBUG
 
 #ifdef MODDEBUG
 #define DDD(x) \
