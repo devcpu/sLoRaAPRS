@@ -1,12 +1,16 @@
+#include <Arduino.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/timers.h"
+#include <APRSControler.h>
 #include <Registry.h>
 #include <TrackerDisplay.h>
 #include <uxa_debug.h>
-#include <APRSControler.h>
 
 extern APRSControler maincontroler;
+extern TimerHandle_t button_timer;
+portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
 Adafruit_SSD1306 display(128, 64, &Wire, OLED_RESET);
-
 
 /**
  * @brief if true text on display will changed continous
@@ -64,7 +68,8 @@ void write2Display(String head = "", String line1 = "", String line2 = "",
   write2Display(head, line1, line2, line3, "");
 }
 
-void write2Display(const char* head, const char* line1, const char* line2, const char* line3, const char* line4) {
+void write2Display(const char *head, const char *line1, const char *line2,
+                   const char *line3, const char *line4) {
   display.clearDisplay();
   display.setTextColor(WHITE);
   display.setTextSize(2);
@@ -81,7 +86,6 @@ void write2Display(const char* head, const char* line1, const char* line2, const
   display.print(line4);
   display.display();
 };
-
 
 void tracker_display_tick(void) {
   DisplayMode dm = displayModeUTC;
@@ -136,8 +140,8 @@ void tracker_display_tick(void) {
 // }
 
 void writeUTC() {
-  display.clearDisplay();
-  writeHead("   UTC");
+  // display.clearDisplay();
+  // writeHead("   UTC");
 
   if (gps.time.isValid() && gps.date.isValid()) {
     char date[25], time[25];
@@ -145,12 +149,13 @@ void writeUTC() {
              reg.gps_time.day);
     snprintf(time, 25, "  %02d:%02d", reg.gps_time.hour, reg.gps_time.minute);
 
-    display.setTextSize(2);
-    display.setCursor(0, 22);
-    display.print(time);
-    display.setCursor(0, 44);
-    display.print(date);
-    display.display();
+    // display.setTextSize(2);
+    // display.setCursor(0, 22);
+    // display.print(time);
+    // display.setCursor(0, 44);
+    // display.print(date);
+    // display.display();
+    write3Line(" - UTC -", time, date, false, 0);
   } else {
     write_no_vaild_data();
   }
@@ -233,7 +238,6 @@ void writeWiFiStatus() {
     display.print("OFF");
   }
 
-
   display.display();
 }
 
@@ -275,6 +279,7 @@ void write_no_vaild_data() {
 
 void write3Line(const char *head, const char *line1, const char *line2,
                 bool toSerial, u_long sleep) {
+  
   display.clearDisplay();
   writeHead(head);
 
@@ -294,6 +299,7 @@ void write3Line(const char *head, const char *line1, const char *line2,
   display.setCursor(0, 44);
   display.print(line2);
   display.display();
+
   if (toSerial) {
     write3toSerial(head, line1, line2, sleep);
   } else {

@@ -19,7 +19,9 @@
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
+#include "freertos/timers.h"
 #include <main.h>
+
 //#include <iGate.h>
 
 extern Registry reg;  // config & system status
@@ -127,15 +129,15 @@ void setup() {
     button.attachClick(singleClick_CB);
     button.attachDoubleClick(doubleClick_CB);
     button.attachLongPressStop(longClick_CB);
-    // write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
-    // int timerid = 2;
-    // button_timer = xTimerCreate("ButtonTimer", pdMS_TO_TICKS(50), pdTRUE, (void*)timerid, &button_tick);
-    // if (NULL == button_timer) {
-    //   Serial.printf("-ERR: can't create ButtonTimer\n");
-    // }
-    // if (xTimerStart(button_timer, 0) == pdFALSE) {
-    //   Serial.printf("-ERR: can't start ButtonTimer! timer-queue full?\n");
-    // }
+    //write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
+    int timerid = 2;
+    button_timer = xTimerCreate("ButtonTimer", pdMS_TO_TICKS(100), pdTRUE, (void*)timerid, &button_tick);
+    if (NULL == button_timer) {
+      Serial.printf("-ERR: can't create ButtonTimer\n");
+    }
+    if (xTimerStart(button_timer, 0) == pdFALSE) {
+      Serial.printf("-ERR: can't start ButtonTimer! timer-queue full?\n");
+    }
   
   }
   pinMode(TXLED, OUTPUT);
@@ -222,6 +224,7 @@ void setup() {
 
 void loop() {
   setGPSData();
+  //Serial.print('*');
   // if (reg.oled_message.active == true) {
   //   write2Display(reg.oled_message.head, reg.oled_message.line1,
   //                 reg.oled_message.line2, reg.oled_message.line3,
@@ -229,10 +232,10 @@ void loop() {
   //   reg.oled_message.active = false;
   // }
 
-  if (wait_wx_update < millis()) {
-    setWXData();
-    wait_wx_update = next_wx_update + millis();
-  }
+  // if (wait_wx_update < millis()) {
+  //   setWXData();
+  //   wait_wx_update = next_wx_update + millis();
+  // }
   // watchdog();
   APRSWebServerTick();
   // iGate_process_udp();
@@ -246,7 +249,7 @@ void loop() {
   //   Serial.println("########################");
   // }
 
-  //button_tick();
+  button_tick();
   LoRa_tick();
   tracker_display_tick();
   Sensor_tick();
@@ -281,7 +284,7 @@ void loop() {
   //   waitTxDg = millis() + nextTxDg + random(nextTxDgRand) * 1000;
   // }
 
-  smartDelay(100);
+  smartDelay(50);
 }
 
 /**
@@ -394,5 +397,5 @@ void button_tick(TimerHandle_t xExpiredTimer) {
 } 
 
 void button_tick() {
-  button.tick();
+ button.tick();
 } 
