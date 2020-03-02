@@ -125,41 +125,21 @@ void tracker_display_tick(void) {
   }
 }
 
-// uint8_t tracker_display_switch(void) {
-//   static uint8_t current = 0;
-//   if (!displayChange) {
-//     return current;
-//   }
-//   uint8_t max = displayModeEND - 1;
-//   if (current < max) {
-//     current++;
-//   } else {
-//     current = 0;
-//   }
-//   return current;
-// }
 
 void writeUTC() {
-  // display.clearDisplay();
-  // writeHead("   UTC");
-
   if (gps.time.isValid() && gps.date.isValid()) {
     char date[25], time[25];
     snprintf(date, 25, "%04d-%02d-%02d", reg.gps_time.year, reg.gps_time.month,
              reg.gps_time.day);
     snprintf(time, 25, "  %02d:%02d", reg.gps_time.hour, reg.gps_time.minute);
 
-    // display.setTextSize(2);
-    // display.setCursor(0, 22);
-    // display.print(time);
-    // display.setCursor(0, 44);
-    // display.print(date);
-    // display.display();
     write3Line(" - UTC -", time, date, false, 0);
   } else {
     write_no_vaild_data();
   }
-};
+}
+
+
 void writeGPS() {
   display.clearDisplay();
   writeHead("   GPS");
@@ -246,9 +226,7 @@ void writeHead(const char *head) {
   char sat[3];
   char hdop[3];
 
-  if (gps.satellites.isValid() && gps.hdop.isValid()) {
-    // snprintf(sat, 3, "%d", int(gps.satellites.value()));
-    // snprintf(hdop, 3, "%d", int(gps.hdop.hdop()));
+  if (gps.satellites.isValid() && gps.hdop.isValid()) { //@FIXME
     snprintf(sat, 3, "%d", reg.gps_meta.sat);
     snprintf(hdop, 3, "%d", int(round(reg.gps_meta.hdop)));
   } else {
