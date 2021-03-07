@@ -1,3 +1,13 @@
+/**
+* main.h
+* @author bulbasaur
+* @description 
+* @created 2020-02-05T11:21:21.897Z+01:00
+* @copyright None 
+* None
+* @last-modified 2021-03-07T16:42:06.978Z+01:00
+*/
+
 #ifndef MAIN_H
 #define MAIN_H
 

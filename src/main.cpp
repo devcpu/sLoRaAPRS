@@ -13,14 +13,14 @@
 #include <OneButton.h>
 #include <SPI.h>
 #include <TrackerDisplay.h>
-#include <Wire.h>
 //#include <fap.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
-#include <freertos/task.h>
-#include "freertos/timers.h"
+//#include <freertos/task.h>
 #include <main.h>
+
+#include "freertos/timers.h"
 
 //#include <iGate.h>
 
@@ -30,7 +30,7 @@ APRSControler maincontroler;
 
 // @TODO APRS_MSG deprecated?
 APRS_MSG tx_msg;         // converts all data to APRS messages
-extern TinyGPSPlus gps;  // driver fot GPS
+extern TinyGPSPlus gps;  // driver for GPS
 
 QueueHandle_t LoRaTXQueue, LoRaRXQueue, WWWTXQueue, WWWRXQueue;
 
@@ -54,8 +54,6 @@ unsigned int input_len;
 
 OneButton button(BUTTON, true);
 
-
-
 void setup() {
   Serial.begin(115200);
   delay(1000);
@@ -74,7 +72,6 @@ void setup() {
   } else {
     // write3toSerial("Init I2C", "   -ERR", "check wire", DISPLA_DELAY_LONG);
   }
-
 
   if (DisplayInit()) {
     // write3Line("Init Disp.", "Display", "   +OK", true, DISPLA_DELAY_SHORT);
@@ -129,16 +126,16 @@ void setup() {
     button.attachClick(singleClick_CB);
     button.attachDoubleClick(doubleClick_CB);
     button.attachLongPressStop(longClick_CB);
-    //write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
     int timerid = 2;
-    button_timer = xTimerCreate("ButtonTimer", pdMS_TO_TICKS(100), pdTRUE, (void*)timerid, &button_tick);
+    button_timer = xTimerCreate("ButtonTimer", pdMS_TO_TICKS(100), pdTRUE,
+                                (void*)timerid, &button_tick);
     if (NULL == button_timer) {
       Serial.printf("-ERR: can't create ButtonTimer\n");
     }
     if (xTimerStart(button_timer, 0) == pdFALSE) {
       Serial.printf("-ERR: can't start ButtonTimer! timer-queue full?\n");
     }
-  
   }
   pinMode(TXLED, OUTPUT);
 
@@ -177,7 +174,7 @@ void setup() {
       break;
   }
 
-  //reg.current_wifi_mode = wifi_client;
+  // reg.current_wifi_mode = wifi_client;
   reg.current_wifi_mode = wifi_ap;
 
   write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
@@ -224,7 +221,7 @@ void setup() {
 
 void loop() {
   setGPSData();
-  //Serial.print('*');
+  // Serial.print('*');
   // if (reg.oled_message.active == true) {
   //   write2Display(reg.oled_message.head, reg.oled_message.line1,
   //                 reg.oled_message.line2, reg.oled_message.line3,
@@ -290,10 +287,7 @@ void loop() {
 /**
  * initAXP.
  *
- * @author	Unknown
- * @since	v0.0.1
- * @version	v1.0.0	Wednesday, January 15th, 2020.
- * @global
+ * @author	Johannes Arlt
  * @return	boolean
  */
 bool initAXP() {
@@ -353,27 +347,6 @@ void restart(void) {
   ESP.restart();
 }
 
-void Scanner() {
-  Serial.println();
-  Serial.println("I2C scanner. Scanning ...");
-  byte count = 0;
-
-  for (byte i = 8; i < 120; i++) {
-    Wire.beginTransmission(i);        // Begin I2C transmission Address (i)
-    if (Wire.endTransmission() == 0)  // Receive 0 = success (ACK response)
-    {
-      Serial.print("Found address: ");
-      Serial.print(i, DEC);
-      Serial.print(" (0x");
-      Serial.print(i, HEX);  // PCF8574 7 bit address
-      Serial.println(")");
-      count++;
-    }
-  }
-  Serial.print("Found ");
-  Serial.print(count, DEC);  // numbers of devices
-  Serial.println(" device(s).");
-}
 
 void setGPSInfo(void) {
   if (gps.location.isValid()) {
@@ -391,11 +364,6 @@ void setGPSInfo(void) {
   }
 }
 
+void button_tick(TimerHandle_t xExpiredTimer) { button.tick(); }
 
-void button_tick(TimerHandle_t xExpiredTimer) {
-  button.tick();
-} 
-
-void button_tick() {
- button.tick();
-} 
+void button_tick() { button.tick(); }
