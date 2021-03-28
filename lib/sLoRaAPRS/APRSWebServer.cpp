@@ -1,22 +1,35 @@
-#include <uxa_debug.h>
+/*
+ * File: APRSWebServer.cpp
+ * Project: sLoRaAPRS
+ * File Created: 2020-11-11 20:13
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-03-29 1:57
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
+
+// #include <uxa_debug.h>
 #include <APRSWebServer.h>
 #include <APRSWiFi.h>
 #include <APRS_MSG.h>
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
 #include <AsyncJson.h>
-#include <apptypes.h>
-#include <Registry.h>
-#include <TinyGPS++.h>
 #include <Preferences.h>
+#include <Registry.h>
 #include <SPIFFSEditor.h>
+#include <TinyGPS++.h>
+#include <apptypes.h>
 
 TinyGPSPlus gps;
 
 extern Preferences preferences;
 extern QueueHandle_t LoRaTXQueue;
 
-//#include "CallBackList.h"
+// #include "CallBackList.h"
 
 // @TODO remove together with restart()
 
@@ -84,7 +97,7 @@ void WebserverStart(void) {
   Serial.println("starting Webserver");
   WebServer = new AsyncWebServer(80);
   ws = new AsyncWebSocket("/ws");
-  
+
   ws->onEvent(onWsEvent);
   WebServer->addHandler(ws);
 
@@ -105,7 +118,7 @@ void WebserverStart(void) {
   WebServer->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("/");
     // first run wizard
-    if (reg.call == "CHANGEME") { // first run wizard
+    if (reg.call == "CHANGEME") {  // first run wizard
       request->redirect("/cc");
     }
     request->send(SPIFFS, "/main.html", "text/html", false, ProcessorDefault);
@@ -125,7 +138,7 @@ void WebserverStart(void) {
     if (request->params() > 0) {
       DDD("/cc");
       handleRequestConfigCall(request);
-      if (reg.APCredentials.auth_tocken == "letmein42") { // first run wizard
+      if (reg.APCredentials.auth_tocken == "letmein42") {  // first run wizard
         request->redirect("/ca");
       }
       request->redirect("/");
@@ -156,8 +169,13 @@ void WebserverStart(void) {
     if (request->params() == 2) {
       DDD(request->params());
       handleRequestChangeMode(request);
-      Serial.printf("new run_mode: %d / new_wifi_mode %d\n", (int)reg.current_run_mode, (int)reg.current_wifi_mode);
-      Serial.printf("new run_mode: %d / new_wifi_mode %d\n", (int)getPrefsDouble(PREFS_CURRENT_SYSTEM_MODE), (int)getPrefsDouble(PREFS_CURRENT_WIFI_MODE));
+      Serial.printf("new run_mode: %d / new_wifi_mode %d\n",
+                    static_cast<uint8_t>(reg.current_run_mode),
+                    static_cast<uint8_t>(reg.current_wifi_mode));
+      Serial.printf(
+          "new run_mode: %d / new_wifi_mode %d\n",
+          static_cast<uint8_t>(getPrefsDouble(PREFS_CURRENT_SYSTEM_MODE)),
+          static_cast<uint8_t>(getPrefsDouble(PREFS_CURRENT_WIFI_MODE)));
       request->redirect("/");
     }
 
@@ -237,17 +255,12 @@ void WebserverStart(void) {
     // handle Request in /ca
   });
 
-
-// Config Web Admin
+  // Config Web Admin
   WebServer->on("/APRSSymbol", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("/APRSSymbol");
     showRequest(request);
     request->send(SPIFFS, "/APRS_Symbol_Chart.pdf", "application/pdf", false);
-    
   });
-
-
-  
 
   WebServer->on("/bb", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("/bb");
@@ -257,7 +270,7 @@ void WebserverStart(void) {
 
   WebServer->begin();
   Serial.println("HTTP WebServer started");
-};
+}
 
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                AwsEventType type, void *arg, uint8_t *data, size_t len) {
@@ -351,7 +364,8 @@ String getSystemInfoTable(void) {
       {"CycleCount: ", String(ESP.getCycleCount())},
       {"FlashChipMode: ", String(ESP.getFlashChipMode())},
       {"FlashChipSize: ", String(ESP.getFlashChipSize() / 1024 / 1024) + "MB"},
-      {"FlashChipSpeed: ", String(ESP.getFlashChipSpeed()/1024/1024) + "MHz"},
+      {"FlashChipSpeed: ",
+       String(ESP.getFlashChipSpeed() / 1024 / 1024) + "MHz"},
       {"SketchSize: ", String(ESP.getSketchSize() / 1024) + "kB"},
       {"FreeSketchSpace: ", String(ESP.getFreeSketchSpace() / 1024) + "kB"},
       {"SketchMD5: ", String(ESP.getSketchMD5())},
@@ -360,10 +374,10 @@ String getSystemInfoTable(void) {
       {"MaxAllocHeap: ", String(ESP.getMaxAllocHeap() / 1024) + "kB"},
       {"MinFreeHeap: ", String(ESP.getMinFreeHeap() / 1024) + "kB"},
 
-      // {"PsramSize: ", String(ESP.getPsramSize() / 1024) + "kB"},
-      // {"FreePsram", String(ESP.getFreePsram() / 1024) + "kB"},
-      // {"MaxAllocPsram: ", String(ESP.getMaxAllocPsram() / 1024) + "kB"},
-      // {"MinFreePsram", String(ESP.getMinFreePsram() / 1024) + "kB"},
+  // {"PsramSize: ", String(ESP.getPsramSize() / 1024) + "kB"},
+  // {"FreePsram", String(ESP.getFreePsram() / 1024) + "kB"},
+  // {"MaxAllocPsram: ", String(ESP.getMaxAllocPsram() / 1024) + "kB"},
+  // {"MinFreePsram", String(ESP.getMinFreePsram() / 1024) + "kB"},
 
 #elif defined(ESP8266)
       {"Flash real id:", String(ESP.getFlashChipId(), HEX)},
@@ -373,14 +387,11 @@ String getSystemInfoTable(void) {
       {"Flash ide  size:", String(ESP.getFlashChipSize() / 1024) + "kB"},
       {"Flash ide speed:",
        String(ESP.getFlashChipSpeed() / 1000 / 1000) + "MHz"},
-      {"Flash ide mode:",
-       String((ideMode == FM_QIO
-                   ? "QIO"
-                   : ideMode == FM_QOUT
-                         ? "QOUT"
-                         : ideMode == FM_DIO
-                               ? "DIO"
-                               : ideMode == FM_DOUT ? "DOUT" : "UNKNOWN"))},
+      {"Flash ide mode:", String((ideMode == FM_QIO    ? "QIO"
+                                  : ideMode == FM_QOUT ? "QOUT"
+                                  : ideMode == FM_DIO  ? "DIO"
+                                  : ideMode == FM_DOUT ? "DOUT"
+                                                       : "UNKNOWN"))},
       {"Sketch size:", String(ESP.getSketchSize() / 1024) + "kB"},
       // size = 10
       {"Free sketch size:", String(ESP.getFreeSketchSpace() / 1024) + "kB"},
@@ -475,27 +486,24 @@ String getResetReason(RESET_REASON reason) {
 #endif
 
 String ProcessorConfigCall(const String &var) {
-
-      String options[][2] = {
-        {" -0: Primärstation", "0"},
-        {" -1: weiter allgemeine Std", "1"},
-        {" -2: weiter allgemeine Std", "2"},
-        {" -3: weiter allgemeine Std", "3"},
-        {" -4: weiter allgemeine Std", "4"},
-        {" -5: anderses Netzwerk (D-Star / 3G)", "5"},
-        {" -6: Satellit", "6"},
-        {" -7: Handfunkgerät", "7"},
-        {" -8: Boot / Schiff", "8"},
-        {" -9: Mobilstadtion", "9"},
-        {"-10: APRS-IS ohne Funkmodul", "10"},
-        {"-11: Ballon / Fluggerät / Raumschiff", "11"},
-        {"-12: APRStt / DTML (Einweg)", "12"},
-        {"-13: Wetterstation", "13"},
-        {"-14: Lastkraftwagen (permanent)", "14"},
-        {"-15: weiter allgemeine Std", "15"},
-    };
-
-
+  String options[][2] = {
+      {" -0: Primärstation", "0"},
+      {" -1: weiter allgemeine Std", "1"},
+      {" -2: weiter allgemeine Std", "2"},
+      {" -3: weiter allgemeine Std", "3"},
+      {" -4: weiter allgemeine Std", "4"},
+      {" -5: anderses Netzwerk (D-Star / 3G)", "5"},
+      {" -6: Satellit", "6"},
+      {" -7: Handfunkgerät", "7"},
+      {" -8: Boot / Schiff", "8"},
+      {" -9: Mobilstadtion", "9"},
+      {"-10: APRS-IS ohne Funkmodul", "10"},
+      {"-11: Ballon / Fluggerät / Raumschiff", "11"},
+      {"-12: APRStt / DTML (Einweg)", "12"},
+      {"-13: Wetterstation", "13"},
+      {"-14: Lastkraftwagen (permanent)", "14"},
+      {"-15: weiter allgemeine Std", "15"},
+  };
 
   if (var == "HTMLTILE") {
     return String("simple LoRaAPRS system by DL7UXA");
@@ -534,30 +542,30 @@ String ProcessorConfigCall(const String &var) {
   }
 
   if (var == "aprs_ext_options") {
-    return optionsFeldGenerator(reg.aprs_call_ext.toInt(), PREFS_APRS_CALL_EX, options, 16);
+    return optionsFeldGenerator(reg.aprs_call_ext.toInt(), PREFS_APRS_CALL_EX,
+                                options, 16);
   }
 
   if (var == PREFS_APRS_CALL_EX) {
     return reg.aprs_call_ext;
   }
 
-
   if (var == "wx_ext_options") {
     DDD(reg.wx_call_ext);
-    return optionsFeldGenerator(reg.wx_call_ext.toInt(), PREFS_WX_CALL_EX, options, 16);
+    return optionsFeldGenerator(reg.wx_call_ext.toInt(), PREFS_WX_CALL_EX,
+                                options, 16);
   }
 
   if (var == PREFS_WX_CALL_EX) {
     return reg.wx_call_ext;
   }
 
-
   if (var == "BODY") {
     return readSPIFFS2String("/FormConfigCall.html") + mainmenue;
   }
 
   return String("wrong placeholder " + var);
-};
+}
 
 void handleRequestConfigCall(AsyncWebServerRequest *request) {
   // call
@@ -583,7 +591,7 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
   String new_aprs_symbol = "";
   if (request->hasParam(PREFS_APRS_SYMBOL)) {
     new_aprs_symbol = getWebParam(request, PREFS_APRS_SYMBOL);
-    reg.aprs_symbol.symbol = (char)new_aprs_symbol.charAt(0);
+    reg.aprs_symbol.symbol = static_cast<char>(new_aprs_symbol.charAt(0));
     setPrefsChar(PREFS_APRS_SYMBOL, new_aprs_symbol.charAt(0));
   } else {
     Serial.println("ERR: APRS Symbol not valide!" + new_aprs_symbol);
@@ -601,7 +609,6 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
 
   if (request->hasParam(PREFS_POS_ALT_FIX)) {
     getWebParam(request, PREFS_POS_ALT_FIX, &reg.posfix.altitude);
-
   }
 }
 
@@ -651,7 +658,7 @@ String ProcessorWXInfo(const String &var) {
   }
 
   return String("wrong placeholder " + var);
-};
+}
 
 String ProcessorConfigWifiAP(const String &var) {
   if (var == "HTMLTILE") {
@@ -709,7 +716,6 @@ void handleRequestConfigAP(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_WEB_PASS)) {
     getWebParam(request, PREFS_WEB_PASS, &reg.WebCredentials.auth_tocken);
   }
-
 }
 
 String ProcessorConfigGateway(const String &var) {
@@ -760,7 +766,6 @@ void handleRequestConfigGateway(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_APRS_SERVER1)) {
     getWebParam(request, PREFS_APRS_SERVER1, &reg.APRSServer[1]);
   }
-
 }
 
 String ProcessorSendMessage(const String &var) {
@@ -780,21 +785,16 @@ String ProcessorSendMessage(const String &var) {
     return html_error.getErrorMsg();
   }
 
-    if (var == MSG_FORM_TO) {
+  if (var == MSG_FORM_TO) {
     return send_msg_form_tmp.to;
   }
 
   if (var == MSG_FORM_WIDE) {
     String options[][2] = {
-        { "local", "0"},
-        {"WIDE1-1", "1" },
-        {"WIDE2-2", "2" },
-        {"WIDE3-3", "3" }
-    };
+        {"local", "0"}, {"WIDE1-1", "1"}, {"WIDE2-2", "2"}, {"WIDE3-3", "3"}};
 
-    return optionsFeldGenerator(send_msg_form_tmp.wide.toInt(), MSG_FORM_WIDE, options,
-                                4);
-    
+    return optionsFeldGenerator(send_msg_form_tmp.wide.toInt(), MSG_FORM_WIDE,
+                                options, 4);
   }
 
   if (var == MSG_FORM_MSG) {
@@ -822,14 +822,16 @@ void handleRequestSendMessage(AsyncWebServerRequest *request) {
     html_error.setErrorMsg("Error wrong parameter");
   }
   if (wide.length() > 0) {
-    sform.wide = wide;    
+    sform.wide = wide;
   }
 
-  if (xQueueSend(LoRaTXQueue, (SendMsgForm*)&sform, (TickType_t)100) != pdPASS) {
-    Serial.printf("ERROR: Can't put APRS msg to LoRaTXQueue\n to:%s msg:%s", sform.to.c_str(), sform.msg.c_str());
+  if (xQueueSend(LoRaTXQueue, reinterpret_cast<SendMsgForm *>(&sform),
+                 (TickType_t)100) != pdPASS) {
+    Serial.printf("ERROR: Can't put APRS msg to LoRaTXQueue\n to:%s msg:%s",
+                  sform.to.c_str(), sform.msg.c_str());
   }
   reg.TxMsg.to = to;
-};
+}
 
 String ProcessorConfigWLAN(const String &var) {
   if (var == "HTMLTILE") {
@@ -885,7 +887,7 @@ String ProcessorConfigWLAN(const String &var) {
   }
 
   return String("wrong placeholder " + var);
-};
+}
 
 void handleRequestConfigWLAN(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_LAN0_SSID)) {
@@ -907,8 +909,6 @@ void handleRequestConfigWLAN(AsyncWebServerRequest *request) {
     getWebParam(request, PREFS_LAN3_SSID, &reg.WifiCrendentials[3].auth_name);
     getWebParam(request, PREFS_LAN3_AUTH, &reg.WifiCrendentials[3].auth_tocken);
   }
-
-
 }
 
 String ProcessorChangeMode(const String &var) {
@@ -940,20 +940,17 @@ String ProcessorChangeMode(const String &var) {
         {"APRS LoRa Repeater & APRS Gateway", String(mode_digi_gateway)},
     };
 
-    return optionsFeldGenerator(reg.current_run_mode,
-                                PREFS_CURRENT_SYSTEM_MODE, options, 6);
+    return optionsFeldGenerator(reg.current_run_mode, PREFS_CURRENT_SYSTEM_MODE,
+                                options, 6);
   }
 
   // enum wifi_mode {wifi_off, wifi_ap, wifi_client};
   if (var == PREFS_CURRENT_WIFI_MODE) {
     String options[][2] = {
-        { "Wifi OFF", "0"},
-        {"Wifi AP", "1" },
-        {"WLAN Connect", "2" }
-    };
+        {"Wifi OFF", "0"}, {"Wifi AP", "1"}, {"WLAN Connect", "2"}};
 
-    return optionsFeldGenerator(reg.current_wifi_mode, PREFS_CURRENT_WIFI_MODE, options,
-                                3);
+    return optionsFeldGenerator(reg.current_wifi_mode, PREFS_CURRENT_WIFI_MODE,
+                                options, 3);
   }
 
   if (var == "BODY") {
@@ -961,35 +958,38 @@ String ProcessorChangeMode(const String &var) {
   }
 
   return String("wrong placeholder " + var);
-};
+}
 
 void handleRequestChangeMode(AsyncWebServerRequest *request) {
   DDD("handleRequestChangeMode");
   if (request->hasParam(PREFS_CURRENT_SYSTEM_MODE)) {
     String new_run_mode = getWebParam(request, PREFS_CURRENT_SYSTEM_MODE);
-    setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE, (int)new_run_mode.toInt());
-    reg.current_run_mode = (run_mode) (int)new_run_mode.toInt();
+    setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE,
+                 static_cast<int>(new_run_mode.toInt()));
+    reg.current_run_mode = (run_mode) static_cast<int>(new_run_mode.toInt());
   }
 
   if (request->hasParam(PREFS_CURRENT_WIFI_MODE)) {
     String new_wifi_mode = getWebParam(request, PREFS_CURRENT_WIFI_MODE);
     setPrefsUInt(PREFS_CURRENT_WIFI_MODE, new_wifi_mode.toInt());
-    reg.current_wifi_mode = (wifi_mode) new_wifi_mode.toInt();
+    reg.current_wifi_mode = (wifi_mode)new_wifi_mode.toInt();
   }
-
 }
 
+/**
+ * @brief Get the Build Date And Time for device info
+ * 
+ * @return String "2017-03-07T11:08:02"
+ */
 String GetBuildDateAndTime(void) {
   // "2017-03-07T11:08:02" - ISO8601:2004
-  char bdt[21];
+  char bdt[21];  // Flawfinder: ignore
   char *p;
   char mdate[] = __DATE__;  // "Mar  7 2017"
   char *smonth = mdate;
   int day = 0;
   int year = 0;
 
-  // sscanf(mdate, "%s %d %d", bdt, &day, &year);  // Not implemented in 2.3.0
-  // and probably too much code
   uint8_t i = 0;
   for (char *str = strtok_r(mdate, " ", &p); str && i < 3;
        str = strtok_r(nullptr, " ", &p)) {
@@ -998,15 +998,15 @@ String GetBuildDateAndTime(void) {
         smonth = str;
         break;
       case 1:  // Day
-        day = atoi(str);
+        day = atoi(str);  // Flawfinder: ignore
         break;
       case 2:  // Year
-        year = atoi(str);
+        year = atoi(str);  // Flawfinder: ignore
     }
   }
 
   int month = (strstr(kMonthNamesEnglish, smonth) - kMonthNamesEnglish) / 3 + 1;
-  snprintf_P(bdt, 21, "%04d-%02d-%02d %s", year, month, day, __TIME__);
+  snprintf_P(bdt, sizeof(bdt), "%04d-%02d-%02d %s", year, month, day, __TIME__);
   return String(bdt);  // 2017-03-07T11:08:02
 }
 
@@ -1017,7 +1017,7 @@ String GetBuildDateAndTime(void) {
  * @since	v0.0.1
  * @version	v1.0.0	Wednesday, January 15th, 2020.
  * @global
- * @param	asyncwebserverrequest	*request	
+ * @param	asyncwebserverrequest	*request
  * @return	void
  */
 void reboot(AsyncWebServerRequest *request) {
@@ -1035,9 +1035,9 @@ void reboot(AsyncWebServerRequest *request) {
  * @since	v0.0.1
  * @version	v1.0.0	Thursday, January 16th, 2020.
  * @global
- * @param	string 	data[][2]	
- * @param	uint8_t	size     	
- * @param	boolean	bold     	
+ * @param	string 	data[][2]
+ * @param	uint8_t	size
+ * @param	boolean	bold
  * @return	mixed
  */
 String table2DGenerator(String data[][2], uint8_t size, boolean bold) {
@@ -1055,53 +1055,53 @@ String table2DGenerator(String data[][2], uint8_t size, boolean bold) {
   }
   retvar += "</table>";
   return retvar;
-};
+}
 
 String readSPIFFS2String(const char *path) {
-  char buf[64] = {0};
+  char buf[64] = {0};  // Flawfinder: ignore
   if (!SPIFFS.exists(path)) {
-    snprintf(buf, 64, "ERROR, %s do not exists.", path);
+    snprintf(buf, sizeof(buf), "ERROR, %s do not exists.", path);
     Serial.println(buf);
     return String(buf);
   }
-  File f = SPIFFS.open(path, "r");
+  File f = SPIFFS.open(path, "r");  // Flawfinder: ignore
   String retvar;
   while (f.available()) {
-    retvar += char(f.read());
+    retvar += static_cast<char>(f.read());  // Flawfinder: ignore
   }
   return retvar;
-};
+}
 
 /**
  * @brief generates HTML options field from given parameter
- * 
+ *
  * @param selected pre selected field
  * @param name field name (HTML)
  * @param data array of HTML display Strings (keys) -> values
  * @param size count elements
- * @return String 
+ * @return String
  */
-String optionsFeldGenerator(uint8_t selected, const char *name, String data[][2],
-                            uint8_t size) {
+String optionsFeldGenerator(uint8_t selected, const char *name,
+                            String data[][2], uint8_t size) {
   DDD(name);
   DDD(selected);
-  char buf[1200] = {0};
-  char zbuf[1200] = {0};
-  char selectxt[32] = {0};
-  snprintf(zbuf, 1200, "\n\n<select name='%s'>\n", name);
-  strncat(buf, zbuf, 1200);
+  char buf[1200] = {0}; // Flawfinder: ignore
+  char zbuf[1200] = {0}; // Flawfinder: ignore
+  char selectxt[32] = {0}; // Flawfinder: ignore
+  snprintf(zbuf, sizeof(zbuf), "\n\n<select name='%s'>\n", name);
+  strncat(buf, zbuf, sizeof(buf));
   for (uint8_t i = 0; i < size; i++) {
     if (i == selected) {
-      strncpy(selectxt, " selected ", 32);
+      strncpy(selectxt, " selected ", sizeof(selectxt));
     } else {
-      strncpy(selectxt, "", 32);
+      strncpy(selectxt, "", sizeof(selectxt));
     }
-    snprintf(zbuf, 1200, "<option value=\"%s\"%s>%s</option>\n", data[i][1].c_str(), selectxt,
-             data[i][0].c_str());
-    strncat(buf, zbuf, 1200);
+    snprintf(zbuf, sizeof(zbuf), "<option value=\"%s\"%s>%s</option>\n",
+             data[i][1].c_str(), selectxt, data[i][0].c_str());
+    strncat(buf, zbuf, sizeof(buf));
   }  // END for
 
-  strncat(buf, "</select>\n\n", 1200);
+  strncat(buf, "</select>\n\n", sizeof(buf));
 
   DDD(name);
 
@@ -1155,7 +1155,6 @@ void showRequest(AsyncWebServerRequest *request) {
   }
 }
 
-
 void APRSWebServerTick(void) {
   if (globalClient != NULL && globalClient->status() == WS_CONNECTED) {
     //      String randomNumber = String(random(0,20));
@@ -1168,28 +1167,27 @@ void APRSWebServerTick(void) {
       sendGPSDataJson();
     }
   }
-};
-
+}
 
 void sendGPSDataJson(void) {
-  
-  
   // StaticJsonDocument<10000> doc;
 
   // AsyncJsonResponse * response = new AsyncJsonResponse();
   // JsonVariant& root = response->getRoot();
   globalClient->server()->cleanupClients();
-  char tmpbuf[32] = {0};
+  char tmpbuf[32] = {0};  // Flawfinder: ignore
   StaticJsonDocument<1024> root;
   root["isValidTime"] = gps.time.isValid();
   root["isValidGPS"] = gps.date.isValid();
 
-  snprintf(tmpbuf, 12, "%02d:%02d:%02d", reg.gps_time.hour, reg.gps_time.minute, reg.gps_time.second);
+  snprintf(tmpbuf, sizeof(tmpbuf), "%02d:%02d:%02d", reg.gps_time.hour,
+           reg.gps_time.minute, reg.gps_time.second);
   root["time"] = tmpbuf;
-  
-  snprintf(tmpbuf, 12, "%4d-%02d-%02d", reg.gps_time.year, reg.gps_time.month, reg.gps_time.day);  
+
+  snprintf(tmpbuf, sizeof(tmpbuf), "%4d-%02d-%02d", reg.gps_time.year,
+           reg.gps_time.month, reg.gps_time.day);
   root["date"] = tmpbuf;
- 
+
   root["lat"] = reg.gps_location.latitude;
   root["lng"] = reg.gps_location.longitude;
   root["alt"] = reg.gps_location.altitude;
@@ -1208,12 +1206,12 @@ void sendGPSDataJson(void) {
   AsyncWebSocketMessageBuffer *buffer = globalClient->server()->makeBuffer(
       len);  //  creates a buffer (len + 1) for you.
   if (buffer) {
-    serializeJson(root, (char *)buffer->get(), len + 1);
+    serializeJson(root, reinterpret_cast<char *>(buffer->get()), len + 1);
     globalClient->server()->textAll(buffer);
   }
 
   // serializeJsonPretty(root, Serial);
-};
+}
 
 String getWebParam(AsyncWebServerRequest *request, const char *key,
                    String *prefsvar) {
@@ -1222,13 +1220,15 @@ String getWebParam(AsyncWebServerRequest *request, const char *key,
     new_var = request->getParam(key)->value();
     if (new_var.length() > 0 && new_var.length() < 32) {
       *prefsvar = new_var;
-      Serial.printf("set new var to reg key=%s value=%s\n", key, new_var.c_str());
+      Serial.printf("set new var to reg key=%s value=%s\n", key,
+                    new_var.c_str());
       setPrefsString(key, new_var);
     }
     return new_var;
   } else {
-    char buf[32] = {0};
-    snprintf(buf, 32, "ERR> key %s not found in request,  no value written", key);
+    char buf[32] = {0};  // Flawfinder: ignore
+    snprintf(buf, sizeof(buf),
+             "ERR> key %s not found in request,  no value written", key);
     DDD(buf);
     return String("");
   }
@@ -1245,8 +1245,9 @@ String getWebParam(AsyncWebServerRequest *request, const char *key,
     setPrefsDouble(key, new_var.toDouble());
     return new_var;
   } else {
-    char buf[32] = {0};
-    snprintf(buf, 32, "key %s not found in request, no value written", key);
+    char buf[32] = {0};  // Flawfinder: ignore
+    snprintf(buf, sizeof(buf), "key %s not found in request, no value written",
+             key);
     DDD(buf);
     return String("");
   }
@@ -1261,8 +1262,9 @@ String getWebParam(AsyncWebServerRequest *request, const char *key) {
       return new_var;
     }
   } else {
-    char buf[32] = {0};
-    snprintf(buf, 32, "key %s not found in request, no value written", key);
+    char buf[32] = {0};  // Flawfinder: ignore
+    snprintf(buf, sizeof(buf), "key %s not found in request, no value written",
+             key);
     DDD(buf);
     return String("");
   }

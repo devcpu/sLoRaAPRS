@@ -1,33 +1,34 @@
+/*
+ * File: ButtonState.cpp
+ * Project: sLoRaAPRS
+ * File Created: 2020-11-11 20:13
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-03-28 1:36
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
+
 #include <Arduino.h>
-#include <OneButton.h>
 #include <ButtonState.h>
+#include <OneButton.h>
+#include <Registry.h>
 #include <TrackerDisplay.h>
+#include <uxa_debug.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
-#include <uxa_debug.h>
-#include <Registry.h>
 
-
-char wifi_mode_txt[3][16] = {
-  "OFF",
-  "AP",
-  "STA"
-};
-char run_mode_txt[6][16] = {
-  "Tracker",
-  "WXTracker",
-  "WX Fix",
-  "Digi",
-  "Gateway",
-  "GW-Digi"
-};
-
+char wifi_mode_txt[3][16] = {"OFF", "AP", "STA"};
+char run_mode_txt[6][16] = {"Tracker", "WXTracker", "WX Fix",
+                            "Digi",    "Gateway",   "GW-Digi"};
 
 TimerHandle_t call_config_timer;
 
-
 AbstracButtonState::~AbstracButtonState() {
-  //DDD("AbstracButtonState::~AbstracButtonState");
+  // DDD("AbstracButtonState::~AbstracButtonState");
 }
 
 void AbstracButtonState::setState(APRSControler& aprs_controler,
@@ -50,12 +51,12 @@ void AbstracButtonState::longClick(APRSControler& aprs_controler) {
 /* -------------------------------------------------------------------------- */
 
 void StateDisplayMode::singleClick(APRSControler& aprs_controler) {
-  //DDD("StateDisplayMode.singleClick");
+  // DDD("StateDisplayMode.singleClick");
   aprs_controler.nextDisplayMode();
   aprs_controler.next_display_time = 0;
 }
 void StateDisplayMode::doubleClick(APRSControler& aprs_controler) {
-  //DDD("StateDisplayMode.doubleClick");
+  // DDD("StateDisplayMode.doubleClick");
   aprs_controler.display_change = true;
   aprs_controler.nextDisplayMode();
   aprs_controler.next_display_time = 0;
@@ -66,19 +67,18 @@ void StateDisplayMode::doubleClick(APRSControler& aprs_controler) {
 /*   Default   */
 /* -------------------------------------------------------------------------- */
 
-
 void StateDefault::singleClick(APRSControler& aprs_controler) {
-  //DDD("StateDefault.singleClick");
+  // DDD("StateDefault.singleClick");
   aprs_controler.display_change = false;
   setState(aprs_controler, new StateDisplayMode());
 }
 
 void StateDefault::doubleClick(APRSControler& aprs_controler) {
-  //DDD("StateDefault.doubleClick");
+  // DDD("StateDefault.doubleClick");
 }
 
 void StateDefault::longClick(APRSControler& aprs_controler) {
-  //DDD("StateDefault.longClick()");
+  // DDD("StateDefault.longClick()");
   aprs_controler.display_change = false;
   aprs_controler.display_update = false;
   setState(aprs_controler, new StateConfigMenue());
@@ -88,16 +88,15 @@ void StateDefault::longClick(APRSControler& aprs_controler) {
 /*   Config Menue   */
 /* -------------------------------------------------------------------------- */
 
-
 StateConfigMenue::StateConfigMenue(void) {
-  ////DDD("StateConfigMenue::StateConfigMenue");
-  //vTaskDelay(pdMS_TO_TICKS(500));
+  // DDD("StateConfigMenue::StateConfigMenue");
+  // vTaskDelay(pdMS_TO_TICKS(500));
   write3Line("Cnfg Mode", "1clck nxt, 2clck ", "long click exit", false, 0);
 }
 
 void StateConfigMenue::singleClick(APRSControler& aprs_controler) {
-  //DDD("StateConfigMenue.singleClick");
-  uint8_t max_items = 3; // count menue items
+  // DDD("StateConfigMenue.singleClick");
+  uint8_t max_items = 3;  // count menue items
   if (button_config_mode < max_items - 1) {
     button_config_mode++;
   } else {
@@ -126,7 +125,7 @@ void StateConfigMenue::singleClick(APRSControler& aprs_controler) {
 }
 
 void StateConfigMenue::doubleClick(APRSControler& aprs_controler) {
-  //DDD("StateConfigMenue.doubleClick");
+  // DDD("StateConfigMenue.doubleClick");
   const char select_list_call[40] = {
       ' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
       'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
@@ -134,8 +133,8 @@ void StateConfigMenue::doubleClick(APRSControler& aprs_controler) {
 
   switch (button_config_mode) {
     case 0:
-      setState(aprs_controler, new ConfigStringSelector(
-                                   "Cfg Call", select_list_call));
+      setState(aprs_controler,
+               new ConfigStringSelector("Cfg Call", select_list_call));
       break;
     case 1:
       setState(aprs_controler, new StateConfigWiFi("Cfg WiFi"));
@@ -144,7 +143,6 @@ void StateConfigMenue::doubleClick(APRSControler& aprs_controler) {
     case 2:
       setState(aprs_controler, new StateConfigRun("Cfg Run"));
       break;
-
 
     default:
       write3Line("ERROR", "something wars going wrong", "please try again",
@@ -158,22 +156,23 @@ void StateConfigMenue::doubleClick(APRSControler& aprs_controler) {
 /* String Selector (Abstrakt String Config)   */
 /* -------------------------------------------------------------------------- */
 
-
-ConfigStringSelector::ConfigStringSelector(const char* head, const char* select_list) {
-  //DDD("ConfigStringSelector::ConfigStringSelector");
+ConfigStringSelector::ConfigStringSelector(const char* head,
+                                           const char* select_list) {
+  // DDD("ConfigStringSelector::ConfigStringSelector");
 
   strncpy(_select_list, select_list, 40);
   _head = head;
   _tmp = reg.call;
   int id = 1;
-  _actual = (char)_tmp.charAt(_pos);
+  _actual = static_cast<char>(_tmp.charAt(_pos));
   for (_select_list_idx = 0; _select_list_idx < 36; _select_list_idx++) {
     if (_actual == _select_list[_select_list_idx]) {
       break;
     }
   }
-  call_config_timer = xTimerCreate("CallConfigTimer", pdMS_TO_TICKS(1000), pdTRUE, (void*)id,
-                      &kinoTimer_CB);
+  call_config_timer =
+      xTimerCreate("CallConfigTimer", pdMS_TO_TICKS(1000), pdTRUE,
+                   reinterpret_cast<void*>(id), &kinoTimer_CB);
   if (call_config_timer == NULL) {
     Serial.println("Timer can not be created");
   }
@@ -186,13 +185,13 @@ ConfigStringSelector::ConfigStringSelector(const char* head, const char* select_
 }
 
 void ConfigStringSelector::singleClick(APRSControler& aprs_controler) {
-  //DDD("ConfigStringSelector.singleClick");
+  // DDD("ConfigStringSelector.singleClick");
   _pos++;
   if (_pos > 7) {
     _pos = 0;
   }
   _arrow_line = " " + _arrow_line;
-  _actual = (char)_tmp.charAt(_pos);
+  _actual = static_cast<char>(_tmp.charAt(_pos));
   for (_select_list_idx = 0; _select_list_idx < 37; _select_list_idx++) {
     if (_actual == _select_list[_select_list_idx]) {
       break;
@@ -219,7 +218,7 @@ void ConfigStringSelector::kino(void) {
   Serial.printf("       _tmp: %s\n", _tmp.c_str());
   Serial.printf("_arrow_line: %s\n", _arrow_line.c_str());
 
-  //_showText(_tmp.c_str(), _arrow_line.c_str());
+  // _showText(_tmp.c_str(), _arrow_line.c_str());
   reg.oled_message.head = _head;
   reg.oled_message.line1 = _tmp;
   reg.oled_message.line2 = _arrow_line;
@@ -231,8 +230,8 @@ void ConfigStringSelector::kino(void) {
 }
 
 void ConfigStringSelector::doubleClick(APRSControler& aprs_controler) {
-  //DDD("ConfigStringSelector.doubleClick");
- xTimerStop( call_config_timer, 0 );
+  // DDD("ConfigStringSelector.doubleClick");
+  xTimerStop(call_config_timer, 0);
   _tmp.trim();
   reg.call = _tmp;
   setState(aprs_controler, new StateConfigMenue());
@@ -245,7 +244,7 @@ void ConfigStringSelector::_showText(const char* line0, const char* line1) {
 }
 
 void ConfigStringSelector::longClick(APRSControler& aprs_controler) {
- xTimerStop( call_config_timer, 0 );
+  xTimerStop(call_config_timer, 0);
   aprs_controler.display_change = true;
   aprs_controler.display_update = true;
   setState(aprs_controler, new StateDefault());
@@ -255,15 +254,15 @@ void ConfigStringSelector::longClick(APRSControler& aprs_controler) {
 /*   Config Mode Selector   */
 /* -------------------------------------------------------------------------- */
 
-StateConfigWiFi::StateConfigWiFi(const char *head) {
-  //DDD("StateConfigMenu.StateConfigMenu");
+StateConfigWiFi::StateConfigWiFi(const char* head) {
+  // DDD("StateConfigMenu.StateConfigMenu");
   _head = head;
   _show();
 }
 
 void StateConfigWiFi::singleClick(APRSControler& aprs_controler) {
-  //DDD("StateConfigWiFi.singleClick");
-  //DDD(String(reg.current_wifi_mode));
+  // DDD("StateConfigWiFi.singleClick");
+  // DDD(String(reg.current_wifi_mode));
   if (reg.current_wifi_mode > 1) {
     reg.current_wifi_mode = wifi_off;
   } else {
@@ -275,7 +274,7 @@ void StateConfigWiFi::singleClick(APRSControler& aprs_controler) {
 }
 
 void StateConfigWiFi::doubleClick(APRSControler& aprs_controler) {
-  //DDD("StateConfigWiFi.doubleClick");
+  // DDD("StateConfigWiFi.doubleClick");
   setState(aprs_controler, new StateConfigMenue());
   ESP.restart();
 }
@@ -290,16 +289,15 @@ void StateConfigWiFi::_show(void) {
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 
-
-StateConfigRun::StateConfigRun(const char *head) {
-  //DDD("StateConfigMenu.StateConfigMenu");
+StateConfigRun::StateConfigRun(const char* head) {
+  // DDD("StateConfigMenu.StateConfigMenu");
   _head = head;
   _show();
 }
 
 void StateConfigRun::singleClick(APRSControler& aprs_controler) {
-  //DDD("StateConfigRun.singleClick");
-  //DDD(String(reg.current_run_mode));
+  // DDD("StateConfigRun.singleClick");
+  // DDD(String(reg.current_run_mode));
   if (reg.current_run_mode > 4) {
     reg.current_run_mode = mode_tracker;
   } else {
@@ -311,15 +309,14 @@ void StateConfigRun::singleClick(APRSControler& aprs_controler) {
 }
 
 void StateConfigRun::doubleClick(APRSControler& aprs_controler) {
-  //DDD("StateConfigRun.doubleClick");
+  // DDD("StateConfigRun.doubleClick");
   setState(aprs_controler, new StateConfigMenue());
   ESP.restart();
 }
 
 void StateConfigRun::_show(void) {
   char buf[12] = {0};
-  strcat(buf, " ");
-  strcat(buf, run_mode_txt[reg.current_run_mode]);
+  snprintf(buf, sizeof(buf), " %s", run_mode_txt[reg.current_run_mode]);
   write3Line(_head, buf, "1clck nxt, 2clck ok", false, 0);
 }
 

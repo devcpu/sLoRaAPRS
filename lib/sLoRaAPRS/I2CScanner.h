@@ -1,30 +1,38 @@
-/**
-* I2CScanner.h
-* @author Johannes Arlt
-* @description 
-* @created 2021-03-07T17:18:22.145Z+01:00
-* @copyright © 2021 Johannes Arlt
-* @last-modified 2021-03-07T17:58:16.051Z+01:00
-*/
+/*
+ * File: I2CScanner.h
+ * Project: sLoRaAPRS
+ * File Created: 2021-03-07 19:53
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-03-29 0:59
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
 
-#ifndef I2CSANNER_H
-#define I2CSANNER_H
+#ifndef LIB_SLORAAPRS_I2CSCANNER_H_
+#define LIB_SLORAAPRS_I2CSCANNER_H_
 
 #include <Arduino.h>
-#include <ArduinoSTL.h>
+#include <LoRaAPRSConfig.h>
+#include <TrackerDisplay.h>
 #include <Wire.h>
 
-class I2CScanner 
-{
-  public:
-    std::vector<byte> devices;  
-    byte device_count = 0;
-    bool scannend = false;
-    void I2CScanner::scan();
-    bool I2CScanner::initialize();
-    
-        
-};
+#include <vector>
 
+// class I2CScanner
+// {
+//   public:
+//     vector<byte> devices;
+//     byte device_count = 0;
+//     bool scannend = false;
+//     void scan();
+//     //bool initialize();
 
-#endif
+// };
+
+byte* ic2scan(byte* devices);
+void ic2init_devices();
+
+#endif  // LIB_SLORAAPRS_I2CSCANNER_H_

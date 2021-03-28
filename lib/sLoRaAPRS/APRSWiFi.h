@@ -1,5 +1,18 @@
-#ifndef APRS_WIFI_H
-#define APRS_WIFI_H
+/*
+ * File: APRSWiFi.h
+ * Project: sLoRaAPRS
+ * File Created: 2020-11-11 20:13
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-03-28 1:05
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt 
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
+
+#ifndef LIB_SLORAAPRS_APRSWIFI_H_
+#define LIB_SLORAAPRS_APRSWIFI_H_
 
 
 #include <Arduino.h>
@@ -27,4 +40,4 @@ void WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info);
 
 
 
-#endif
+#endif  // LIB_SLORAAPRS_APRSWIFI_H_

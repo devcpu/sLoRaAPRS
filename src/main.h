@@ -1,53 +1,23 @@
-/**
-* main.h
-* @author bulbasaur
-* @description 
-* @created 2020-02-05T11:21:21.897Z+01:00
-* @copyright None 
-* None
-* @last-modified 2021-03-07T16:42:06.978Z+01:00
-*/
+/*
+ * File: main.h
+ * Project: src
+ * File Created: 2021-03-07 20:08
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-03-29 1:46
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt 
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
 
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef SRC_MAIN_H_
+#define SRC_MAIN_H_
 
-#include <apptypes.h>
-#include <Registry.h>
 #include <Arduino.h>
-#include <APRSWiFi.h>
-#include <ESPFS.h>
-#include <APRS_MSG.h>
-#include <TinyGPS++.h>
 #include <LoRaAPRSConfig.h>
+#include "I2CScanner.h"
+#include <TrackerDisplay.h>
 
-#define DISPLA_DELAY_SHORT 100
-#define DISPLA_DELAY_MEDIUM 300
-#define DISPLA_DELAY_LONG 500
-
-#ifdef T_BEAM_V1_0
-  #include <axp20x.h>
-  AXP20X_Class axp;
-#endif
-
-#ifdef WX_DHT_SENSOR
-   #include <DHTesp.h>
-  DHTesp dht;
-#endif
-
-// @TODO ifdef GPS
-HardwareSerial ss(1);        // TTGO has HW serial to GPS // 1 = first UART
-extern void WifiDisconnect(void);
-
-bool initAXP();
-static void smartDelay(uint32_t ms);
-
-void button_tick(TimerHandle_t xExpiredTimer);
-void button_tick(void);
-
-void restart(void);
-static void watchdog(void);
-
-
-
-void Scanner(void);
-#endif
+// static void watchdog(void);
+#endif  // SRC_MAIN_H_

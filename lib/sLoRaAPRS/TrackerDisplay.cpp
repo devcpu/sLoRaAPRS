@@ -1,10 +1,25 @@
+/*
+ * File: TrackerDisplay.cpp
+ * Project: sLoRaAPRS
+ * File Created: 2020-11-11 20:14
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-03-29 1:41
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
+
+#include "TrackerDisplay.h"
+
 #include <Arduino.h>
+
+#include "../config/uxa_debug.h"
+#include "APRSControler.h"
+#include "Registry.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
-#include <APRSControler.h>
-#include <Registry.h>
-#include <TrackerDisplay.h>
-#include <uxa_debug.h>
 
 extern APRSControler maincontroler;
 extern TimerHandle_t button_timer;
@@ -40,7 +55,7 @@ bool DisplayInit(void) {
   display.display();
   delay(1000);
   return true;
-};
+}
 
 // TextSize(1) ^= 21 Zeichen
 // TextSize(2) ^= 10 Zeichen
@@ -61,7 +76,7 @@ void write2Display(String head = "", String line1 = "", String line2 = "",
   display.setCursor(0, 56);  // TextSize 1 needs 8 pixel minimum
   display.print(line4);
   display.display();
-};
+}
 
 void write2Display(String head = "", String line1 = "", String line2 = "",
                    String line3 = "") {
@@ -85,7 +100,7 @@ void write2Display(const char *head, const char *line1, const char *line2,
   display.setCursor(0, 56);  // TextSize 1 needs 8 pixel minimum
   display.print(line4);
   display.display();
-};
+}
 
 void tracker_display_tick(void) {
   DisplayMode dm = displayModeUTC;
@@ -125,13 +140,13 @@ void tracker_display_tick(void) {
   }
 }
 
-
 void writeUTC() {
   if (gps.time.isValid() && gps.date.isValid()) {
     char date[25], time[25];
-    snprintf(date, 25, "%04d-%02d-%02d", reg.gps_time.year, reg.gps_time.month,
-             reg.gps_time.day);
-    snprintf(time, 25, "  %02d:%02d", reg.gps_time.hour, reg.gps_time.minute);
+    snprintf(date, sizeof(date), "%04d-%02d-%02d", reg.gps_time.year,
+             reg.gps_time.month, reg.gps_time.day);
+    snprintf(time, sizeof(time), "  %02d:%02d", reg.gps_time.hour,
+             reg.gps_time.minute);
 
     write3Line(" - UTC -", time, date, false, 0);
   } else {
@@ -139,19 +154,18 @@ void writeUTC() {
   }
 }
 
-
 void writeGPS() {
   display.clearDisplay();
   writeHead("   GPS");
 
   if (gps.location.isValid()) {
     char lat[22], lng[22], speed_course[22], alt_hdop[22];
-    snprintf(lat, 22, "lat: %8.4f", reg.gps_location.latitude);
-    snprintf(lng, 22, "lng: %9.4f", reg.gps_location.longitude);
-    snprintf(speed_course, 22, "kmh: %4.1f  dir: %3.1f*", reg.gps_move.speed,
-             reg.gps_move.course);
-    snprintf(alt_hdop, 22, "alt: %5.1fm sat: %d", reg.gps_location.altitude,
-             reg.gps_meta.sat);
+    snprintf(lat, sizeof(lat), "lat: %8.4f", reg.gps_location.latitude);
+    snprintf(lng, sizeof(lng), "lng: %9.4f", reg.gps_location.longitude);
+    snprintf(speed_course, sizeof(speed_course), "kmh: %4.1f  dir: %3.1f*",
+             reg.gps_move.speed, reg.gps_move.course);
+    snprintf(alt_hdop, sizeof(alt_hdop), "alt: %5.1fm sat: %d",
+             reg.gps_location.altitude, reg.gps_meta.sat);
 
     display.setTextSize(1);
     display.setCursor(0, 20);
@@ -167,14 +181,18 @@ void writeGPS() {
   } else {
     write_no_vaild_data();
   }
-};
+}
+
 void writeWX() {
   char temp_buf[24] = {0};
   char hum_buf[24] = {0};
   char press_buf[24] = {0};
-  snprintf(temp_buf, 24, "Temp:      %3.0f *C", round(reg.WXdata.temp));
-  snprintf(hum_buf, 24, "Humidity:  %3.0f %%", round(reg.WXdata.humidity));
-  snprintf(press_buf, 24, "Pressure: %4.0f hPa", round(reg.WXdata.pressure));
+  snprintf(temp_buf, sizeof(temp_buf), "Temp:      %3.0f *C",
+           round(reg.WXdata.temp));
+  snprintf(hum_buf, sizeof(hum_buf), "Humidity:  %3.0f %%",
+           round(reg.WXdata.humidity));
+  snprintf(press_buf, sizeof(press_buf), "Pressure: %4.0f hPa",
+           round(reg.WXdata.pressure));
   display.clearDisplay();
   writeHead("   WX");
   display.setTextSize(1);
@@ -186,7 +204,7 @@ void writeWX() {
   display.print(press_buf);
 
   display.display();
-};
+}
 
 void writeWiFiStatus() {
   display.clearDisplay();
@@ -226,12 +244,13 @@ void writeHead(const char *head) {
   char sat[3];
   char hdop[3];
 
-  if (gps.satellites.isValid() && gps.hdop.isValid()) { //@FIXME
-    snprintf(sat, 3, "%d", reg.gps_meta.sat);
-    snprintf(hdop, 3, "%d", int(round(reg.gps_meta.hdop)));
+  if (gps.satellites.isValid() && gps.hdop.isValid()) {  // @FIXME
+    snprintf(sat, sizeof(sat), "%d", reg.gps_meta.sat);
+    snprintf(hdop, sizeof(hdop), "%d",
+             static_cast<int>(round(reg.gps_meta.hdop)));
   } else {
-    strcpy(sat, "");
-    strcpy(hdop, "");
+    strncpy(sat, "", sizeof(sat));
+    strncpy(hdop, "", sizeof(hdop));
   }
 
   display.clearDisplay();
@@ -257,7 +276,6 @@ void write_no_vaild_data() {
 
 void write3Line(const char *head, const char *line1, const char *line2,
                 bool toSerial, u_long sleep) {
-  
   display.clearDisplay();
   writeHead(head);
 

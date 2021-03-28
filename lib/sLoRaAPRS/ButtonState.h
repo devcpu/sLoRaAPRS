@@ -1,18 +1,31 @@
-#ifndef BUTTON_STATE_H
-#define BUTTON_STATE_H
+/*
+ * File: ButtonState.h
+ * Project: sLoRaAPRS
+ * File Created: 2020-11-11 20:13
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-03-29 0:24
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt 
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
+
+#ifndef LIB_SLORAAPRS_BUTTONSTATE_H_
+#define LIB_SLORAAPRS_BUTTONSTATE_H_
 
 #include <APRSControler.h>
 #include <Arduino.h>
 #include <apptypes.h>
 #include <uxa_debug.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
 
-/* https://stackoverflow.com/questions/14676709/c-code-for-state-machine */
-/* https://www.philipphauer.de/study/se/design-pattern/state.php */
+// https://stackoverflow.com/questions/14676709/c-code-for-state-machine
+// https://www.philipphauer.de/study/se/design-pattern/state.php
 
 class APRSControler;
-
 
 class AbstracButtonState {
  public:
@@ -86,9 +99,10 @@ class ConfigStringSelector : public AbstracButtonState {
 
 class StateConfigWiFi : public AbstracButtonState {
  public:
-  StateConfigWiFi(const char* head);
+  explicit StateConfigWiFi(const char* head);
   virtual void singleClick(APRSControler& aprs_controler);
   virtual void doubleClick(APRSControler& aprs_controler);
+
  private:
   const char* _head;
   void _show(void);
@@ -96,9 +110,10 @@ class StateConfigWiFi : public AbstracButtonState {
 
 class StateConfigRun : public AbstracButtonState {
  public:
-  StateConfigRun(const char* head);
+  explicit StateConfigRun(const char* head);
   virtual void singleClick(APRSControler& aprs_controler);
   virtual void doubleClick(APRSControler& aprs_controler);
+
  private:
   const char* _head;
   void _show(void);
@@ -118,4 +133,4 @@ class StateConfigRun : public AbstracButtonState {
 
 // };
 
-#endif
+#endif  // LIB_SLORAAPRS_BUTTONSTATE_H_

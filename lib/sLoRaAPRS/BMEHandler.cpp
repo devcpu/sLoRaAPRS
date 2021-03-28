@@ -1,8 +1,21 @@
+/*
+ * File: BMEHandler.cpp
+ * Project: sLoRaAPRS
+ * File Created: 2020-11-11 20:13
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-03-28 1:07
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
+
 #include <Arduino.h>
 #include <BMEHandler.h>
+#include <LoRaAPRSConfig.h>
 #include <Registry.h>
 #include <uxa_debug.h>
-#include <LoRaAPRSConfig.h>
 
 extern Registry reg;  // config & system status
 
@@ -22,7 +35,6 @@ bool bme280_ok = false;
 // bool bmestatus =
 
 bool BMEHandlerInit() {
-  
   if (bme.begin(BME280_ADDRESS)) {
     Serial.printf("found BME280 on %#x\n", BME280_ADDRESS);
     bme280_ok = true;
@@ -30,7 +42,8 @@ bool BMEHandlerInit() {
     Serial.printf("found BME280 on %#x\n", BME280_ADDRESS);
     bme280_ok = true;
   } else {
-    Serial.printf("ERR> sorry, no BME280 found on %x nor %x\n", BME280_ADDRESS, BME280_ADDRESS_ALTERNATE);
+    Serial.printf("ERR> sorry, no BME280 found on %x nor %x\n", BME280_ADDRESS,
+                  BME280_ADDRESS_ALTERNATE);
     bme280_ok = false;
     return false;
   }

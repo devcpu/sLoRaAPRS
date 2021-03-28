@@ -1,16 +1,51 @@
+/*
+ * File: APRSControler.cpp
+ * Project: sLoRaAPRS
+ * File Created: 2020-11-11 20:13
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-03-28 0:33
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
+
 #include <APRSControler.h>
 #include <uxa_debug.h>
 
 extern APRSControler maincontroler;
 
+
+/**
+ * APRSControler::getCurrentDisplayMode.
+ * 
+ * returns current DisplayMode
+ *
+ * @author	(DL7UXA) Johannes G.  Arlt
+ * @global
+ * @param	void	
+ * @return	DisplayMode current DisplayMode
+ */
 DisplayMode APRSControler::getCurrentDisplayMode(void) {
   return (DisplayMode)display_mode;
-};
+}
+
+
+/**
+ * @brief sets the next display mode by calling APRSControler::nextDisplayMode() and return it.
+ * 
+ * @return <DisplayMode> current disply mode
+ */
 DisplayMode APRSControler::getNextDisplayMode(void) {
   nextDisplayMode();
   return (DisplayMode)display_mode;
-};
+}
 
+/**
+ * @brief set the next display mode for status display
+ * 
+ */
 void APRSControler::nextDisplayMode(void) {
   uint8_t max = displayModeEND - 1;
   if (display_mode < max) {
@@ -18,39 +53,28 @@ void APRSControler::nextDisplayMode(void) {
   } else {
     display_mode = displayModeUTC;
   }
-};
+}
 
 // APRSControler::APRSControler() {
 // }
 
-void APRSControler::singleClick() {
-  button_state->singleClick(*this);
-};
+/**
+ * @brief callback 
+ * 
+ */
+void APRSControler::singleClick() { button_state->singleClick(*this); }
 
-void APRSControler::doubleClick(void) {
-  button_state->doubleClick(*this);
-};
+void APRSControler::doubleClick(void) { button_state->doubleClick(*this); }
 
-void APRSControler::longClick(void) {
-  button_state->longClick(*this);
-};
+void APRSControler::longClick(void) { button_state->longClick(*this); }
 
+void singleClick_CB(void) { maincontroler.singleClick(); }
 
+void doubleClick_CB(void) { maincontroler.doubleClick(); }
 
-void singleClick_CB(void){
-  maincontroler.singleClick();
-}
+void longClick_CB(void) { maincontroler.longClick(); }
 
-void doubleClick_CB(void){
-  
-  maincontroler.doubleClick();
-}
-
-void longClick_CB(void){
-  maincontroler.longClick();
-}
-
-void kinoTimer_CB(TimerHandle_t xExpiredTimer){
+void kinoTimer_CB(TimerHandle_t xExpiredTimer) {
   Serial.printf("\ncall of kinoTimer_CB\n");
   maincontroler.button_state->kino();
 }

@@ -1,17 +1,28 @@
-#include <uxa_debug.h>
+/*
+ * File: Registry.cpp
+ * Project: sLoRaAPRS
+ * File Created: 2020-11-11 20:13
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-03-29 1:28
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
+
 #include <LoRaAPRSConfig.h>
-#include <Registry.h>
 #include <Preferences.h>
+#include <Registry.h>
 #include <apptypes.h>
+#include <uxa_debug.h>
 
 Registry reg;
 
-
 void RegistryInit(void) {
-
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
-  
+
   reg.Version = preferences.getString(PREFS_VERSION);
   reg.Release = preferences.getString(PREFS_RELASE);
 
@@ -20,24 +31,31 @@ void RegistryInit(void) {
   Serial.printf("write boot_count: %d\n", reg.boot_count);
   preferences.putULong64(PREFS_BOOT_COUNT, reg.boot_count);
 
-  reg.current_wifi_mode = (wifi_mode) preferences.getUInt(PREFS_CURRENT_WIFI_MODE, int(wifi_ap));
-  reg.current_run_mode = (run_mode) preferences.getUInt(PREFS_CURRENT_SYSTEM_MODE, int(mode_tracker));
-  
-  
+  reg.current_wifi_mode = static_cast<wifi_mode>(
+      preferences.getUInt(PREFS_CURRENT_WIFI_MODE, int(wifi_ap)));
+  reg.current_run_mode = static_cast<run_mode>(
+      preferences.getUInt(PREFS_CURRENT_SYSTEM_MODE, int(mode_tracker)));
+
   reg.call = preferences.getString(PREFS_CALL, CHANGE_ME);
   reg.aprs_call_ext = preferences.getString(PREFS_APRS_CALL_EX, "3");
   reg.wx_call_ext = preferences.getString(PREFS_WX_CALL_EX, "13");
   reg.aprs_symbol.symbol = preferences.getChar(PREFS_APRS_SYMBOL, '[');
 
-  reg.WebCredentials.auth_name = preferences.getString(PREFS_WEB_ADMIN, "admin");
-  reg.WebCredentials.auth_tocken = preferences.getString(PREFS_WEB_PASS, DEFAULT_PASSWORD);
-  
-  reg.APCredentials.auth_name = preferences.getString(PREFS_AP_SSID, "sLoRaAPRS");
-  reg.APCredentials.auth_tocken = preferences.getString(PREFS_AP_PASS, DEFAULT_PASSWORD);
-  
+  reg.WebCredentials.auth_name =
+      preferences.getString(PREFS_WEB_ADMIN, "admin");
+  reg.WebCredentials.auth_tocken =
+      preferences.getString(PREFS_WEB_PASS, DEFAULT_PASSWORD);
+
+  reg.APCredentials.auth_name =
+      preferences.getString(PREFS_AP_SSID, "sLoRaAPRS");
+  reg.APCredentials.auth_tocken =
+      preferences.getString(PREFS_AP_PASS, DEFAULT_PASSWORD);
+
   reg.APRSPassword = preferences.getString(PREFS_APRS_PASSWORD, "12345");
-  reg.APRSServer[0] = preferences.getString(PREFS_APRS_SERVER0, "192.168.168.192");
-  reg.APRSServer[0] = preferences.getString(PREFS_APRS_SERVER0, "192.168.168.192");
+  reg.APRSServer[0] =
+      preferences.getString(PREFS_APRS_SERVER0, "192.168.168.192");
+  reg.APRSServer[0] =
+      preferences.getString(PREFS_APRS_SERVER0, "192.168.168.192");
 
   reg.posfix.latitude = preferences.getDouble(PREFS_POS_LAT_FIX, 0ULL);
   reg.posfix.longitude = preferences.getDouble(PREFS_POS_LNG_FIX, 0ULL);
@@ -47,41 +65,43 @@ void RegistryInit(void) {
   char auth_name_buf[12] = {0};
   uint8_t x = 0;
   for (x = 0; x < 4; x++) {
-    snprintf(ssid_name_buf, 12, "lan%d_ssid", x);
-    snprintf(auth_name_buf, 12, "lan%d_auth", x);
+    snprintf(ssid_name_buf, sizeof(ssid_name_buf), "lan%d_ssid", x);
+    snprintf(auth_name_buf, sizeof(auth_name_buf), "lan%d_auth", x);
     // Serial.printf("ssid_name_buf: %s\n", ssid_name_buf);
     // Serial.printf("auth_name_buf: %s\n", auth_name_buf);
-    reg.WifiCrendentials[x].auth_name = preferences.getString(ssid_name_buf, CHANGE_ME);
-    reg.WifiCrendentials[x].auth_tocken = preferences.getString(auth_name_buf, DEFAULT_PASSWORD);
-    // Serial.printf("index: %d key: %s value: %s\n", x, ssid_name_buf, reg.WifiCrendentials[x].auth_name.c_str());
-    // Serial.printf("index: %d key: %s value: %s\n\n", x, auth_name_buf, reg.WifiCrendentials[x].auth_tocken.c_str());
+    reg.WifiCrendentials[x].auth_name =
+        preferences.getString(ssid_name_buf, CHANGE_ME);
+    reg.WifiCrendentials[x].auth_tocken =
+        preferences.getString(auth_name_buf, DEFAULT_PASSWORD);
+    // Serial.printf("index: %d key: %s value: %s\n", x, ssid_name_buf,
+    // reg.WifiCrendentials[x].auth_name.c_str()); Serial.printf("index: %d key:
+    // %s value: %s\n\n", x, auth_name_buf,
+    // reg.WifiCrendentials[x].auth_tocken.c_str());
   }
 
   preferences.end();
-  
+
   if (reg.call == "CHANGEME") {
     reg.current_wifi_mode = wifi_ap;
     reg.current_run_mode = mode_tracker;
     registryWriteInit();
   }
 #ifdef MODDEBUG
-  //RegistryToString();
+  // RegistryToString();
 #endif
   Serial.println("Registry init ready\n");
 }
 
-
-void registryWriteInit(void){
+void registryWriteInit(void) {
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
 
   preferences.putString(PREFS_VERSION, "0.0.1 preAlpha");
   preferences.putString(PREFS_RELASE, "Gehasi");
 
-  
-  preferences.putUInt(PREFS_CURRENT_WIFI_MODE, (uint8_t) reg.current_wifi_mode);
+  preferences.putUInt(PREFS_CURRENT_WIFI_MODE, (uint8_t)reg.current_wifi_mode);
   preferences.putUInt(PREFS_CURRENT_SYSTEM_MODE, reg.current_run_mode);
-   
+
   preferences.putString(PREFS_CALL, reg.call);
   preferences.putString(PREFS_APRS_CALL_EX, reg.aprs_call_ext);
   preferences.putString(PREFS_WX_CALL_EX, reg.wx_call_ext);
@@ -89,10 +109,10 @@ void registryWriteInit(void){
 
   preferences.putString(PREFS_WEB_ADMIN, reg.WebCredentials.auth_name);
   preferences.putString(PREFS_WEB_PASS, reg.WebCredentials.auth_tocken);
-  
+
   preferences.putString(PREFS_AP_SSID, reg.APCredentials.auth_name);
   preferences.putString(PREFS_AP_PASS, reg.APCredentials.auth_tocken);
-  
+
   preferences.putString(PREFS_LAN0_SSID, reg.WifiCrendentials[0].auth_name);
   preferences.putString(PREFS_LAN0_AUTH, reg.WifiCrendentials[0].auth_tocken);
   preferences.putString(PREFS_LAN1_SSID, reg.WifiCrendentials[1].auth_name);
@@ -101,8 +121,7 @@ void registryWriteInit(void){
   preferences.putString(PREFS_LAN2_AUTH, reg.WifiCrendentials[2].auth_tocken);
   preferences.putString(PREFS_LAN3_SSID, reg.WifiCrendentials[3].auth_name);
   preferences.putString(PREFS_LAN3_AUTH, reg.WifiCrendentials[3].auth_tocken);
-  
-  
+
   preferences.putDouble(PREFS_POS_LAT_FIX, reg.posfix.latitude);
   preferences.putDouble(PREFS_POS_LNG_FIX, reg.posfix.longitude);
   preferences.putDouble(PREFS_POS_ALT_FIX, reg.posfix.altitude);
@@ -110,9 +129,9 @@ void registryWriteInit(void){
   preferences.putString(PREFS_APRS_PASSWORD, reg.APRSPassword);
   preferences.putString(PREFS_APRS_SERVER0, reg.APRSServer[0]);
   preferences.putString(PREFS_APRS_SERVER1, reg.APRSServer[1]);
-  
+
   preferences.end();
-};
+}
 
 /* * * * * * * * * * * * * * * * * * * * * */
 
@@ -132,7 +151,6 @@ uint16_t getPrefsInt(const char* key) {
   retvar = preferences.getUInt(key, 0);
   preferences.end();
   return retvar;
-  
 }
 
 char getPrefsChar(const char* key) {
@@ -144,7 +162,7 @@ char getPrefsChar(const char* key) {
   return retvar;
 }
 
-double getPrefsDouble(const char *key) {
+double getPrefsDouble(const char* key) {
   Preferences preferences;
   double retvar;
   preferences.begin(NVS_APP_NAME_SPACE, false);
@@ -153,10 +171,9 @@ double getPrefsDouble(const char *key) {
   return retvar;
 }
 
-
 /* * * * * * * * * * * * * * * * * * * * * */
 
-void setPrefsString(const char* key, String  value){
+void setPrefsString(const char* key, String value) {
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
   delay(500);
@@ -165,15 +182,14 @@ void setPrefsString(const char* key, String  value){
   Serial.println(old_value);
   if (old_value != value) {
     Serial.printf("write %s\n", value.c_str());
-    long rv =  preferences.putString(key, value);
-    Serial.printf("write of key=%s value=%s returns: %lu\n", key, value.c_str(), rv);
+    long rv = preferences.putString(key, value);
+    Serial.printf("write of key=%s value=%s returns: %lu\n", key, value.c_str(),
+                  rv);
     String new_var = preferences.getString(key);
     Serial.printf("got var from NVS: %s\n", new_var.c_str());
-
   }
   preferences.end();
 }
-
 
 void setPrefsUInt(const char* key, uint16_t value) {
   Preferences preferences;
@@ -189,8 +205,7 @@ void setPrefsUInt(const char* key, uint16_t value) {
   DDD("setPrefsUInt END");
 }
 
-
-void setPrefsDouble(const char *key, double value) {
+void setPrefsDouble(const char* key, double value) {
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
   double old_value = getPrefsDouble(key);
@@ -199,11 +214,9 @@ void setPrefsDouble(const char *key, double value) {
     DDE(String(key), String(value));
     preferences.putDouble(key, value);
   }
-  
+
   preferences.end();
 }
-
-
 
 void setPrefsChar(const char* key, char value) {
   Preferences preferences;
@@ -215,7 +228,7 @@ void setPrefsChar(const char* key, char value) {
     Serial.printf("wite new Char\n");
     preferences.putChar(key, value);
   }
-  
+
   preferences.end();
 }
 
@@ -228,8 +241,8 @@ void RegistryToString(void) {
   Serial.printf("aprs_call_ext: %s\n", reg.aprs_call_ext.c_str());
   Serial.printf("wx_call_ext: %s\n", reg.wx_call_ext.c_str());
 
-  Serial.printf("run_mode: %d\n", (int)reg.current_run_mode);
-  Serial.printf("wifi_mode: %d\n", (int)reg.current_wifi_mode);
+  Serial.printf("run_mode: %d\n", static_cast<int>(reg.current_run_mode));
+  Serial.printf("wifi_mode: %d\n", static_cast<int>(reg.current_wifi_mode));
 
   Serial.printf("web admin %s\n", reg.WebCredentials.auth_name.c_str());
   Serial.printf("web pass %s\n", reg.WebCredentials.auth_tocken.c_str());
@@ -256,62 +269,57 @@ void RegistryToString(void) {
   Serial.printf("Lat Fix %3.8f\n", reg.posfix.latitude);
   Serial.printf("Lng Fix %3.8f\n", reg.posfix.longitude);
   Serial.printf("Alt Fix %3.8f\n", reg.posfix.altitude);
-
-};
-
+}
 
 String getWifiMode() {
-  switch (reg.current_wifi_mode)
-  {
-  case wifi_off:
-    return String("WiFi OFF");
-    break;
-  
-  case wifi_ap:
-    return String("WiFi AP");
-    break;
-  
-  case wifi_client:
-    return String("WiFi Client");
-  default:
-    return String(" no mode");
-    break;
+  switch (reg.current_wifi_mode) {
+    case wifi_off:
+      return String("WiFi OFF");
+      break;
+
+    case wifi_ap:
+      return String("WiFi AP");
+      break;
+
+    case wifi_client:
+      return String("WiFi Client");
+    default:
+      return String(" no mode");
+      break;
   }
 }
 
 String getRunMode() {
-  switch (reg.current_run_mode)
-  {
-  case mode_tracker:
-    return String(" tracker");
-    break;
+  switch (reg.current_run_mode) {
+    case mode_tracker:
+      return String(" tracker");
+      break;
 
-  case mode_wxtracker:
-    return String("WX tracker");
-    break;
+    case mode_wxtracker:
+      return String("WX tracker");
+      break;
 
-  case mode_wxfix:
-    return String("  WX FIX");
-    break;
+    case mode_wxfix:
+      return String("  WX FIX");
+      break;
 
-  case mode_digi:
-    return String(" repeater");
-    break;
+    case mode_digi:
+      return String(" repeater");
+      break;
 
-  case mode_gateway:
-    return String(" Gateway");
-    break;
+    case mode_gateway:
+      return String(" Gateway");
+      break;
 
-  case mode_digi_gateway:
-    return String(" RPT & GW");
-    break;
+    case mode_digi_gateway:
+      return String(" RPT & GW");
+      break;
 
-  default:
-    return String(" no mode");
-    break;
+    default:
+      return String(" no mode");
+      break;
   }
 }
 
-String reg_wxCall(void) { return reg.call + String("-") + reg.wx_call_ext; };
-String reg_aprsCall(void) { return reg.call + String("-") + reg.aprs_call_ext; };
-
+String reg_wxCall(void) { return reg.call + String("-") + reg.wx_call_ext; }
+String reg_aprsCall(void) { return reg.call + String("-") + reg.aprs_call_ext; }

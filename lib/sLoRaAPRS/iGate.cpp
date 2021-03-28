@@ -1,9 +1,24 @@
+/*
+ * File: iGate.cpp
+ * Project: sLoRaAPRS
+ * File Created: 2020-11-11 20:13
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-03-29 1:12
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
+
+#include "iGate.h"
+
 #include <Arduino.h>
+#include <AsyncTCP.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
-#include <AsyncTCP.h>
 
 void clienttcp(void* c);
 void SendToServer(char* value);
@@ -27,8 +42,8 @@ QueueHandle_t xQueuesend, xQueuereceive;
 uint64_t tt = 0;
 
 void setup() {
-  snprintf(range_filter, 32, "r/%02.1f/%03.1f/%d", filterlat, filterlng,
-           filterrange);
+  snprintf(range_filter, sizeof(range_filter), "r/%02.1f/%03.1f/%d", filterlat,
+           filterlng, filterrange);
 
   // task variable to run on core 0 and controls socket communication
   TaskHandle_t Task1;
@@ -74,8 +89,9 @@ void clienttcp(void* c) {
 
   client.onConnect([](void* arg, AsyncClient* c) {
     char authbuf[255] = {0};
-    snprintf(authbuf, 255, "user %s-%d pass %s vers %s filter m/25 \r\n", call,
-             call_ext, passcode, clientversion);
+    snprintf(authbuf, sizeof(authbuf),
+             "user %s-%d pass %s vers %s filter m/25 \r\n", call, call_ext,
+             passcode, clientversion);
     Serial.printf("\nConnected! Sending data. %s\n", authbuf);
     c->write(authbuf);
     delay(2000);
@@ -85,13 +101,13 @@ void clienttcp(void* c) {
     // Serial.printf("\n}Data received with length: %d\n", len);
     // Serial.printf("\n->data: %s in line %d", (char*)data, __LINE__);
 
-    char subbuff[len];
-    memcpy(subbuff, &((char*)data)[0], len);
+    char subbuff[len];  // NOLINT(runtime/arrays)
+    memcpy(subbuff, &(reinterpret_cast<char*>(data))[0], len);
 
-    if (xQueueSend(xQueuereceive, (char*)data, (TickType_t)10) != pdPASS) {
+    if (xQueueSend(xQueuereceive, reinterpret_cast<char*>(data),
+                   (TickType_t)10) != pdPASS) {
       Serial.printf("\nProblema Problema, %d\n", __LINE__);
     }
-
   });
   client.connect(host, port);
   while (true) {
@@ -110,13 +126,10 @@ void clienttcp(void* c) {
     }
   }
 
-  vTaskDelete( NULL );
-
+  vTaskDelete(NULL);
 }
 
 void loop() {
-
-  
   // char pos[64] = {0};
   // strncpy(pos, "DL7UXA>APRS,TCPIP*:!5252.37N/1332.29E[\n", 64);
 
@@ -145,9 +158,11 @@ void loop() {
 void SendToServer(char* value) {
   Serial.printf("\nDDD:> in SendToServer line: %d sending %s \n", __LINE__,
                 value);
-  if (xQueueSend(xQueuesend, (char*)value, (TickType_t)10) != pdPASS) {
+  if (xQueueSend(xQueuesend, reinterpret_cast<char*>(value), (TickType_t)10) !=
+      pdPASS) {
     /* Failed to post the message, even after 10 ticks. */
-    Serial.printf("unable to send message %s\n", (char*)value);
+    Serial.printf("unable to send message %s\n",
+                  reinterpret_cast<char*>(value));
   }
 }
 

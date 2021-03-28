@@ -1,14 +1,25 @@
-#ifndef APP_TYPES_H
-#define APP_TYPES_H
+/*
+ * File: apptypes.h
+ * Project: sLoRaAPRS
+ * File Created: 2020-11-11 20:13
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-03-27 23:58
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
+
+#ifndef LIB_SLORAAPRS_APPTYPES_H_
+#define LIB_SLORAAPRS_APPTYPES_H_
 
 #include <Arduino.h>
-
 
 #define NVS_APP_NAME_SPACE "sla"
 #define SYSTEM_STRING "sLoRaAPRS"
 #define DEFAULT_PASSWORD "letmein42"
 #define CHANGE_ME "CHANGEME"
-
 
 #define PREFS_VERSION "Version"
 #define PREFS_RELASE "Release"
@@ -42,13 +53,7 @@
 #define MSG_FORM_WIDE "wide"
 #define MSG_FORM_MSG "msg"
 
-
-enum wifi_mode { 
-  wifi_off, 
-  wifi_ap, 
-  wifi_client 
-};
-
+enum wifi_mode { wifi_off, wifi_ap, wifi_client };
 
 enum run_mode {
   mode_tracker,
@@ -58,8 +63,6 @@ enum run_mode {
   mode_gateway,
   mode_digi_gateway
 };
-
-
 
 struct APRSMessage {
   String msg;
@@ -93,7 +96,6 @@ struct DateTime {
   uint8_t hour = 0;
   uint8_t minute = 0;
   uint8_t second = 0;
- 
 };
 
 struct GPSMeta {
@@ -118,7 +120,6 @@ struct HardWare {
   boolean AXP192 = false;
   boolean GPS = false;
 };
-
 
 struct LanStatus {
   wifi_mode mode = wifi_off;
@@ -166,5 +167,4 @@ struct Registry {
   WXData WXdata;
 };
 
-
-#endif
+#endif  // LIB_SLORAAPRS_APPTYPES_H_
