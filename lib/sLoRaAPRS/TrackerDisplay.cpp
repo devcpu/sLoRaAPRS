@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-29 1:41
+ * Last Modified: 2021-09-07 0:08
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -46,8 +46,14 @@ uint16_t tracker_display_time = 5000;
  */
 extern TinyGPSPlus gps;
 
+/**
+ * @brief Initialize SSD1306 OLED Display on 0x3C.
+ * Not FreeRTOS save!
+ *
+ * @return true if +OK
+ * @return false if error
+ */
 bool DisplayInit(void) {
-  Serial.println("Init Display SSD1306!");
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {  // Address 0x3D for 128x64
     Serial.println("Dsiplay SSD1306 on 0x3c not ready!");
     return false;
@@ -140,6 +146,10 @@ void tracker_display_tick(void) {
   }
 }
 
+/**
+ * @brief writes time in utc to OLED display
+ * 
+ */
 void writeUTC() {
   if (gps.time.isValid() && gps.date.isValid()) {
     char date[25], time[25];
@@ -150,10 +160,14 @@ void writeUTC() {
 
     write3Line(" - UTC -", time, date, false, 0);
   } else {
-    write_no_vaild_data();
+    _write_no_vaild_data();
   }
 }
 
+/**
+ * @brief writes current gps position to OLED display
+ * 
+ */
 void writeGPS() {
   display.clearDisplay();
   writeHead("   GPS");
@@ -179,10 +193,14 @@ void writeGPS() {
     display.display();
 
   } else {
-    write_no_vaild_data();
+    _write_no_vaild_data();
   }
 }
 
+/**
+ * @brief writes wether info to OLED display
+ * 
+ */
 void writeWX() {
   char temp_buf[24] = {0};
   char hum_buf[24] = {0};
@@ -206,6 +224,10 @@ void writeWX() {
   display.display();
 }
 
+/**
+ * @brief writes current WIFI status to OLED display
+ * 
+ */
 void writeWiFiStatus() {
   display.clearDisplay();
   if (reg.lan_status.mode == wifi_ap) {
@@ -239,7 +261,11 @@ void writeWiFiStatus() {
   display.display();
 }
 
-// fuer Erweiterungen in der Hauptzeile z.B. ttl next tx
+/**
+ * @brief fuer Erweiterungen in der Hauptzeile z.B. ttl next tx
+ * 
+ * @param head 
+ */
 void writeHead(const char *head) {
   char sat[3];
   char hdop[3];
@@ -265,7 +291,11 @@ void writeHead(const char *head) {
   display.print(hdop);
 }
 
-void write_no_vaild_data() {
+/**
+ * @brief if gps / time is not valid prints this to OLED display
+ * 
+ */
+void _write_no_vaild_data() {
   display.clearDisplay();
   display.setCursor(0, 22);
   display.print("no valid");
@@ -274,6 +304,16 @@ void write_no_vaild_data() {
   display.display();
 }
 
+/**
+ * @brief prints head + lines to OLED display.
+ * Attention! Not FreeRTOS save!
+ * 
+ * @param const char *head head line
+ * @param const char *line1 
+ * @param const char *line2 
+ * @param bool toSerial 
+ * @param u_long sleep 
+ */
 void write3Line(const char *head, const char *line1, const char *line2,
                 bool toSerial, u_long sleep) {
   display.clearDisplay();
@@ -314,6 +354,11 @@ void write3toSerial(const char *head, const char *line1, const char *line2,
   delay(sleep);
 }
 
+/**
+ * @brief show that LoRa is sending
+ * 
+ * @param to 
+ */
 void writeTX(const char *to) {
   display.clearDisplay();
   display.setTextSize(2);

@@ -1,4 +1,4 @@
-# SX127x
+# SX127x LoRa TRX
 
 | PinNr. | function |
 | ------ | -------- |

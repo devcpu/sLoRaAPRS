@@ -82,6 +82,7 @@ void setup() {
     reg.hardware.OLED = false;
   }
 
+/*
   // write3Line({{""}, {""}, {""}}, true, 1);
 #ifdef T_BEAM_V1_0
   if (initAXP()) {
@@ -92,7 +93,7 @@ void setup() {
     reg.hardware.AXP192 = false;
   }
 #endif
-
+*/
   if (BMEHandlerInit()) {
     // write3Line("Init BME", "  BME280", "   +OK", true, DISPLA_DELAY_SHORT);
     reg.hardware.BME280 = true;
@@ -290,6 +291,7 @@ void loop() {
  * @author	Johannes Arlt
  * @return	boolean
  */
+
 bool initAXP() {
   if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) {
     Serial.println("AXP192 Begin PASS");

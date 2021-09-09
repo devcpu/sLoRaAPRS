@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-29 1:28
+ * Last Modified: 2021-09-06 23:24
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -18,6 +18,7 @@
 #include <uxa_debug.h>
 
 Registry reg;
+
 
 void RegistryInit(void) {
   Preferences preferences;

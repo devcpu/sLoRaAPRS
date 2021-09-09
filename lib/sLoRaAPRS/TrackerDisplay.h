@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-29 1:31
+ * Last Modified: 2021-09-07 1:25
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -40,7 +40,7 @@ void write3Line(const char *head, const char *line1, const char *line2,
                 bool toSerial, u_long sleep);
 void write3toSerial(const char *head, const char *line1, const char *line2,
                     u_long sleep);
-void write_no_vaild_data(void);
+void _write_no_vaild_data(void);
 void write2Display(String head, String line1, String line2, String line3);
 void write2Display(String head, String line1, String line2, String line3,
                    String line4);

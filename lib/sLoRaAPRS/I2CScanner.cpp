@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 19:53
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-29 0:52
+ * Last Modified: 2021-09-10 0:19
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -14,14 +14,27 @@
 #include "I2CScanner.h"
 #include "AXP20xDevice.h"
 
-// void I2CScanner::scan() {
-byte* ic2scan(byte* devices) {
+/**
+ * @brief scans  all I2C-addresses (0-127) and print founds
+ *
+ */
+void I2CScanner::scan() {
+  // byte* ic2scan(byte* devices) {
   byte device_count = 0;
   Serial.println();
   Serial.println("I2C scanner. Scanning ...");
 
-  for (byte i = 8; i < 120; i++) {
-    Wire.beginTransmission(i);        // Begin I2C transmission Address (i)
+
+// the scanner didn't found AXP-Device
+
+#ifdef T_BEAM_V1_0
+  devices.push_back(52);
+  device_count++;
+#endif
+  
+
+  for (byte i = 58; i < 62; i++) {
+    Wire.beginTransmission(i);          // Begin I2C transmission Address (i)
     if (Wire.endTransmission() == 0) {  // Receive 0 = success (ACK response)
       Serial.print("Found device on address ");
       Serial.print("DEC: ");
@@ -31,59 +44,88 @@ byte* ic2scan(byte* devices) {
       Serial.print(i, HEX);
       Serial.println(")");
 
-      // devices.push_back(i);
-      devices[device_count] = i;
+      devices.push_back(i);
       device_count++;
+      Serial.println();
+    } else {
+        if (Wire.endTransmission() == 4) {
+        Serial.print("Found error");
+      }
     }
+    delay(500);
   }
   Serial.print("Found ");
   Serial.print(device_count, DEC);  // numbers of devices
   Serial.println(" device(s).");
-  return devices;
+  scannend = true;
+  Serial.println("END I2CScanner::scan");
 }
 
-void ic2init_devices(byte* devices) {
-  for (int i = 0; i < 10; i++) {
-    switch (devices[i]) {
-      // AXP192
-      case 52:
-        if (initAXP()) {
-          write3Line("Init AXP", " AXP 192", "   +OK", true,
-                     DISPLA_DELAY_SHORT);
-          // reg.hardware.AXP192 = true;
-        } else {
-          write3Line("Init AXP", "   -ERR", "check wire", true,
-                     DISPLA_DELAY_LONG);
-          // reg.hardware.AXP192 = false;
-        }
+/**
+ * @brief Initialize founded devices, print errors on console if errors
+ *
+ */
+void I2CScanner::initialize() {
+  
+  if (!devices.empty()) {
+    Serial.println("Mist");
+    for (std::vector<byte>::iterator it = devices.begin(); it != devices.end();
+         ++it) {
+      switch (*it) {
+        // AXP192
+        case 52:
+          Serial.println("Init for address 0x34");
+          Serial.print("\tTry to initialize AXP Device ..");
+          if (initAXP()) {
+            Serial.println("+OK");
+            reg.hardware.AXP192 = true;
+          } else {
+            Serial.println("ERROR :no AXP Device found!");
+            reg.hardware.AXP192 = false;
+          }
+          // break;
+        case 60:
+          Serial.println("Init for address 0x3C");
+          Serial.print("\tTry to initialize OLED Display ...");
+          if (DisplayInit()) {
+            Serial.println("+OK");
+            reg.hardware.OLED = true;
+          } else {
+            Serial.println("ERROR! Can't initialize OLED Display");
+            reg.hardware.OLED = false;
+          }
+          break;
 
-      // INA219 High-Side DC Current/Voltage sensor (0x40 - 0x4F)
-      case 64:
-      case 65:
-      case 66:
-      case 67:
-      case 68:
-      case 69:
-      case 70:
-      case 71:
-      case 72:
-      case 73:
-      case 74:
-      case 75:
-      case 76:
-      case 77:
-      case 78:
-      case 79:
-        Serial.println("Found INA219");
+        // INA219 High-Side DC Current/Voltage sensor (0x40 - 0x4F)
+        case 64:
+        case 65:
+        case 66:
+        case 67:
+        case 68:
+        case 69:
+        case 70:
+        case 71:
+        case 72:
+        case 73:
+        case 74:
+        case 75:
+        case 76:
+        case 77:
+        case 78:
+          break;
+        case 79:
+          Serial.println("Init for 0x40 - 0x4F");
+          Serial.println("\tTODO: init for INA219 not implemented yet");
+          break;
+        case 118:
+        case 119:
+          Serial.println("Init for 0x77");
+          Serial.println("\tTODO: Init for BME280 not implemented yet");
+          break;
 
-      case 118:
-      case 119:
-        Serial.println("Found BME280");
-
-        break;
-
-      default:
-        break;
+        default:
+          break;
+      }
     }
   }
 }

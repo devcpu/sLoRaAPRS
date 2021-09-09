@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-29 1:46
+ * Last Modified: 2021-09-09 23:47
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt 
@@ -16,8 +16,13 @@
 
 #include <Arduino.h>
 #include <LoRaAPRSConfig.h>
-#include "I2CScanner.h"
 #include <TrackerDisplay.h>
+#include <ESPFS.h>
+#include <GPSSensor.h>
+#include <LoRaAPRSConfig.h>
+#include <LoRaHandler.h>
+#include <SPI.h>
+#include <I2CScanner.h>
 
 // static void watchdog(void);
 #endif  // SRC_MAIN_H_

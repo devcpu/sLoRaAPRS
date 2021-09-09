@@ -14,10 +14,12 @@
 #define DISPLA_DELAY_MEDIUM 300
 #define DISPLA_DELAY_LONG 500
 
+/*
 #ifdef T_BEAM_V1_0
   #include <axp20x.h>
   AXP20X_Class axp;
 #endif
+*/
 
 #ifdef WX_DHT_SENSOR
    #include <DHTesp.h>

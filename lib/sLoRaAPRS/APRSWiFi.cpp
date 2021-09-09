@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-28 1:01
+ * Last Modified: 2021-09-07 2:36
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt 
@@ -27,13 +27,13 @@ extern Registry reg;
 String APRSWiFI_SSID = "";
 
 void WifiAPInit(void) {
-  WifiDisconnect();  // after flash it will not connect without
+  WifiDisconnect();  // after flash it will not connect without it
   /* You can remove the password parameter if you want the AP to be open. */
   Serial.println("Configuring access point...");
 #ifdef ESP32
   // WiFi.softAP(reg.APCredentials.auth_name.c_str(),
   // reg.APCredentials.auth_tocken.c_str());
-  WiFi.softAP("sLoRaAPRS", "letmein42");
+  WiFi.softAP("sLoRaAPRS", "letmein42"); // FIXME from reg!
   Serial.println("WiFi.softAP");
 // @TODO sollte hier nicht nötig sein!
 #elif defined(ESP8266)
