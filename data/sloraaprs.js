@@ -61,8 +61,8 @@ function showGateway() {
     }
 };
 
-function checkReboot(reboot) {
-    if (window.confirm("eh, really reboot" + reboot)) {
+function checkReboot() {
+    if (window.confirm("eh, really reboot")) {
         x = new XMLHttpRequest();
         //window.setTimeout('window.location = "/rebootinfo"', 0);
         x.open('GET', '/reboot', true);

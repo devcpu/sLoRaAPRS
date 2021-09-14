@@ -137,7 +137,7 @@ struct OLEDMessage {
   String line4 = "";
 };
 
-struct Registry {
+struct Config {
   String Version = "";
   String Release = "";
   OLEDMessage oled_message;

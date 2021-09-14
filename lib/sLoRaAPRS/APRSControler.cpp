@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-28 0:33
+ * Last Modified: 2021-09-13 1:35
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -35,7 +35,7 @@ DisplayMode APRSControler::getCurrentDisplayMode(void) {
 /**
  * @brief sets the next display mode by calling APRSControler::nextDisplayMode() and return it.
  * 
- * @return <DisplayMode> current disply mode
+ * @return <DisplayMode> next disply mode
  */
 DisplayMode APRSControler::getNextDisplayMode(void) {
   nextDisplayMode();
@@ -51,7 +51,7 @@ void APRSControler::nextDisplayMode(void) {
   if (display_mode < max) {
     display_mode++;
   } else {
-    display_mode = displayModeUTC;
+    display_mode = 0;
   }
 }
 

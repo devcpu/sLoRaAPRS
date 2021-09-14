@@ -28,13 +28,13 @@ char* APRS_MSG::computeWXField(char* rv) {
            "...",  // windspeed in mph
            "...",  // gust
            static_cast<int8_t>(
-               round(APRS_MSG::c2f(reg.WXdata.temp))),  // temperature
+               round(APRS_MSG::c2f(cfg.WXdata.temp))),  // temperature
            "...",                                       // rainfalllasthourhinch
            "...",                                       // rainfalllast24hinch
            "...",  // rainfallsinceMidnightinch
-           APRS_MSG::calcHumidity(hum_buf, reg.WXdata.humidity),  // humidity
+           APRS_MSG::calcHumidity(hum_buf, cfg.WXdata.humidity),  // humidity
            static_cast<uint8_t>(round(
-               reg.WXdata.pressure * 10)),  // pressure @FIXME / 100.00L * 10 ??
+               cfg.WXdata.pressure * 10)),  // pressure @FIXME / 100.00L * 10 ??
            "Sensor: BME280");  // wx sensor @FIXME sensor from i2c-scanner, not
                                // staticly
   return rv;
@@ -60,22 +60,22 @@ char* APRS_MSG::computeAPRSPos(char* rv) {
   char buf_lat[16] = {0};
   char buf_lng[16] = {0};
   snprintf(
-      rv, 32, "%s%c%s%c", dc2gms(buf_lat, reg.gps_location.latitude, false),
-      reg.aprs_symbol.table, dc2gms(buf_lng, reg.gps_location.longitude, true),
-      reg.aprs_symbol.symbol);
+      rv, 32, "%s%c%s%c", dc2gms(buf_lat, cfg.gps_location.latitude, false),
+      cfg.aprs_symbol.table, dc2gms(buf_lng, cfg.gps_location.longitude, true),
+      cfg.aprs_symbol.symbol);
   return rv;
 }
 
 char* APRS_MSG::computeTrackInfo(char* rv) {
-  snprintf(rv, sizeof(rv), "%03.0f/%03.0f/A=%06.0f", reg.gps_move.speed,
-           reg.gps_move.course, reg.gps_location.altitude);
+  snprintf(rv, sizeof(rv), "%03.0f/%03.0f/A=%06.0f", cfg.gps_move.speed,
+           cfg.gps_move.course, cfg.gps_location.altitude);
   return rv;
 }
 
 char* APRS_MSG::computeTimestamp(char* rv) {
   // day/hour/minute
-  snprintf(rv, sizeof(rv), "@%02d%02d%02dz", reg.gps_time.day,
-           reg.gps_time.hour, reg.gps_time.minute);
+  snprintf(rv, sizeof(rv), "@%02d%02d%02dz", cfg.gps_time.day,
+           cfg.gps_time.hour, cfg.gps_time.minute);
   return rv;
 }
 

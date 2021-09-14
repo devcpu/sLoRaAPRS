@@ -4,7 +4,7 @@
  * File Created: 2020-09-26 21:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-27 23:47
+ * Last Modified: 2021-09-13 1:08
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -101,6 +101,8 @@ static const uint32_t GPSBaud = 9600;
 #endif
 
 // Button of TTGO T-Beam
+// @FIXME 38 for T_BEAM_V1_0
+// 2 for my test board
 #ifdef T_BEAM_V1_0
 #define BUTTON 2  // GPIO number for Button on TTGO T-Beam
 #else

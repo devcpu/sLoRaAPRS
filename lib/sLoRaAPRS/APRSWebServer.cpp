@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-29 1:57
+ * Last Modified: 2021-09-13 3:42
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -12,6 +12,7 @@
  */
 
 // #include <uxa_debug.h>
+#include "freertos/FreeRTOS.h"
 #include <APRSWebServer.h>
 #include <APRSWiFi.h>
 #include <APRS_MSG.h>
@@ -19,21 +20,22 @@
 #include <ArduinoOTA.h>
 #include <AsyncJson.h>
 #include <Preferences.h>
-#include <Registry.h>
+#include <Config.h>
 #include <SPIFFSEditor.h>
 #include <TinyGPS++.h>
 #include <apptypes.h>
 
+
 TinyGPSPlus gps;
 
 extern Preferences preferences;
-extern QueueHandle_t LoRaTXQueue;
+//extern QueueHandle_t LoRaTXQueue;
 
 // #include "CallBackList.h"
 
 // @TODO remove together with restart()
 
-extern Registry reg;
+extern Config reg;
 
 AsyncWebServer *WebServer;
 AsyncWebSocket *ws;
@@ -118,7 +120,7 @@ void WebserverStart(void) {
   WebServer->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("/");
     // first run wizard
-    if (reg.call == "CHANGEME") {  // first run wizard
+    if (cfg.call == "CHANGEME") {  // first run wizard
       request->redirect("/cc");
     }
     request->send(SPIFFS, "/main.html", "text/html", false, ProcessorDefault);
@@ -138,7 +140,7 @@ void WebserverStart(void) {
     if (request->params() > 0) {
       DDD("/cc");
       handleRequestConfigCall(request);
-      if (reg.APCredentials.auth_tocken == "letmein42") {  // first run wizard
+      if (cfg.APCredentials.auth_tocken == "letmein42") {  // first run wizard
         request->redirect("/ca");
       }
       request->redirect("/");
@@ -163,24 +165,29 @@ void WebserverStart(void) {
 
   // Change Mode
   WebServer->on("/cm", HTTP_GET, [](AsyncWebServerRequest *request) {
+    bool changed = false;
     Serial.println("/cm");
     showRequest(request);
     DDD("Change Mode");
     if (request->params() == 2) {
       DDD(request->params());
-      handleRequestChangeMode(request);
+      changed = handleRequestChangeMode(request);
       Serial.printf("new run_mode: %d / new_wifi_mode %d\n",
-                    static_cast<uint8_t>(reg.current_run_mode),
-                    static_cast<uint8_t>(reg.current_wifi_mode));
+                    static_cast<uint8_t>(cfg.current_run_mode),
+                    static_cast<uint8_t>(cfg.current_wifi_mode));
+      // @FIXME cast error? see debug console
       Serial.printf(
           "new run_mode: %d / new_wifi_mode %d\n",
           static_cast<uint8_t>(getPrefsDouble(PREFS_CURRENT_SYSTEM_MODE)),
           static_cast<uint8_t>(getPrefsDouble(PREFS_CURRENT_WIFI_MODE)));
       request->redirect("/");
     }
+    if (changed) {
 
-    request->send(SPIFFS, "/main.html", "text/html", false,
+    } else {
+      request->send(SPIFFS, "/main.html", "text/html", false,
                   ProcessorChangeMode);
+    }
   });
 
   // GPS Info
@@ -286,8 +293,8 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 
 String ProcessorJS(const String &var) {
   if (var == "SERVER_IP") {
-    DDD(reg.SERVER_IP);
-    return reg.SERVER_IP;
+    DDD(cfg.SERVER_IP);
+    return cfg.SERVER_IP;
   }
 
   return String("wrong placeholder " + var);
@@ -299,7 +306,7 @@ String ProcessorDefault(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.call;
+    return String("sLoRaAPRS for ") + cfg.call;
   }
 
   if (var == "H2TITLE") {
@@ -322,7 +329,7 @@ String systemInfoProcessor(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.call;
+    return String("sLoRaAPRS for ") + cfg.call;
   }
 
   if (var == "H2TITLE") {
@@ -352,7 +359,7 @@ String getSystemInfoTable(void) {
   String systemdata[][2] = {
       {"Build DateTime: ", GetBuildDateAndTime()},
       {"SDKVersion: ", String(ESP.getSdkVersion())},
-      {"BootCount: ", String(reg.boot_count)},
+      {"BootCount: ", String(cfg.boot_count)},
       {"Uptime: ", String(millis() / 1000 / 60, DEC) + "min"},
 #ifdef ESP32
       {"Chip Revision:", String(ESP.getChipRevision())},
@@ -406,10 +413,10 @@ String getSystemInfoTable(void) {
   };
 
   String hwdata[][2] = {
-      {"GPS:", String(reg.hardware.GPS)},
-      {"OLED:", String(reg.hardware.OLED)},
-      {"DHT:", String(reg.hardware.DHT22)},
-      {"BME280", String(reg.hardware.BME280)},
+      {"GPS:", String(cfg.hardware.GPS)},
+      {"OLED:", String(cfg.hardware.OLED)},
+      {"DHT:", String(cfg.hardware.DHT22)},
+      {"BME280", String(cfg.hardware.BME280)},
   };
 
   return table2DGenerator(systemdata, 32, true) +
@@ -510,7 +517,7 @@ String ProcessorConfigCall(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.call;
+    return String("sLoRaAPRS for ") + cfg.call;
   }
 
   if (var == "H2TITLE") {
@@ -518,19 +525,19 @@ String ProcessorConfigCall(const String &var) {
   }
 
   if (var == PREFS_CALL) {
-    return reg.call;
+    return cfg.call;
   }
 
   if (var == PREFS_POS_LAT_FIX) {
-    return String(reg.posfix.latitude, 6);
+    return String(cfg.posfix.latitude, 6);
   }
 
   if (var == PREFS_POS_LNG_FIX) {
-    return String(reg.posfix.longitude, 6);
+    return String(cfg.posfix.longitude, 6);
   }
 
   if (var == PREFS_POS_ALT_FIX) {
-    return String(reg.posfix.altitude, 1);
+    return String(cfg.posfix.altitude, 1);
   }
 
   if (var == "ERRORMSG") {
@@ -538,26 +545,26 @@ String ProcessorConfigCall(const String &var) {
   }
 
   if (var == PREFS_APRS_SYMBOL) {
-    return String(reg.aprs_symbol.symbol);
+    return String(cfg.aprs_symbol.symbol);
   }
 
   if (var == "aprs_ext_options") {
-    return optionsFeldGenerator(reg.aprs_call_ext.toInt(), PREFS_APRS_CALL_EX,
+    return optionsFeldGenerator(cfg.aprs_call_ext.toInt(), PREFS_APRS_CALL_EX,
                                 options, 16);
   }
 
   if (var == PREFS_APRS_CALL_EX) {
-    return reg.aprs_call_ext;
+    return cfg.aprs_call_ext;
   }
 
   if (var == "wx_ext_options") {
-    DDD(reg.wx_call_ext);
-    return optionsFeldGenerator(reg.wx_call_ext.toInt(), PREFS_WX_CALL_EX,
+    DDD(cfg.wx_call_ext);
+    return optionsFeldGenerator(cfg.wx_call_ext.toInt(), PREFS_WX_CALL_EX,
                                 options, 16);
   }
 
   if (var == PREFS_WX_CALL_EX) {
-    return reg.wx_call_ext;
+    return cfg.wx_call_ext;
   }
 
   if (var == "BODY") {
@@ -574,7 +581,7 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
     new_call = getWebParam(request, PREFS_CALL);
     if (new_call.length() > 2 && new_call.length() < 16) {
       new_call.toUpperCase();
-      reg.call = new_call;
+      cfg.call = new_call;
       setPrefsString(PREFS_CALL, new_call);
     } else {
       html_error.ErrorMsg = String("call to short or to long");
@@ -583,15 +590,15 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
   }
 
   // aprs_call_ext
-  getWebParam(request, PREFS_APRS_CALL_EX, &reg.aprs_call_ext);
-  getWebParam(request, PREFS_WX_CALL_EX, &reg.wx_call_ext);
+  getWebParam(request, PREFS_APRS_CALL_EX, &cfg.aprs_call_ext);
+  getWebParam(request, PREFS_WX_CALL_EX, &cfg.wx_call_ext);
 
   DDD("wx_ext +OK");
 
   String new_aprs_symbol = "";
   if (request->hasParam(PREFS_APRS_SYMBOL)) {
     new_aprs_symbol = getWebParam(request, PREFS_APRS_SYMBOL);
-    reg.aprs_symbol.symbol = static_cast<char>(new_aprs_symbol.charAt(0));
+    cfg.aprs_symbol.symbol = static_cast<char>(new_aprs_symbol.charAt(0));
     setPrefsChar(PREFS_APRS_SYMBOL, new_aprs_symbol.charAt(0));
   } else {
     Serial.println("ERR: APRS Symbol not valide!" + new_aprs_symbol);
@@ -600,15 +607,15 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
   ////////////////////////////////////////////////////////////////////////////////
 
   if (request->hasParam(PREFS_POS_LAT_FIX)) {
-    getWebParam(request, PREFS_POS_LAT_FIX, &reg.posfix.latitude);
+    getWebParam(request, PREFS_POS_LAT_FIX, &cfg.posfix.latitude);
   }
 
   if (request->hasParam(PREFS_POS_LNG_FIX)) {
-    getWebParam(request, PREFS_POS_LNG_FIX, &reg.posfix.longitude);
+    getWebParam(request, PREFS_POS_LNG_FIX, &cfg.posfix.longitude);
   }
 
   if (request->hasParam(PREFS_POS_ALT_FIX)) {
-    getWebParam(request, PREFS_POS_ALT_FIX, &reg.posfix.altitude);
+    getWebParam(request, PREFS_POS_ALT_FIX, &cfg.posfix.altitude);
   }
 }
 
@@ -618,7 +625,7 @@ String ProcessorGPSInfo(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.call;
+    return String("sLoRaAPRS for ") + cfg.call;
   }
 
   if (var == "H2TITLE") {
@@ -642,7 +649,7 @@ String ProcessorWXInfo(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.call;
+    return String("sLoRaAPRS for ") + cfg.call;
   }
 
   if (var == "H2TITLE") {
@@ -666,7 +673,7 @@ String ProcessorConfigWifiAP(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.call;
+    return String("sLoRaAPRS for ") + cfg.call;
   }
 
   if (var == "H2TITLE") {
@@ -674,19 +681,19 @@ String ProcessorConfigWifiAP(const String &var) {
   }
 
   if (var == PREFS_AP_SSID) {
-    return reg.APCredentials.auth_name;
+    return cfg.APCredentials.auth_name;
   }
 
   if (var == PREFS_AP_PASS) {
-    return reg.APCredentials.auth_tocken;
+    return cfg.APCredentials.auth_tocken;
   }
 
   if (var == PREFS_WEB_ADMIN) {
-    return reg.WebCredentials.auth_name;
+    return cfg.WebCredentials.auth_name;
   }
 
   if (var == PREFS_WEB_PASS) {
-    return reg.WebCredentials.auth_tocken;
+    return cfg.WebCredentials.auth_tocken;
   }
 
   if (var == "ERRORMSG") {
@@ -702,19 +709,19 @@ String ProcessorConfigWifiAP(const String &var) {
 
 void handleRequestConfigAP(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_AP_SSID)) {
-    getWebParam(request, PREFS_AP_SSID, &reg.APCredentials.auth_name);
+    getWebParam(request, PREFS_AP_SSID, &cfg.APCredentials.auth_name);
   }
 
   if (request->hasParam(PREFS_AP_PASS)) {
-    getWebParam(request, PREFS_AP_PASS, &reg.APCredentials.auth_tocken);
+    getWebParam(request, PREFS_AP_PASS, &cfg.APCredentials.auth_tocken);
   }
 
   if (request->hasParam(PREFS_WEB_ADMIN)) {
-    getWebParam(request, PREFS_WEB_ADMIN, &reg.WebCredentials.auth_name);
+    getWebParam(request, PREFS_WEB_ADMIN, &cfg.WebCredentials.auth_name);
   }
 
   if (request->hasParam(PREFS_WEB_PASS)) {
-    getWebParam(request, PREFS_WEB_PASS, &reg.WebCredentials.auth_tocken);
+    getWebParam(request, PREFS_WEB_PASS, &cfg.WebCredentials.auth_tocken);
   }
 }
 
@@ -724,7 +731,7 @@ String ProcessorConfigGateway(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.call;
+    return String("sLoRaAPRS for ") + cfg.call;
   }
 
   if (var == "H2TITLE") {
@@ -732,15 +739,15 @@ String ProcessorConfigGateway(const String &var) {
   }
 
   if (var == PREFS_APRS_SERVER0) {
-    return reg.APRSServer[0];
+    return cfg.APRSServer[0];
   }
 
   if (var == PREFS_APRS_SERVER1) {
-    return reg.APRSServer[1];
+    return cfg.APRSServer[1];
   }
 
   if (var == PREFS_APRS_PASSWORD) {
-    return reg.APRSPassword;
+    return cfg.APRSPassword;
   }
 
   if (var == "ERRORMSG") {
@@ -756,15 +763,15 @@ String ProcessorConfigGateway(const String &var) {
 
 void handleRequestConfigGateway(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_APRS_PASSWORD)) {
-    getWebParam(request, PREFS_APRS_PASSWORD, &reg.APRSPassword);
+    getWebParam(request, PREFS_APRS_PASSWORD, &cfg.APRSPassword);
   }
 
   if (request->hasParam(PREFS_APRS_SERVER0)) {
-    getWebParam(request, PREFS_APRS_SERVER0, &reg.APRSServer[0]);
+    getWebParam(request, PREFS_APRS_SERVER0, &cfg.APRSServer[0]);
   }
 
   if (request->hasParam(PREFS_APRS_SERVER1)) {
-    getWebParam(request, PREFS_APRS_SERVER1, &reg.APRSServer[1]);
+    getWebParam(request, PREFS_APRS_SERVER1, &cfg.APRSServer[1]);
   }
 }
 
@@ -774,7 +781,7 @@ String ProcessorSendMessage(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.call;
+    return String("sLoRaAPRS for ") + cfg.call;
   }
 
   if (var == "H2TITLE") {
@@ -825,12 +832,13 @@ void handleRequestSendMessage(AsyncWebServerRequest *request) {
     sform.wide = wide;
   }
 
-  if (xQueueSend(LoRaTXQueue, reinterpret_cast<SendMsgForm *>(&sform),
-                 (TickType_t)100) != pdPASS) {
-    Serial.printf("ERROR: Can't put APRS msg to LoRaTXQueue\n to:%s msg:%s",
-                  sform.to.c_str(), sform.msg.c_str());
-  }
-  reg.TxMsg.to = to;
+// @FIXME
+//  if (xQueueSend(LoRaTXQueue, reinterpret_cast<SendMsgForm *>(&sform),
+//                 (TickType_t)100) != pdPASS) {
+//    Serial.printf("ERROR: Can't put APRS msg to LoRaTXQueue\n to:%s msg:%s",
+//                  sform.to.c_str(), sform.msg.c_str());
+//  }
+  cfg.TxMsg.to = to;
 }
 
 String ProcessorConfigWLAN(const String &var) {
@@ -839,7 +847,7 @@ String ProcessorConfigWLAN(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.call;
+    return String("sLoRaAPRS for ") + cfg.call;
   }
 
   if (var == "H2TITLE") {
@@ -847,35 +855,35 @@ String ProcessorConfigWLAN(const String &var) {
   }
 
   if (var == PREFS_LAN0_SSID) {
-    return reg.WifiCrendentials[0].auth_name;
+    return cfg.WifiCrendentials[0].auth_name;
   }
 
   if (var == PREFS_LAN0_AUTH) {
-    return reg.WifiCrendentials[0].auth_tocken;
+    return cfg.WifiCrendentials[0].auth_tocken;
   }
 
   if (var == PREFS_LAN1_SSID) {
-    return reg.WifiCrendentials[1].auth_name;
+    return cfg.WifiCrendentials[1].auth_name;
   }
 
   if (var == PREFS_LAN1_AUTH) {
-    return reg.WifiCrendentials[1].auth_tocken;
+    return cfg.WifiCrendentials[1].auth_tocken;
   }
 
   if (var == PREFS_LAN2_SSID) {
-    return reg.WifiCrendentials[2].auth_name;
+    return cfg.WifiCrendentials[2].auth_name;
   }
 
   if (var == PREFS_LAN2_AUTH) {
-    return reg.WifiCrendentials[2].auth_tocken;
+    return cfg.WifiCrendentials[2].auth_tocken;
   }
 
   if (var == PREFS_LAN3_SSID) {
-    return reg.WifiCrendentials[3].auth_name;
+    return cfg.WifiCrendentials[3].auth_name;
   }
 
   if (var == PREFS_LAN3_AUTH) {
-    return reg.WifiCrendentials[3].auth_tocken;
+    return cfg.WifiCrendentials[3].auth_tocken;
   }
 
   if (var == "ERRORMSG") {
@@ -891,23 +899,23 @@ String ProcessorConfigWLAN(const String &var) {
 
 void handleRequestConfigWLAN(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_LAN0_SSID)) {
-    getWebParam(request, PREFS_LAN0_SSID, &reg.WifiCrendentials[0].auth_name);
-    getWebParam(request, PREFS_LAN0_AUTH, &reg.WifiCrendentials[0].auth_tocken);
+    getWebParam(request, PREFS_LAN0_SSID, &cfg.WifiCrendentials[0].auth_name);
+    getWebParam(request, PREFS_LAN0_AUTH, &cfg.WifiCrendentials[0].auth_tocken);
   }
 
   if (request->hasParam(PREFS_LAN1_SSID)) {
-    getWebParam(request, PREFS_LAN1_SSID, &reg.WifiCrendentials[1].auth_name);
-    getWebParam(request, PREFS_LAN1_AUTH, &reg.WifiCrendentials[1].auth_tocken);
+    getWebParam(request, PREFS_LAN1_SSID, &cfg.WifiCrendentials[1].auth_name);
+    getWebParam(request, PREFS_LAN1_AUTH, &cfg.WifiCrendentials[1].auth_tocken);
   }
 
   if (request->hasParam(PREFS_LAN2_SSID)) {
-    getWebParam(request, PREFS_LAN2_SSID, &reg.WifiCrendentials[2].auth_name);
-    getWebParam(request, PREFS_LAN2_AUTH, &reg.WifiCrendentials[2].auth_tocken);
+    getWebParam(request, PREFS_LAN2_SSID, &cfg.WifiCrendentials[2].auth_name);
+    getWebParam(request, PREFS_LAN2_AUTH, &cfg.WifiCrendentials[2].auth_tocken);
   }
 
   if (request->hasParam(PREFS_LAN3_SSID)) {
-    getWebParam(request, PREFS_LAN3_SSID, &reg.WifiCrendentials[3].auth_name);
-    getWebParam(request, PREFS_LAN3_AUTH, &reg.WifiCrendentials[3].auth_tocken);
+    getWebParam(request, PREFS_LAN3_SSID, &cfg.WifiCrendentials[3].auth_name);
+    getWebParam(request, PREFS_LAN3_AUTH, &cfg.WifiCrendentials[3].auth_tocken);
   }
 }
 
@@ -917,7 +925,7 @@ String ProcessorChangeMode(const String &var) {
   }
 
   if (var == "H3TITLE") {
-    return String("sLoRaAPRS for ") + reg.call;
+    return String("sLoRaAPRS for ") + cfg.call;
   }
 
   if (var == "H2TITLE") {
@@ -940,7 +948,7 @@ String ProcessorChangeMode(const String &var) {
         {"APRS LoRa Repeater & APRS Gateway", String(mode_digi_gateway)},
     };
 
-    return optionsFeldGenerator(reg.current_run_mode, PREFS_CURRENT_SYSTEM_MODE,
+    return optionsFeldGenerator(cfg.current_run_mode, PREFS_CURRENT_SYSTEM_MODE,
                                 options, 6);
   }
 
@@ -949,7 +957,7 @@ String ProcessorChangeMode(const String &var) {
     String options[][2] = {
         {"Wifi OFF", "0"}, {"Wifi AP", "1"}, {"WLAN Connect", "2"}};
 
-    return optionsFeldGenerator(reg.current_wifi_mode, PREFS_CURRENT_WIFI_MODE,
+    return optionsFeldGenerator(cfg.current_wifi_mode, PREFS_CURRENT_WIFI_MODE,
                                 options, 3);
   }
 
@@ -960,20 +968,22 @@ String ProcessorChangeMode(const String &var) {
   return String("wrong placeholder " + var);
 }
 
-void handleRequestChangeMode(AsyncWebServerRequest *request) {
+bool handleRequestChangeMode(AsyncWebServerRequest *request) {
+  bool rv = false;
   DDD("handleRequestChangeMode");
   if (request->hasParam(PREFS_CURRENT_SYSTEM_MODE)) {
     String new_run_mode = getWebParam(request, PREFS_CURRENT_SYSTEM_MODE);
-    setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE,
+    rv = setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE,
                  static_cast<int>(new_run_mode.toInt()));
-    reg.current_run_mode = (run_mode) static_cast<int>(new_run_mode.toInt());
+    cfg.current_run_mode = (run_mode) static_cast<int>(new_run_mode.toInt());
   }
 
   if (request->hasParam(PREFS_CURRENT_WIFI_MODE)) {
     String new_wifi_mode = getWebParam(request, PREFS_CURRENT_WIFI_MODE);
     setPrefsUInt(PREFS_CURRENT_WIFI_MODE, new_wifi_mode.toInt());
-    reg.current_wifi_mode = (wifi_mode)new_wifi_mode.toInt();
+    cfg.current_wifi_mode = (wifi_mode)new_wifi_mode.toInt();
   }
+  return rv;
 }
 
 /**
@@ -1022,9 +1032,9 @@ String GetBuildDateAndTime(void) {
  */
 void reboot(AsyncWebServerRequest *request) {
   request->redirect("/rebootinfo");
-  delay(3000);
+  vTaskDelay(3000 / portTICK_PERIOD_MS);
   WifiDisconnect();
-  delay(500);
+  vTaskDelay(3000 / portTICK_PERIOD_MS);
   ESP.restart();
 }
 
@@ -1180,25 +1190,25 @@ void sendGPSDataJson(void) {
   root["isValidTime"] = gps.time.isValid();
   root["isValidGPS"] = gps.date.isValid();
 
-  snprintf(tmpbuf, sizeof(tmpbuf), "%02d:%02d:%02d", reg.gps_time.hour,
-           reg.gps_time.minute, reg.gps_time.second);
+  snprintf(tmpbuf, sizeof(tmpbuf), "%02d:%02d:%02d", cfg.gps_time.hour,
+           cfg.gps_time.minute, cfg.gps_time.second);
   root["time"] = tmpbuf;
 
-  snprintf(tmpbuf, sizeof(tmpbuf), "%4d-%02d-%02d", reg.gps_time.year,
-           reg.gps_time.month, reg.gps_time.day);
+  snprintf(tmpbuf, sizeof(tmpbuf), "%4d-%02d-%02d", cfg.gps_time.year,
+           cfg.gps_time.month, cfg.gps_time.day);
   root["date"] = tmpbuf;
 
-  root["lat"] = reg.gps_location.latitude;
-  root["lng"] = reg.gps_location.longitude;
-  root["alt"] = reg.gps_location.altitude;
-  root["course"] = reg.gps_move.course;
-  root["speed"] = reg.gps_move.speed;
-  root["temp"] = reg.WXdata.temp;
-  root["humidity"] = reg.WXdata.humidity;
-  root["pressure"] = reg.WXdata.pressure;
+  root["lat"] = cfg.gps_location.latitude;
+  root["lng"] = cfg.gps_location.longitude;
+  root["alt"] = cfg.gps_location.altitude;
+  root["course"] = cfg.gps_move.course;
+  root["speed"] = cfg.gps_move.speed;
+  root["temp"] = cfg.WXdata.temp;
+  root["humidity"] = cfg.WXdata.humidity;
+  root["pressure"] = cfg.WXdata.pressure;
   root["sensor"] = "BME280";
-  root["sat"] = reg.gps_meta.sat;
-  root["hdop"] = reg.gps_meta.hdop;
+  root["sat"] = cfg.gps_meta.sat;
+  root["hdop"] = cfg.gps_meta.hdop;
   uint16_t len = measureJson(root);
   // Serial.println(len);
   // serializeJson(root, Serial);

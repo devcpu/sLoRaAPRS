@@ -14,10 +14,10 @@
 #include <Arduino.h>
 #include <BMEHandler.h>
 #include <LoRaAPRSConfig.h>
-#include <Registry.h>
+#include <Config.h>
 #include <uxa_debug.h>
 
-extern Registry reg;  // config & system status
+extern Config reg;  // config & system status
 
 // 1013.25 ^= -50.96m
 // 1100.00 ^= 634.93m

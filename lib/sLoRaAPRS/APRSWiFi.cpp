@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-07 2:36
+ * Last Modified: 2021-09-13 1:26
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt 
@@ -14,11 +14,11 @@
 #include <APRSWiFi.h>
 #include <Arduino.h>
 #include <LoRaAPRSConfig.h>
-#include <Registry.h>
+#include <Config.h>
 #include <TrackerDisplay.h>
 #include <apptypes.h>
 
-extern Registry reg;
+extern Config reg;
 
 #ifdef ESP32
 #elif defined(ESP8266)
@@ -31,42 +31,42 @@ void WifiAPInit(void) {
   /* You can remove the password parameter if you want the AP to be open. */
   Serial.println("Configuring access point...");
 #ifdef ESP32
-  // WiFi.softAP(reg.APCredentials.auth_name.c_str(),
-  // reg.APCredentials.auth_tocken.c_str());
+  // WiFi.softAP(cfg.APCredentials.auth_name.c_str(),
+  // cfg.APCredentials.auth_tocken.c_str());
   WiFi.softAP("sLoRaAPRS", "letmein42"); // FIXME from reg!
   Serial.println("WiFi.softAP");
 // @TODO sollte hier nicht nötig sein!
 #elif defined(ESP8266)
-  WiFi.softAP(reg.APCredentials[0], reg.APCredentials[1]);
+  WiFi.softAP(cfg.APCredentials[0], cfg.APCredentials[1]);
 #endif
 
   IPAddress myIP = WiFi.softAPIP();
-  reg.SERVER_IP = myIP.toString();
+  cfg.SERVER_IP = myIP.toString();
   Serial.println("got IP");
-  if (reg.call == "CHANGEME") {
+  if (cfg.call == "CHANGEME") {
     // //@FIXME print to OLED to!
     Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
     Serial.print("++++++++++   AP IP address: ");
     Serial.print(myIP);
     Serial.println("    ++++++++++");
-    Serial.println("++++++++++   SSID: " + reg.APCredentials.auth_name +
+    Serial.println("++++++++++   SSID: " + cfg.APCredentials.auth_name +
                    "               ++++++++++");
-    Serial.println("++++++++++   Password: " + reg.APCredentials.auth_tocken +
+    Serial.println("++++++++++   Password: " + cfg.APCredentials.auth_tocken +
                    "         ++++++++++");
     Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
-    write3Line(" WIFI AP", reg.APCredentials.auth_name.c_str(),
-               reg.APCredentials.auth_tocken.c_str(), false, 3000);
+    write3Line(" WIFI AP", cfg.APCredentials.auth_name.c_str(),
+               cfg.APCredentials.auth_tocken.c_str(), false, 3000);
   } else {
     Serial.print("AP IP address: ");
     Serial.println(myIP);
-    Serial.println("SSID: " + reg.APCredentials.auth_name);
-    write3Line(" WIFI AP", "  SSID:", reg.APCredentials.auth_name.c_str(), true,
+    Serial.println("SSID: " + cfg.APCredentials.auth_name);
+    write3Line(" WIFI AP", "  SSID:", cfg.APCredentials.auth_name.c_str(), true,
                3000);
   }
-  reg.lan_status.SSID = WiFi.SSID();
-  reg.lan_status.IP = myIP.toString();
-  reg.lan_status.status = "running";
-  reg.lan_status.mode = wifi_ap;
+  cfg.lan_status.SSID = WiFi.SSID();
+  cfg.lan_status.IP = myIP.toString();
+  cfg.lan_status.status = "running";
+  cfg.lan_status.mode = wifi_ap;
 }
 
 void WifiConnect(void) {
@@ -76,8 +76,8 @@ void WifiConnect(void) {
   // WiFi.mode(WIFI_STA);
   delay(1000);
   Serial.println("Trying Connecting to WiFi ..");
-  WiFi.begin(reg.WifiCrendentials[0].auth_name.c_str(),
-             reg.WifiCrendentials[0].auth_tocken.c_str());
+  WiFi.begin(cfg.WifiCrendentials[0].auth_name.c_str(),
+             cfg.WifiCrendentials[0].auth_tocken.c_str());
 
   // @TODO
   uint8_t count = 0;
@@ -91,14 +91,14 @@ void WifiConnect(void) {
 
   Serial.println(WiFi.localIP());
   IPAddress myIP = WiFi.localIP();
-  reg.SERVER_IP = myIP.toString();
+  cfg.SERVER_IP = myIP.toString();
   write3Line("WiFiclient", APRSWiFI_SSID.c_str(), myIP.toString().c_str(), true,
              3000);
 
-  reg.lan_status.SSID = WiFi.SSID();
-  reg.lan_status.IP = myIP.toString();
-  reg.lan_status.status = "connected";
-  reg.lan_status.mode = wifi_client;
+  cfg.lan_status.SSID = WiFi.SSID();
+  cfg.lan_status.IP = myIP.toString();
+  cfg.lan_status.status = "connected";
+  cfg.lan_status.mode = wifi_client;
 }
 
 void WifiDisconnect(void) {

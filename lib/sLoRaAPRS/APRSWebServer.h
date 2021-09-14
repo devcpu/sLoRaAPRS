@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-28 0:58
+ * Last Modified: 2021-09-13 3:40
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -33,7 +33,7 @@ void handleRequestConfigCall(AsyncWebServerRequest *request);
 String ProcessorSendMessage(const String &var);
 void handleRequestSendMessage(AsyncWebServerRequest *request);
 
-void handleRequestChangeMode(AsyncWebServerRequest *request);
+bool handleRequestChangeMode(AsyncWebServerRequest *request);
 String ProcessorChangeMode(const String &var);
 
 String ProcessorGPSInfo(const String &var);

@@ -15,10 +15,10 @@
 #include <Arduino.h>
 #include <GPSSensor.h>
 #include <LoRaAPRSConfig.h>
-#include <Registry.h>
+#include <Config.h>
 #include <TinyGPS++.h>
 
-extern Registry reg;
+extern Config reg;
 extern TinyGPSPlus gps;
 extern APRSControler maincontroler;
 

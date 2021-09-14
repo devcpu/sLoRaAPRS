@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-07 0:08
+ * Last Modified: 2021-09-13 2:07
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -17,7 +17,7 @@
 
 #include "../config/uxa_debug.h"
 #include "APRSControler.h"
-#include "Registry.h"
+#include "Config.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
 
@@ -59,7 +59,7 @@ bool DisplayInit(void) {
     return false;
   }
   display.display();
-  delay(1000);
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
   return true;
 }
 
@@ -148,15 +148,15 @@ void tracker_display_tick(void) {
 
 /**
  * @brief writes time in utc to OLED display
- * 
+ *
  */
 void writeUTC() {
   if (gps.time.isValid() && gps.date.isValid()) {
     char date[25], time[25];
-    snprintf(date, sizeof(date), "%04d-%02d-%02d", reg.gps_time.year,
-             reg.gps_time.month, reg.gps_time.day);
-    snprintf(time, sizeof(time), "  %02d:%02d", reg.gps_time.hour,
-             reg.gps_time.minute);
+    snprintf(date, sizeof(date), "%04d-%02d-%02d", cfg.gps_time.year,
+             cfg.gps_time.month, cfg.gps_time.day);
+    snprintf(time, sizeof(time), "  %02d:%02d", cfg.gps_time.hour,
+             cfg.gps_time.minute);
 
     write3Line(" - UTC -", time, date, false, 0);
   } else {
@@ -166,7 +166,7 @@ void writeUTC() {
 
 /**
  * @brief writes current gps position to OLED display
- * 
+ *
  */
 void writeGPS() {
   display.clearDisplay();
@@ -174,12 +174,12 @@ void writeGPS() {
 
   if (gps.location.isValid()) {
     char lat[22], lng[22], speed_course[22], alt_hdop[22];
-    snprintf(lat, sizeof(lat), "lat: %8.4f", reg.gps_location.latitude);
-    snprintf(lng, sizeof(lng), "lng: %9.4f", reg.gps_location.longitude);
+    snprintf(lat, sizeof(lat), "lat: %8.4f", cfg.gps_location.latitude);
+    snprintf(lng, sizeof(lng), "lng: %9.4f", cfg.gps_location.longitude);
     snprintf(speed_course, sizeof(speed_course), "kmh: %4.1f  dir: %3.1f*",
-             reg.gps_move.speed, reg.gps_move.course);
+             cfg.gps_move.speed, cfg.gps_move.course);
     snprintf(alt_hdop, sizeof(alt_hdop), "alt: %5.1fm sat: %d",
-             reg.gps_location.altitude, reg.gps_meta.sat);
+             cfg.gps_location.altitude, cfg.gps_meta.sat);
 
     display.setTextSize(1);
     display.setCursor(0, 20);
@@ -199,18 +199,18 @@ void writeGPS() {
 
 /**
  * @brief writes wether info to OLED display
- * 
+ *
  */
 void writeWX() {
   char temp_buf[24] = {0};
   char hum_buf[24] = {0};
   char press_buf[24] = {0};
   snprintf(temp_buf, sizeof(temp_buf), "Temp:      %3.0f *C",
-           round(reg.WXdata.temp));
+           round(cfg.WXdata.temp));
   snprintf(hum_buf, sizeof(hum_buf), "Humidity:  %3.0f %%",
-           round(reg.WXdata.humidity));
+           round(cfg.WXdata.humidity));
   snprintf(press_buf, sizeof(press_buf), "Pressure: %4.0f hPa",
-           round(reg.WXdata.pressure));
+           round(cfg.WXdata.pressure));
   display.clearDisplay();
   writeHead("   WX");
   display.setTextSize(1);
@@ -226,32 +226,32 @@ void writeWX() {
 
 /**
  * @brief writes current WIFI status to OLED display
- * 
+ *
  */
 void writeWiFiStatus() {
   display.clearDisplay();
-  if (reg.lan_status.mode == wifi_ap) {
+  if (cfg.lan_status.mode == wifi_ap) {
     writeHead("Wifi AP");
     display.setTextSize(1);
     display.setCursor(0, 22);
-    display.print(reg.lan_status.SSID.c_str());
+    display.print(cfg.lan_status.SSID.c_str());
     display.setCursor(0, 36);
-    display.print(reg.lan_status.status.c_str());
+    display.print(cfg.lan_status.status.c_str());
     display.setCursor(0, 50);
-    display.print(reg.lan_status.IP.c_str());
+    display.print(cfg.lan_status.IP.c_str());
   }
-  if (reg.lan_status.mode == wifi_client) {
+  if (cfg.lan_status.mode == wifi_client) {
     writeHead("Wifi Clnt");
     display.setTextSize(1);
     display.setCursor(0, 22);
-    display.print(reg.lan_status.SSID.c_str());
+    display.print(cfg.lan_status.SSID.c_str());
     display.setCursor(0, 36);
-    display.print(reg.lan_status.status.c_str());
+    display.print(cfg.lan_status.status.c_str());
     display.setCursor(0, 50);
-    display.print(reg.lan_status.IP.c_str());
+    display.print(cfg.lan_status.IP.c_str());
   }
 
-  if (reg.lan_status.mode == wifi_off) {
+  if (cfg.lan_status.mode == wifi_off) {
     writeHead("  Wifi");
     display.setTextSize(2);
     display.setCursor(0, 32);
@@ -263,17 +263,17 @@ void writeWiFiStatus() {
 
 /**
  * @brief fuer Erweiterungen in der Hauptzeile z.B. ttl next tx
- * 
- * @param head 
+ *
+ * @param head
  */
 void writeHead(const char *head) {
   char sat[3];
   char hdop[3];
 
   if (gps.satellites.isValid() && gps.hdop.isValid()) {  // @FIXME
-    snprintf(sat, sizeof(sat), "%d", reg.gps_meta.sat);
+    snprintf(sat, sizeof(sat), "%d", cfg.gps_meta.sat);
     snprintf(hdop, sizeof(hdop), "%d",
-             static_cast<int>(round(reg.gps_meta.hdop)));
+             static_cast<int>(round(cfg.gps_meta.hdop)));
   } else {
     strncpy(sat, "", sizeof(sat));
     strncpy(hdop, "", sizeof(hdop));
@@ -293,7 +293,7 @@ void writeHead(const char *head) {
 
 /**
  * @brief if gps / time is not valid prints this to OLED display
- * 
+ *
  */
 void _write_no_vaild_data() {
   display.clearDisplay();
@@ -307,12 +307,12 @@ void _write_no_vaild_data() {
 /**
  * @brief prints head + lines to OLED display.
  * Attention! Not FreeRTOS save!
- * 
+ *
  * @param const char *head head line
- * @param const char *line1 
- * @param const char *line2 
- * @param bool toSerial 
- * @param u_long sleep 
+ * @param const char *line1
+ * @param const char *line2
+ * @param bool toSerial
+ * @param u_long sleep
  */
 void write3Line(const char *head, const char *line1, const char *line2,
                 bool toSerial, u_long sleep) {
@@ -339,7 +339,9 @@ void write3Line(const char *head, const char *line1, const char *line2,
   if (toSerial) {
     write3toSerial(head, line1, line2, sleep);
   } else {
-    delay(sleep);
+    if (sleep) {
+      vTaskDelay(sleep / portTICK_PERIOD_MS);
+    }
   }
 }
 
@@ -351,13 +353,15 @@ void write3toSerial(const char *head, const char *line1, const char *line2,
   Serial.printf("| %s\n", line1);
   Serial.printf("| %s\n", line2);
   Serial.println("+----------------------\n\n");
-  delay(sleep);
+  if (sleep) {
+    vTaskDelay(sleep / portTICK_PERIOD_MS);
+  }
 }
 
 /**
  * @brief show that LoRa is sending
- * 
- * @param to 
+ *
+ * @param to
  */
 void writeTX(const char *to) {
   display.clearDisplay();

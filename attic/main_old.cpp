@@ -24,7 +24,7 @@
 
 //#include <iGate.h>
 
-extern Registry reg;  // config & system status
+extern Config reg;  // config & system status
 
 APRSControler maincontroler;
 
@@ -64,7 +64,7 @@ void setup() {
   /* --------------------------------------------------------------------------
    */
 
-  RegistryInit();
+  ConfigInit();
   // write3Line("Init Pref.", "Prefernces", "   +OK", true, DISPLA_DELAY_SHORT);
 
   if (Wire.begin(SDA, SCL)) {

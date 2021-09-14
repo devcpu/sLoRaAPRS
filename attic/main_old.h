@@ -2,7 +2,7 @@
 #define MAIN_H
 
 #include <apptypes.h>
-#include <Registry.h>
+#include <Config.h>
 #include <Arduino.h>
 #include <APRSWiFi.h>
 #include <ESPFS.h>

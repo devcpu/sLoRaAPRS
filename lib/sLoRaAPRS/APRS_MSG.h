@@ -16,10 +16,10 @@
 
 #include <Arduino.h>
 #include <LoRaAPRSConfig.h>
-#include <Registry.h>
+#include <Config.h>
 #include <TinyGPS++.h>
 
-extern Registry reg;
+extern Config cfg;
 
 #define CONVERT_FEED_METER 3.28084
 #define WX_DEVICE_STR_LENGHT 12

@@ -14,7 +14,7 @@
 #include <Arduino.h>
 #include <ButtonState.h>
 #include <OneButton.h>
-#include <Registry.h>
+#include <Config.h>
 #include <TrackerDisplay.h>
 #include <uxa_debug.h>
 
@@ -162,7 +162,7 @@ ConfigStringSelector::ConfigStringSelector(const char* head,
 
   strncpy(_select_list, select_list, 40);
   _head = head;
-  _tmp = reg.call;
+  _tmp = cfg.call;
   int id = 1;
   _actual = static_cast<char>(_tmp.charAt(_pos));
   for (_select_list_idx = 0; _select_list_idx < 36; _select_list_idx++) {
@@ -219,12 +219,12 @@ void ConfigStringSelector::kino(void) {
   Serial.printf("_arrow_line: %s\n", _arrow_line.c_str());
 
   // _showText(_tmp.c_str(), _arrow_line.c_str());
-  reg.oled_message.head = _head;
-  reg.oled_message.line1 = _tmp;
-  reg.oled_message.line2 = _arrow_line;
-  reg.oled_message.line3 = _hint_line0;
-  reg.oled_message.line4 = _hint_line1;
-  reg.oled_message.active = true;
+  cfg.oled_message.head = _head;
+  cfg.oled_message.line1 = _tmp;
+  cfg.oled_message.line2 = _arrow_line;
+  cfg.oled_message.line3 = _hint_line0;
+  cfg.oled_message.line4 = _hint_line1;
+  cfg.oled_message.active = true;
 
   _count = true;
 }
@@ -233,10 +233,10 @@ void ConfigStringSelector::doubleClick(APRSControler& aprs_controler) {
   // DDD("ConfigStringSelector.doubleClick");
   xTimerStop(call_config_timer, 0);
   _tmp.trim();
-  reg.call = _tmp;
+  cfg.call = _tmp;
   setState(aprs_controler, new StateConfigMenue());
-  Serial.printf("new call: %s\n", reg.call.c_str());
-  setPrefsString(PREFS_CALL, reg.call);
+  Serial.printf("new call: %s\n", cfg.call.c_str());
+  setPrefsString(PREFS_CALL, cfg.call);
 }
 
 void ConfigStringSelector::_showText(const char* line0, const char* line1) {
@@ -262,13 +262,13 @@ StateConfigWiFi::StateConfigWiFi(const char* head) {
 
 void StateConfigWiFi::singleClick(APRSControler& aprs_controler) {
   // DDD("StateConfigWiFi.singleClick");
-  // DDD(String(reg.current_wifi_mode));
-  if (reg.current_wifi_mode > 1) {
-    reg.current_wifi_mode = wifi_off;
+  // DDD(String(cfg.current_wifi_mode));
+  if (cfg.current_wifi_mode > 1) {
+    cfg.current_wifi_mode = wifi_off;
   } else {
-    uint8_t mode = reg.current_wifi_mode;
+    uint8_t mode = cfg.current_wifi_mode;
     mode++;
-    reg.current_wifi_mode = static_cast<wifi_mode>(mode);
+    cfg.current_wifi_mode = static_cast<wifi_mode>(mode);
   }
   _show();
 }
@@ -282,7 +282,7 @@ void StateConfigWiFi::doubleClick(APRSControler& aprs_controler) {
 void StateConfigWiFi::_show(void) {
   char buf[12] = {0};
   strncat(buf, "  ", 12);
-  strncat(buf, wifi_mode_txt[reg.current_wifi_mode], 12);
+  strncat(buf, wifi_mode_txt[cfg.current_wifi_mode], 12);
   write3Line(_head, buf, "1clck nxt, 2clck ok", false, 0);
 }
 
@@ -297,13 +297,13 @@ StateConfigRun::StateConfigRun(const char* head) {
 
 void StateConfigRun::singleClick(APRSControler& aprs_controler) {
   // DDD("StateConfigRun.singleClick");
-  // DDD(String(reg.current_run_mode));
-  if (reg.current_run_mode > 4) {
-    reg.current_run_mode = mode_tracker;
+  // DDD(String(cfg.current_run_mode));
+  if (cfg.current_run_mode > 4) {
+    cfg.current_run_mode = mode_tracker;
   } else {
-    uint8_t mode = reg.current_run_mode;
+    uint8_t mode = cfg.current_run_mode;
     mode++;
-    reg.current_run_mode = static_cast<run_mode>(mode);
+    cfg.current_run_mode = static_cast<run_mode>(mode);
   }
   _show();
 }
@@ -316,7 +316,7 @@ void StateConfigRun::doubleClick(APRSControler& aprs_controler) {
 
 void StateConfigRun::_show(void) {
   char buf[12] = {0};
-  snprintf(buf, sizeof(buf), " %s", run_mode_txt[reg.current_run_mode]);
+  snprintf(buf, sizeof(buf), " %s", run_mode_txt[cfg.current_run_mode]);
   write3Line(_head, buf, "1clck nxt, 2clck ok", false, 0);
 }
 

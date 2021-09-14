@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 19:53
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-10 0:19
+ * Last Modified: 2021-09-12 19:38
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -58,7 +58,6 @@ void I2CScanner::scan() {
   Serial.print(device_count, DEC);  // numbers of devices
   Serial.println(" device(s).");
   scannend = true;
-  Serial.println("END I2CScanner::scan");
 }
 
 /**
@@ -78,10 +77,10 @@ void I2CScanner::initialize() {
           Serial.print("\tTry to initialize AXP Device ..");
           if (initAXP()) {
             Serial.println("+OK");
-            reg.hardware.AXP192 = true;
+            cfg.hardware.AXP192 = true;
           } else {
             Serial.println("ERROR :no AXP Device found!");
-            reg.hardware.AXP192 = false;
+            cfg.hardware.AXP192 = false;
           }
           // break;
         case 60:
@@ -89,10 +88,10 @@ void I2CScanner::initialize() {
           Serial.print("\tTry to initialize OLED Display ...");
           if (DisplayInit()) {
             Serial.println("+OK");
-            reg.hardware.OLED = true;
+            cfg.hardware.OLED = true;
           } else {
             Serial.println("ERROR! Can't initialize OLED Display");
-            reg.hardware.OLED = false;
+            cfg.hardware.OLED = false;
           }
           break;
 
