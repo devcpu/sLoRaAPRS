@@ -1,3 +1,0 @@
-#!/bin/bash
-
-platformio run --environment esp32-v2z

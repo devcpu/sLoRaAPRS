@@ -1,0 +1,22 @@
+#!/bin/bash
+
+rv=0
+
+for i in $@; do
+#matches=$(git diff --cached | grep -E '\+.*?FIXME')
+
+matches=$(egrep -n 'FIXME|TODO' $i)
+
+if [ "$matches" != "" ]
+then
+    rv=1
+    echo -ne "\n==========\n$i\n"
+    echo -ne "${matches}\n"
+    echo
+#else 
+#    echo -ne "Done with $i\n"
+fi
+
+done
+
+exit $rv

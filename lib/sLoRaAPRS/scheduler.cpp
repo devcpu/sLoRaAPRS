@@ -38,9 +38,9 @@ void scheduler_init() {
 
   /***************** Timers *******************/
 
-  DisplayTimer =
-      xTimerCreate("DisplayTimer", pdMS_TO_TICKS(DISPLAY_KINO_TIME), pdTRUE,
-                   reinterpret_cast<void *>(23), DisplayTimerCB);  // @FIXME 23
+  DisplayTimer = xTimerCreate("DisplayTimer", pdMS_TO_TICKS(DISPLAY_KINO_TIME),
+                              pdTRUE, reinterpret_cast<void *>(23),
+                              DisplayTimerCB);  // @FIXME replace 23
   if (DisplayTimer == NULL) {
     ESP_LOGE(TAG, "Creation of DisplayTimer failed");
   }
