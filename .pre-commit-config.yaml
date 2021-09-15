@@ -46,10 +46,9 @@ repos:
       #    entry: platformio run --environment esp32-v2z
       #    pass_filenames: false
       #    language: system
-  - id: TODO
-    name: TODO Fixer
-    entry: .todo-checker
-    #    files: \.(h|cpp|js|html)$
-    exclude: (^attic|^build|^doc)
-    types: [file]
-    language: script
+#  - id: TODO
+#    name: TODO Fixer
+#    entry: .todo-checker
+#    exclude: (^attic|^build|^doc)
+#    types: [file]
+#    language: script
