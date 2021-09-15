@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-13 3:29
+ * Last Modified: 2021-09-15 2:33
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -13,11 +13,7 @@
 
 #include <main.h>
 
-void xbutton_tick(void *pvParameters);
-void xws_tick(void *pvParameters);
-void vTimerCB(TimerHandle_t pxTimer);
 
-TimerHandle_t DisplayTimer;
 
 void singleClick() { ESP_LOGE(TAG, "singleClick"); }
 
@@ -87,20 +83,6 @@ void setup() {
   xob.attachDoubleClick(doubleClick);
   xob.attachDuringLongPress(longClick);
 
-  TaskHandle_t ButtonHandle = NULL;
-  if (xTaskCreate(xbutton_tick, "ButtonTick", 10000, NULL, 2, &ButtonHandle) ==
-      pdPASS) {
-    ESP_LOGE(TAG, "Task ButtonTick created!");
-  }
-
-  DisplayTimer = xTimerCreate("DisplayTimer", pdMS_TO_TICKS(5000), pdTRUE,
-                              (void *)23, vTimerCB);
-  if (DisplayTimer == NULL) {
-    ESP_LOGE(TAG, "creation of Timer failed");
-  }
-  if (xTimerStart(DisplayTimer, 0) != pdPASS) {
-    ESP_LOGE(TAG, "start of Timer failed");
-  }
 
   switch (cfg.current_run_mode) {
     case mode_tracker:
@@ -153,13 +135,8 @@ void setup() {
     WebserverStart();
   }
 
-/*
-  TaskHandle_t WSHandle = NULL;
-  if (xTaskCreate(xws_tick, "WebServerTick", 10000, NULL, 2, &WSHandle) ==
-      pdPASS) {
-    ESP_LOGE(TAG, "Task WebServerTick created!");
-  }
-*/
+
+
   write3Line("sLoRaAPRS", "  up &", " running", true, 0);
   delay(2000);
   write3Line("  Hello", (String("  ") + cfg.call).c_str(), "  nice to be back",
@@ -167,24 +144,13 @@ void setup() {
   delay(2000);
   write3Line("  Enjoy", "   the", "   day", true, 0);
   delay(2000);
+
+  scheduler_init();
 }
 
 void loop() {
-  vTaskDelay(portMAX_DELAY);
+  vTaskDelay(portMAX_DELAY); // don't remove it!
   ESP_LOGE(TAG, "xxxxxxxxxxxxxxxxx   IN LOOP   xxxxxxxxxxxxxxxxxxxxxxxx");
-}
-
-void xbutton_tick(void *pvParameters) {
-  (void)pvParameters;
-  xob.tick();
-}
-
-void xws_tick(void *pvParameters) {
-  (void)pvParameters;
-  while (1) {
-    APRSWebServerTick();
-    vTaskDelay(10 / portTICK_PERIOD_MS);
-  }
 }
 
 /*
@@ -238,7 +204,3 @@ void button_tick(void *pvParameters) {
   }
 }
 */
-
-void vTimerCB(TimerHandle_t pxTimer) { 
-  //ESP_LOGE(TAG, "Timer fire"); 
-  }

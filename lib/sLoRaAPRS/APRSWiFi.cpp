@@ -18,7 +18,7 @@
 #include <TrackerDisplay.h>
 #include <apptypes.h>
 
-extern Config reg;
+extern Config cfg;
 
 #ifdef ESP32
 #elif defined(ESP8266)

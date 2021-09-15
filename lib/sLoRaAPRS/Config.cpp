@@ -289,7 +289,7 @@ String getWifiMode() {
     case wifi_client:
       return String("WiFi Client");
     default:
-      return String(" no mode");
+      return String("ERROR no mode");
       break;
   }
 }

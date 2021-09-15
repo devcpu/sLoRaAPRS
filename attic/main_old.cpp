@@ -65,20 +65,20 @@ void setup() {
    */
 
   ConfigInit();
-  // write3Line("Init Pref.", "Prefernces", "   +OK", true, DISPLA_DELAY_SHORT);
+  // write3Line("Init Pref.", "Prefernces", "   +OK", true, DISPLAY_DELAY_SHORT);
 
   if (Wire.begin(SDA, SCL)) {
-    // write3toSerial("Init I2C", "  System", "   +OK", DISPLA_DELAY_SHORT);
+    // write3toSerial("Init I2C", "  System", "   +OK", DISPLAY_DELAY_SHORT);
   } else {
-    // write3toSerial("Init I2C", "   -ERR", "check wire", DISPLA_DELAY_LONG);
+    // write3toSerial("Init I2C", "   -ERR", "check wire", DISPLAY_DELAY_LONG);
   }
 
   if (DisplayInit()) {
-    // write3Line("Init Disp.", "Display", "   +OK", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init Disp.", "Display", "   +OK", true, DISPLAY_DELAY_SHORT);
     reg.hardware.OLED = true;
   } else {
     // write3Line("Init Disp.", "   -ERR", "check wire", true,
-    // DISPLA_DELAY_LONG);
+    // DISPLAY_DELAY_LONG);
     reg.hardware.OLED = false;
   }
 
@@ -86,38 +86,38 @@ void setup() {
   // write3Line({{""}, {""}, {""}}, true, 1);
 #ifdef T_BEAM_V1_0
   if (initAXP()) {
-    // write3Line("Init AXP", " AXP 192", "   +OK", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init AXP", " AXP 192", "   +OK", true, DISPLAY_DELAY_SHORT);
     reg.hardware.AXP192 = true;
   } else {
-    // write3Line("Init AXP", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);
+    // write3Line("Init AXP", "   -ERR", "check wire", true, DISPLAY_DELAY_LONG);
     reg.hardware.AXP192 = false;
   }
 #endif
 */
   if (BMEHandlerInit()) {
-    // write3Line("Init BME", "  BME280", "   +OK", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init BME", "  BME280", "   +OK", true, DISPLAY_DELAY_SHORT);
     reg.hardware.BME280 = true;
   } else {
-    // write3Line("Init BME", "   -ERR", "check wire", true, DISPLA_DELAY_LONG);
+    // write3Line("Init BME", "   -ERR", "check wire", true, DISPLAY_DELAY_LONG);
     reg.hardware.BME280 = false;
   }
 
   if (ESPFSInit()) {
-    // write3Line("Init SPIFS", "  SPIFFS", "   +OK", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init SPIFS", "  SPIFFS", "   +OK", true, DISPLAY_DELAY_SHORT);
   } else {
     // write3Line("Init SPIFS", "   -ERR", "check chip", true,
-    // DISPLA_DELAY_SHORT);
+    // DISPLAY_DELAY_SHORT);
   }
 
   ss.begin(GPS_BAUD, SERIAL_8N1, TXPin, RXPin);
-  // write3Line("Init UART", " GPS UART", "   +OK", true, DISPLA_DELAY_SHORT);
+  // write3Line("Init UART", " GPS UART", "   +OK", true, DISPLAY_DELAY_SHORT);
 
   if (LoRa_init()) {
     // write3Line("Init LoRa", "LoDaDevive", "   +OK", true,
-    // DISPLA_DELAY_SHORT);
+    // DISPLAY_DELAY_SHORT);
   } else {
     // write3Line("Init LoRa", "   -ERR", "check wire", true,
-    // DISPLA_DELAY_SHORT);
+    // DISPLAY_DELAY_SHORT);
   }
   // lora.onReceive(lora.processMessage);
   // lora.receive();
@@ -127,7 +127,7 @@ void setup() {
     button.attachClick(singleClick_CB);
     button.attachDoubleClick(doubleClick_CB);
     button.attachLongPressStop(longClick_CB);
-    // write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLA_DELAY_SHORT);
+    // write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLAY_DELAY_SHORT);
     int timerid = 2;
     button_timer = xTimerCreate("ButtonTimer", pdMS_TO_TICKS(100), pdTRUE,
                                 (void*)timerid, &button_tick);
@@ -178,8 +178,8 @@ void setup() {
   // reg.current_wifi_mode = wifi_client;
   reg.current_wifi_mode = wifi_ap;
 
-  write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
-  write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLA_DELAY_MEDIUM);
+  write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLAY_DELAY_MEDIUM);
+  write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLAY_DELAY_MEDIUM);
 
   if (reg.current_wifi_mode == wifi_ap) {
     Serial.println("start wifi_ap");
