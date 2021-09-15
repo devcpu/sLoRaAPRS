@@ -107,7 +107,7 @@ static const uint32_t GPSBaud = 9600;
 #endif
 
 // Button of TTGO T-Beam
-// @FIXME 38 for T_BEAM_V1_0
+// @CHANGEME
 // 2 for my test board
 #ifdef T_BEAM_V1_0
 #define BUTTON 2  // GPIO number for Button on TTGO T-Beam
