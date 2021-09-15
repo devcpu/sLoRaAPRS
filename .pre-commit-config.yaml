@@ -11,19 +11,16 @@ repos:
     -   id: detect-private-key
     -   id: mixed-line-ending
 
-repos:
--   repo: github.com/pre-commit/mirrors-csslint
-    rev: master
-    hooks:
-    -   id: csslint
+# -   repo: github.com/pre-commit/mirrors-csslint
+#     rev: master
+#     hooks:
+#     -   id: csslint
 
-repos:
--   repo: github.com/Lucas-C/pre-commit-hooks-java
-    rev: master
-    hooks:
-    -   id: validate-html
+#-   repo: github.com/Lucas-C/pre-commit-hooks-java
+#    rev: master
+#    hooks:
+#    -   id: validate-html
 
-repos:
 -   repo: https://github.com/bmorcos/pre-commit-hooks-cpp
     rev: 9a5aa38207bf557961110d6a4f7e3a9d352911f9
     hooks:
@@ -34,3 +31,28 @@ repos:
     -   id: cppcheck
         exclude: (^attic|^build|^doc)
         args: [--language=c++,--inline-suppr]
+
+- repo: local
+  hooks:
+  -     id: compile
+        name: test compile
+        entry: .compile
+        language: script
+
+#      - id: bandit
+#        name: run bandit
+#        entry: make bandit
+#        language: system
+#        types: [python]
+#      - id: pytest
+#        name: run pytest
+#        entry: pytest -v .
+#        language: system
+#        types: [python]
+      #  stages: [commit,manual,push]
+      # - id: python-safety-dependencies-check
+      #   name: python-safety-dependencies-check
+      #   entry: safety
+      #   args: [check, --full-report]
+      #   language: system
+      #   files: requirements
