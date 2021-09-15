@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-13 3:42
+ * Last Modified: 2021-09-15 12:40
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -12,24 +12,23 @@
  */
 
 // #include <uxa_debug.h>
-#include "freertos/FreeRTOS.h"
 #include <APRSWebServer.h>
 #include <APRSWiFi.h>
 #include <APRS_MSG.h>
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
 #include <AsyncJson.h>
-#include <Preferences.h>
 #include <Config.h>
+#include <Preferences.h>
 #include <SPIFFSEditor.h>
 #include <TinyGPS++.h>
 #include <apptypes.h>
-
+#include "freertos/FreeRTOS.h"
 
 TinyGPSPlus gps;
 
 extern Preferences preferences;
-//extern QueueHandle_t LoRaTXQueue;
+// extern QueueHandle_t LoRaTXQueue;
 
 // #include "CallBackList.h"
 
@@ -183,10 +182,9 @@ void WebserverStart(void) {
       request->redirect("/");
     }
     if (changed) {
-
     } else {
       request->send(SPIFFS, "/main.html", "text/html", false,
-                  ProcessorChangeMode);
+                    ProcessorChangeMode);
     }
   });
 
@@ -364,6 +362,7 @@ String getSystemInfoTable(void) {
 #ifdef ESP32
       {"Chip Revision:", String(ESP.getChipRevision())},
       {"ESP32 Chip ID:",
+       // cppcheck-suppress shiftTooManyBits
        String((uint16_t)chipid >> 32, HEX) + String((uint32_t)chipid, HEX)},
       {"Reset Reason CPU0: ", getResetReason(rtc_get_reset_reason(0))},
       {"Reset Reason CPU1: ", getResetReason(rtc_get_reset_reason(1))},
@@ -394,11 +393,14 @@ String getSystemInfoTable(void) {
       {"Flash ide  size:", String(ESP.getFlashChipSize() / 1024) + "kB"},
       {"Flash ide speed:",
        String(ESP.getFlashChipSpeed() / 1000 / 1000) + "MHz"},
-      {"Flash ide mode:", String((ideMode == FM_QIO    ? "QIO"
-                                  : ideMode == FM_QOUT ? "QOUT"
-                                  : ideMode == FM_DIO  ? "DIO"
-                                  : ideMode == FM_DOUT ? "DOUT"
-                                                       : "UNKNOWN"))},
+      {"Flash ide mode:",
+       String((ideMode == FM_QIO
+                   ? "QIO"
+                   : ideMode == FM_QOUT
+                         ? "QOUT"
+                         : ideMode == FM_DIO
+                               ? "DIO"
+                               : ideMode == FM_DOUT ? "DOUT" : "UNKNOWN"))},
       {"Sketch size:", String(ESP.getSketchSize() / 1024) + "kB"},
       // size = 10
       {"Free sketch size:", String(ESP.getFreeSketchSpace() / 1024) + "kB"},
@@ -832,12 +834,12 @@ void handleRequestSendMessage(AsyncWebServerRequest *request) {
     sform.wide = wide;
   }
 
-// @FIXME
-//  if (xQueueSend(LoRaTXQueue, reinterpret_cast<SendMsgForm *>(&sform),
-//                 (TickType_t)100) != pdPASS) {
-//    Serial.printf("ERROR: Can't put APRS msg to LoRaTXQueue\n to:%s msg:%s",
-//                  sform.to.c_str(), sform.msg.c_str());
-//  }
+  // @FIXME
+  //  if (xQueueSend(LoRaTXQueue, reinterpret_cast<SendMsgForm *>(&sform),
+  //                 (TickType_t)100) != pdPASS) {
+  //    Serial.printf("ERROR: Can't put APRS msg to LoRaTXQueue\n to:%s msg:%s",
+  //                  sform.to.c_str(), sform.msg.c_str());
+  //  }
   cfg.TxMsg.to = to;
 }
 
@@ -974,7 +976,7 @@ bool handleRequestChangeMode(AsyncWebServerRequest *request) {
   if (request->hasParam(PREFS_CURRENT_SYSTEM_MODE)) {
     String new_run_mode = getWebParam(request, PREFS_CURRENT_SYSTEM_MODE);
     rv = setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE,
-                 static_cast<int>(new_run_mode.toInt()));
+                      static_cast<int>(new_run_mode.toInt()));
     cfg.current_run_mode = (run_mode) static_cast<int>(new_run_mode.toInt());
   }
 
@@ -988,7 +990,7 @@ bool handleRequestChangeMode(AsyncWebServerRequest *request) {
 
 /**
  * @brief Get the Build Date And Time for device info
- * 
+ *
  * @return String "2017-03-07T11:08:02"
  */
 String GetBuildDateAndTime(void) {
@@ -1007,10 +1009,10 @@ String GetBuildDateAndTime(void) {
       case 0:  // Month
         smonth = str;
         break;
-      case 1:  // Day
+      case 1:             // Day
         day = atoi(str);  // Flawfinder: ignore
         break;
-      case 2:  // Year
+      case 2:              // Year
         year = atoi(str);  // Flawfinder: ignore
     }
   }
@@ -1095,9 +1097,9 @@ String optionsFeldGenerator(uint8_t selected, const char *name,
                             String data[][2], uint8_t size) {
   DDD(name);
   DDD(selected);
-  char buf[1200] = {0}; // Flawfinder: ignore
-  char zbuf[1200] = {0}; // Flawfinder: ignore
-  char selectxt[32] = {0}; // Flawfinder: ignore
+  char buf[1200] = {0};     // Flawfinder: ignore
+  char zbuf[1200] = {0};    // Flawfinder: ignore
+  char selectxt[32] = {0};  // Flawfinder: ignore
   snprintf(zbuf, sizeof(zbuf), "\n\n<select name='%s'>\n", name);
   strncat(buf, zbuf, sizeof(buf));
   for (uint8_t i = 0; i < size; i++) {

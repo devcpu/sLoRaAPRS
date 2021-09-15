@@ -63,7 +63,7 @@ void reciveMessages() {
   writeUTC();
 }
 
-void sendMessage(char* outgoing, boolean toDigi) {
+void sendMessage(char *outgoing, boolean toDigi) {
   char txmsgbuf[16] = {0};
   Serial.printf("sendMessage '%s'\n", outgoing);
   // 850 ms init plus header 35 / char both with spare
@@ -127,7 +127,7 @@ void processMessage(void) {
 
   String incoming = "";  // payload of packet
 
-  while (LoRa.available()) {        // can't use readString() in callback, so
+  while (LoRa.available()) {  // can't use readString() in callback, so
     incoming += static_cast<char>(LoRa.read());  // add bytes one by one
   }
 

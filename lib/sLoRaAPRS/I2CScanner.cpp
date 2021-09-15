@@ -24,14 +24,12 @@ void I2CScanner::scan() {
   Serial.println();
   Serial.println("I2C scanner. Scanning ...");
 
-
-// the scanner didn't found AXP-Device
+  // the scanner didn't found AXP-Device
 
 #ifdef T_BEAM_V1_0
   devices.push_back(52);
   device_count++;
 #endif
-  
 
   for (byte i = 58; i < 62; i++) {
     Wire.beginTransmission(i);          // Begin I2C transmission Address (i)
@@ -48,7 +46,7 @@ void I2CScanner::scan() {
       device_count++;
       Serial.println();
     } else {
-        if (Wire.endTransmission() == 4) {
+      if (Wire.endTransmission() == 4) {
         Serial.print("Found error");
       }
     }
@@ -65,7 +63,6 @@ void I2CScanner::scan() {
  *
  */
 void I2CScanner::initialize() {
-  
   if (!devices.empty()) {
     Serial.println("Mist");
     for (std::vector<byte>::iterator it = devices.begin(); it != devices.end();

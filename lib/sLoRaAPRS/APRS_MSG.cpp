@@ -21,7 +21,7 @@ extern TinyGPSPlus gps;
 
 // ".../...g...t...r...p...P...h..b...."
 
-char* APRS_MSG::computeWXField(char* rv) {
+char *APRS_MSG::computeWXField(char *rv) {
   char hum_buf[16] = {0};
   snprintf(rv, sizeof(rv), "%s/%sg%st%03dr%sp%sP%sh%sb%05d %s",
            "...",  // winddirection 0-360
@@ -47,7 +47,7 @@ char* APRS_MSG::computeWXField(char* rv) {
  * @param float humidity: humidity
  * @return char*
  */
-char* APRS_MSG::calcHumidity(char* rv, float humidity) {
+char *APRS_MSG::calcHumidity(char *rv, float humidity) {
   if (humidity == 100) {
     snprintf(rv, sizeof(rv), "%s", "00");
   } else {
@@ -56,7 +56,7 @@ char* APRS_MSG::calcHumidity(char* rv, float humidity) {
   return rv;
 }
 
-char* APRS_MSG::computeAPRSPos(char* rv) {
+char *APRS_MSG::computeAPRSPos(char *rv) {
   char buf_lat[16] = {0};
   char buf_lng[16] = {0};
   snprintf(
@@ -66,13 +66,13 @@ char* APRS_MSG::computeAPRSPos(char* rv) {
   return rv;
 }
 
-char* APRS_MSG::computeTrackInfo(char* rv) {
+char *APRS_MSG::computeTrackInfo(char *rv) {
   snprintf(rv, sizeof(rv), "%03.0f/%03.0f/A=%06.0f", cfg.gps_move.speed,
            cfg.gps_move.course, cfg.gps_location.altitude);
   return rv;
 }
 
-char* APRS_MSG::computeTimestamp(char* rv) {
+char *APRS_MSG::computeTimestamp(char *rv) {
   // day/hour/minute
   snprintf(rv, sizeof(rv), "@%02d%02d%02dz", cfg.gps_time.day,
            cfg.gps_time.hour, cfg.gps_time.minute);
@@ -111,7 +111,7 @@ double_t APRS_MSG::f2c(double_t temp) { return round((temp - 32) * 5 / 9); }
 
 double_t APRS_MSG::c2f(double_t temp) { return round(temp * 9 / 5 + 32); }
 
-char* APRS_MSG::dc2gms(char* rv, double gpsdata, boolean lng) {
+char *APRS_MSG::dc2gms(char *rv, double gpsdata, boolean lng) {
   char fstr[16] = {0};
   // char retvar[16] = {0};
   char ew;
@@ -144,7 +144,7 @@ char* APRS_MSG::dc2gms(char* rv, double gpsdata, boolean lng) {
   } else {
     strncpy(fstr, "%02d%02d.%02d%c", sizeof(fstr));
   }
-  snprintf(rv, sizeof(rv), // Flawfinder: ignore
-          fstr, grad, minute, secunde, ew);  
+  snprintf(rv, sizeof(rv),  // Flawfinder: ignore
+           fstr, grad, minute, secunde, ew);
   return rv;
 }

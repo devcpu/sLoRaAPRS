@@ -4,21 +4,20 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-13 3:38
+ * Last Modified: 2021-09-15 12:59
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
+#include <Config.h>
 #include <LoRaAPRSConfig.h>
 #include <Preferences.h>
-#include <Config.h>
 #include <apptypes.h>
 #include <uxa_debug.h>
 
 Config cfg;
-
 
 void ConfigInit(void) {
   Preferences preferences;
@@ -28,15 +27,15 @@ void ConfigInit(void) {
   cfg.Release = preferences.getString(PREFS_RELASE);
 
   cfg.boot_count = preferences.getULong64(PREFS_BOOT_COUNT, 1ULL);
-// @FIXME
-//  cfg.boot_count++;
-//  Serial.printf("write boot_count: %d\n", cfg.boot_count);
-//  preferences.putULong64(PREFS_BOOT_COUNT, cfg.boot_count);
+  // @FIXME
+  //  cfg.boot_count++;
+  //  Serial.printf("write boot_count: %d\n", cfg.boot_count);
+  //  preferences.putULong64(PREFS_BOOT_COUNT, cfg.boot_count);
 
   cfg.current_wifi_mode = static_cast<wifi_mode>(
-      preferences.getUInt(PREFS_CURRENT_WIFI_MODE, int(wifi_ap)));
-  cfg.current_run_mode = static_cast<run_mode>(
-      preferences.getUInt(PREFS_CURRENT_SYSTEM_MODE, int(mode_tracker)));
+      preferences.getUInt(PREFS_CURRENT_WIFI_MODE, static_cast<int>(wifi_ap)));
+  cfg.current_run_mode = static_cast<run_mode>(preferences.getUInt(
+      PREFS_CURRENT_SYSTEM_MODE, static_cast<int>(mode_tracker)));
 
   cfg.call = preferences.getString(PREFS_CALL, CHANGE_ME);
   cfg.aprs_call_ext = preferences.getString(PREFS_APRS_CALL_EX, "3");
@@ -137,7 +136,7 @@ void ConfigWriteInit(void) {
 
 /* * * * * * * * * * * * * * * * * * * * * */
 
-String getPrefsString(const char* key) {
+String getPrefsString(const char *key) {
   Preferences preferences;
   String retvar;
   preferences.begin(NVS_APP_NAME_SPACE, false);
@@ -146,7 +145,7 @@ String getPrefsString(const char* key) {
   return retvar;
 }
 
-uint16_t getPrefsInt(const char* key) {
+uint16_t getPrefsInt(const char *key) {
   Preferences preferences;
   uint16_t retvar;
   preferences.begin(NVS_APP_NAME_SPACE, false);
@@ -155,7 +154,7 @@ uint16_t getPrefsInt(const char* key) {
   return retvar;
 }
 
-char getPrefsChar(const char* key) {
+char getPrefsChar(const char *key) {
   Preferences preferences;
   char retvar;
   preferences.begin(NVS_APP_NAME_SPACE, false);
@@ -164,7 +163,7 @@ char getPrefsChar(const char* key) {
   return retvar;
 }
 
-double getPrefsDouble(const char* key) {
+double getPrefsDouble(const char *key) {
   Preferences preferences;
   double retvar;
   preferences.begin(NVS_APP_NAME_SPACE, false);
@@ -175,7 +174,7 @@ double getPrefsDouble(const char* key) {
 
 /* * * * * * * * * * * * * * * * * * * * * */
 
-void setPrefsString(const char* key, String value) {
+void setPrefsString(const char *key, String value) {
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
   delay(500);
@@ -184,7 +183,7 @@ void setPrefsString(const char* key, String value) {
   Serial.println(old_value);
   if (old_value != value) {
     Serial.printf("write %s\n", value.c_str());
-    long rv = preferences.putString(key, value);
+    uint32_t rv = preferences.putString(key, value);
     Serial.printf("write of key=%s value=%s returns: %lu\n", key, value.c_str(),
                   rv);
     String new_var = preferences.getString(key);
@@ -193,7 +192,7 @@ void setPrefsString(const char* key, String value) {
   preferences.end();
 }
 
-bool setPrefsUInt(const char* key, uint16_t value) {
+bool setPrefsUInt(const char *key, uint16_t value) {
   bool rv = false;
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
@@ -202,7 +201,7 @@ bool setPrefsUInt(const char* key, uint16_t value) {
   DDE("old value: %d", old_value);
   if (old_value != value) {
     preferences.putUInt(key, value);
-    rv = true; 
+    rv = true;
     DDD("update");
   }
   preferences.end();
@@ -210,7 +209,7 @@ bool setPrefsUInt(const char* key, uint16_t value) {
   return rv;
 }
 
-void setPrefsDouble(const char* key, double value) {
+void setPrefsDouble(const char *key, double value) {
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
   double old_value = getPrefsDouble(key);
@@ -223,7 +222,7 @@ void setPrefsDouble(const char* key, double value) {
   preferences.end();
 }
 
-void setPrefsChar(const char* key, char value) {
+void setPrefsChar(const char *key, char value) {
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
   char old_value = getPrefsChar(key);

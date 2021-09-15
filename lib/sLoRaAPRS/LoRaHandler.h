@@ -7,10 +7,9 @@
  * Last Modified: 2021-03-29 1:18
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
- * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt 
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
-
 
 #ifndef LIB_SLORAAPRS_LORAHANDLER_H_
 #define LIB_SLORAAPRS_LORAHANDLER_H_
@@ -64,12 +63,10 @@ struct LoRaRXControl {
   volatile int isMessage = 0;
 };
 
-
 extern LoRaRXControl lora_control;
 
-
 bool LoRa_init(void);
-void sendMessage(char* outgoing, boolean toDigi);
+void sendMessage(char *outgoing, boolean toDigi);
 void onReceive(int packetSize);
 void LoRa_tick(void);
 void processMessage(void);

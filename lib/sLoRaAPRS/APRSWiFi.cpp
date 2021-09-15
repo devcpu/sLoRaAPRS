@@ -7,14 +7,14 @@
  * Last Modified: 2021-09-13 1:26
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
- * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt 
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
 #include <APRSWiFi.h>
 #include <Arduino.h>
-#include <LoRaAPRSConfig.h>
 #include <Config.h>
+#include <LoRaAPRSConfig.h>
 #include <TrackerDisplay.h>
 #include <apptypes.h>
 
@@ -33,7 +33,7 @@ void WifiAPInit(void) {
 #ifdef ESP32
   // WiFi.softAP(cfg.APCredentials.auth_name.c_str(),
   // cfg.APCredentials.auth_tocken.c_str());
-  WiFi.softAP("sLoRaAPRS", "letmein42"); // FIXME from reg!
+  WiFi.softAP("sLoRaAPRS", "letmein42");  // FIXME from reg!
   Serial.println("WiFi.softAP");
 // @TODO sollte hier nicht nötig sein!
 #elif defined(ESP8266)

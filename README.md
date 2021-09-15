@@ -2,11 +2,11 @@
 
 simple LoRa APRS Software One-in-All
 
-APRS stands for Automatic Packet Reporting System. 
+APRS stands for Automatic Packet Reporting System.
 
 Please take a look at https://en.wikipedia.org/wiki/Automatic_Packet_Reporting_System
 
-## Goal 
+## Goal
 
 **based on ESP8266 / ESP32 / (ATmega 328 / Arduino) and using LoRa**
 

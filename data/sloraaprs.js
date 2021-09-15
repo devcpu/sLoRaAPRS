@@ -1,4 +1,4 @@
-//window.onload 
+//window.onload
 
 
 var ws = new WebSocket("ws://%SERVER_IP%/ws");
@@ -67,7 +67,7 @@ function checkReboot() {
         //window.setTimeout('window.location = "/rebootinfo"', 0);
         x.open('GET', '/reboot', true);
         x.send();
-        
+
     }
 
 }

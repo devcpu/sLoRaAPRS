@@ -19,17 +19,16 @@
 #include <TrackerDisplay.h>
 #include <Wire.h>
 
-
 #include <vector>
 
 class I2CScanner {
-  public:
-    std::vector<byte> devices;
-    byte device_count = 0;
-    
-    bool scannend = false;
-    void scan();
-    void initialize();
+ public:
+  std::vector<byte> devices;
+  byte device_count = 0;
+
+  bool scannend = false;
+  void scan();
+  void initialize();
 };
 
 #endif  // LIB_SLORAAPRS_I2CSCANNER_H_

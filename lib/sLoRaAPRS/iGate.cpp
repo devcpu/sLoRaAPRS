@@ -20,18 +20,18 @@
 #include <freertos/semphr.h>
 #include <freertos/task.h>
 
-void clienttcp(void* c);
-void SendToServer(char* value);
-void ProcessMessage(char* value);
+void clienttcp(void *c);
+void SendToServer(char *value);
+void ProcessMessage(char *value);
 
-const char* host = "igates.aprs.fi";
+const char *host = "igates.aprs.fi";
 // const char* host = "85.214.27.31";
 const uint16_t port = 14580;
-const char* call = "DL7UXA";
+const char *call = "DL7UXA";
 const uint8_t call_ext = 10;
-const char* passcode = "22714";
-const char* clientversion = "sLoRaAPRS 0.1-alpha";
-const char* filter = "t/poimqstunw";
+const char *passcode = "22714";
+const char *clientversion = "sLoRaAPRS 0.1-alpha";
+const char *filter = "t/poimqstunw";
 const float filterlat = 52.5;
 const float filterlng = 13.6;
 const uint16_t filterrange = 25;
@@ -73,21 +73,21 @@ void setup() {
   delay(1000);
 }
 
-void clienttcp(void* c) {
+void clienttcp(void *c) {
   // asyncronous tcp client
   Serial.println("\n}start clienttcp ...");
   AsyncClient client;
 
-  client.onError([](void* arg, AsyncClient* c, int8_t error) {
+  client.onError([](void *arg, AsyncClient *c, int8_t error) {
     Serial.printf("\n}Error: %s\n\n", c->errorToString(error));
     c->close();
   });
 
-  client.onTimeout([](void* arg, AsyncClient* c, uint32_t time) {
+  client.onTimeout([](void *arg, AsyncClient *c, uint32_t time) {
     Serial.printf("\n}Timeout %d\n\n", (uint32_t)time);
   });
 
-  client.onConnect([](void* arg, AsyncClient* c) {
+  client.onConnect([](void *arg, AsyncClient *c) {
     char authbuf[255] = {0};
     snprintf(authbuf, sizeof(authbuf),
              "user %s-%d pass %s vers %s filter m/25 \r\n", call, call_ext,
@@ -97,14 +97,14 @@ void clienttcp(void* c) {
     delay(2000);
     c->write("DL7UXA-10>APRS,TCPIP*:!5229.07N/01334.53E_\r\n");
   });
-  client.onData([](void* arg, AsyncClient* c, void* data, size_t len) {
+  client.onData([](void *arg, AsyncClient *c, void *data, size_t len) {
     // Serial.printf("\n}Data received with length: %d\n", len);
     // Serial.printf("\n->data: %s in line %d", (char*)data, __LINE__);
 
     char subbuff[len];  // NOLINT(runtime/arrays)
-    memcpy(subbuff, &(reinterpret_cast<char*>(data))[0], len);
+    memcpy(subbuff, &(reinterpret_cast<char *>(data))[0], len);
 
-    if (xQueueSend(xQueuereceive, reinterpret_cast<char*>(data),
+    if (xQueueSend(xQueuereceive, reinterpret_cast<char *>(data),
                    (TickType_t)10) != pdPASS) {
       Serial.printf("\nProblema Problema, %d\n", __LINE__);
     }
@@ -155,18 +155,18 @@ void loop() {
   // while (true);//client.connected)
 }
 
-void SendToServer(char* value) {
+void SendToServer(char *value) {
   Serial.printf("\nDDD:> in SendToServer line: %d sending %s \n", __LINE__,
                 value);
-  if (xQueueSend(xQueuesend, reinterpret_cast<char*>(value), (TickType_t)10) !=
+  if (xQueueSend(xQueuesend, reinterpret_cast<char *>(value), (TickType_t)10) !=
       pdPASS) {
     /* Failed to post the message, even after 10 ticks. */
     Serial.printf("unable to send message %s\n",
-                  reinterpret_cast<char*>(value));
+                  reinterpret_cast<char *>(value));
   }
 }
 
-void ProcessMessage(char* value) {
+void ProcessMessage(char *value) {
   /**
    * @var		string	Serial.printf(
    *//**

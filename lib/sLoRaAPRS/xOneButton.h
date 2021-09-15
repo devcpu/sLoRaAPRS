@@ -20,8 +20,8 @@
 // 26.09.2018 Jay M Ericsson: compiler warnings removed.
 // -----
 
-#ifndef xOneButton_h
-#define xOneButton_h
+#ifndef LIB_SLORAAPRS_XONEBUTTON_H_
+#define LIB_SLORAAPRS_XONEBUTTON_H_
 
 #include "Arduino.h"
 #include "freertos/FreeRTOS.h"
@@ -30,23 +30,24 @@
 
 extern "C" {
 typedef void (*callbackFunction)(void);
-typedef void (*parameterizedCallbackFunction)(void*);
+typedef void (*parameterizedCallbackFunction)(void *);
 }
 
-
-class xOneButton
-{
-public:
+class xOneButton {
+ public:
   // ----- Constructor -----
   xOneButton();
 
   /**
    * Initialize the OneButton library.
    * @param pin The pin to be used for input from a momentary button.
-   * @param activeLow Set to true when the input level is LOW when the button is pressed, Default is true.
-   * @param pullupActive Activate the internal pullup when available. Default is true.
+   * @param activeLow Set to true when the input level is LOW when the button is
+   * pressed, Default is true.
+   * @param pullupActive Activate the internal pullup when available. Default is
+   * true.
    */
-  xOneButton(int pin, boolean activeLow = true, bool pullupActive = true);
+  explicit xOneButton(int pin, boolean activeLow = true,
+                      bool pullupActive = true);
 
   // ----- Set runtime parameters -----
 
@@ -70,14 +71,15 @@ public:
    * @param newFunction
    */
   void attachClick(callbackFunction newFunction);
-  void attachClick(parameterizedCallbackFunction newFunction, void* parameter);
+  void attachClick(parameterizedCallbackFunction newFunction, void *parameter);
 
   /**
    * Attach an event to be called after a double click is detected.
    * @param newFunction
    */
   void attachDoubleClick(callbackFunction newFunction);
-  void attachDoubleClick(parameterizedCallbackFunction newFunction, void* parameter);
+  void attachDoubleClick(parameterizedCallbackFunction newFunction,
+                         void *parameter);
 
   /**
    * @deprecated Replaced by longPressStart, longPressStop, and duringLongPress.
@@ -96,21 +98,25 @@ public:
    * @param newFunction
    */
   void attachLongPressStart(callbackFunction newFunction);
-  void attachLongPressStart(parameterizedCallbackFunction newFunction, void* parameter);
+  void attachLongPressStart(parameterizedCallbackFunction newFunction,
+                            void *parameter);
 
   /**
-   * Attach an event to fire as soon as the button is released after a long press.
+   * Attach an event to fire as soon as the button is released after a long
+   * press.
    * @param newFunction
    */
   void attachLongPressStop(callbackFunction newFunction);
-  void attachLongPressStop(parameterizedCallbackFunction newFunction, void* parameter);
+  void attachLongPressStop(parameterizedCallbackFunction newFunction,
+                           void *parameter);
 
   /**
    * Attach an event to fire periodically while the button is held down.
    * @param newFunction
    */
   void attachDuringLongPress(callbackFunction newFunction);
-  void attachDuringLongPress(parameterizedCallbackFunction newFunction, void* parameter);
+  void attachDuringLongPress(parameterizedCallbackFunction newFunction,
+                             void *parameter);
 
   // ----- State machine functions -----
 
@@ -144,13 +150,13 @@ public:
    */
   void reset(void);
 
-private:
-  int _pin; // hardware pin number.
-  unsigned int _debounceTicks = 50; // number of ticks for debounce times.
-  unsigned int _clickTicks = 600; // number of ticks that have to pass by
-                                  // before a click is detected.
-  unsigned int _pressTicks = 1000; // number of ticks that have to pass by
-                                   // before a long button press is detected
+ private:
+  int _pin;                          // hardware pin number.
+  unsigned int _debounceTicks = 50;  // number of ticks for debounce times.
+  unsigned int _clickTicks = 600;    // number of ticks that have to pass by
+                                     // before a click is detected.
+  unsigned int _pressTicks = 1000;   // number of ticks that have to pass by
+                                     // before a long button press is detected
 
   int _buttonPressed;
 
@@ -159,33 +165,33 @@ private:
   // These variables will hold functions acting as event source.
   callbackFunction _clickFunc = NULL;
   parameterizedCallbackFunction _paramClickFunc = NULL;
-  void* _clickFuncParam = NULL;
+  void *_clickFuncParam = NULL;
 
   callbackFunction _doubleClickFunc = NULL;
   parameterizedCallbackFunction _paramDoubleClickFunc = NULL;
-  void* _doubleClickFuncParam = NULL;
+  void *_doubleClickFuncParam = NULL;
 
   callbackFunction _pressFunc = NULL;
   callbackFunction _pressStartFunc = NULL;
 
   callbackFunction _longPressStartFunc = NULL;
   parameterizedCallbackFunction _paramLongPressStartFunc = NULL;
-  void* _longPressStartFuncParam = NULL;
+  void *_longPressStartFuncParam = NULL;
 
   callbackFunction _longPressStopFunc = NULL;
   parameterizedCallbackFunction _paramLongPressStopFunc = NULL;
-  void* _longPressStopFuncParam;
+  void *_longPressStopFuncParam;
 
   callbackFunction _duringLongPressFunc = NULL;
   parameterizedCallbackFunction _paramDuringLongPressFunc = NULL;
-  void* _duringLongPressFuncParam = NULL;
+  void *_duringLongPressFuncParam = NULL;
 
   // These variables that hold information across the upcoming tick calls.
   // They are initialized once on program start and are updated every time the
   // tick function is called.
   int _state = 0;
-  unsigned long _startTime; // will be set in state 1
-  unsigned long _stopTime; // will be set in state 2
+  uint64_t _startTime;  // will be set in state 1
+  uint64_t _stopTime;   // will be set in state 2
 };
 
-#endif
+#endif  // LIB_SLORAAPRS_XONEBUTTON_H_

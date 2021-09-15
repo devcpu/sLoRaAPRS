@@ -7,7 +7,7 @@
  * Last Modified: 2021-03-29 0:24
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
- * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt 
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
@@ -31,39 +31,39 @@ class AbstracButtonState {
  public:
   virtual ~AbstracButtonState();
 
-  virtual void singleClick(APRSControler& aprs_controler) = 0;
-  virtual void doubleClick(APRSControler& aprs_controler) = 0;
-  virtual void longClick(APRSControler& aprs_controler);
+  virtual void singleClick(APRSControler &aprs_controler) = 0;
+  virtual void doubleClick(APRSControler &aprs_controler) = 0;
+  virtual void longClick(APRSControler &aprs_controler);
   virtual void kino();
 
  protected:
-  void setState(APRSControler& aprs_controler, AbstracButtonState* st);
+  void setState(APRSControler &aprs_controler, AbstracButtonState *st);
 };
 
 class StateDisplayMode : public AbstracButtonState {
  public:
-  virtual void singleClick(APRSControler& aprs_controler);
-  virtual void doubleClick(APRSControler& aprs_controler);
+  virtual void singleClick(APRSControler &aprs_controler);
+  virtual void doubleClick(APRSControler &aprs_controler);
 };
 
 class StateDefault : public AbstracButtonState {
  public:
-  virtual void singleClick(APRSControler& aprs_controler);
-  virtual void doubleClick(APRSControler& aprs_controler);
-  virtual void longClick(APRSControler& aprs_controler);
+  virtual void singleClick(APRSControler &aprs_controler);
+  virtual void doubleClick(APRSControler &aprs_controler);
+  virtual void longClick(APRSControler &aprs_controler);
 };
 
 class StateConfigCall : public AbstracButtonState {
  public:
-  virtual void singleClick(APRSControler& aprs_controler);
-  virtual void doubleClick(APRSControler& aprs_controler);
+  virtual void singleClick(APRSControler &aprs_controler);
+  virtual void doubleClick(APRSControler &aprs_controler);
 };
 
 class StateConfigMenue : public AbstracButtonState {
  public:
   StateConfigMenue(void);
-  virtual void singleClick(APRSControler& aprs_controler);
-  virtual void doubleClick(APRSControler& aprs_controler);
+  virtual void singleClick(APRSControler &aprs_controler);
+  virtual void doubleClick(APRSControler &aprs_controler);
 
  private:
   /**
@@ -74,10 +74,10 @@ class StateConfigMenue : public AbstracButtonState {
 
 class ConfigStringSelector : public AbstracButtonState {
  public:
-  ConfigStringSelector(const char* head, const char* select_list);
-  virtual void singleClick(APRSControler& aprs_controler);
-  virtual void doubleClick(APRSControler& aprs_controler);
-  virtual void longClick(APRSControler& aprs_controler);
+  ConfigStringSelector(const char *head, const char *select_list);
+  virtual void singleClick(APRSControler &aprs_controler);
+  virtual void doubleClick(APRSControler &aprs_controler);
+  virtual void longClick(APRSControler &aprs_controler);
   void kino(void);
 
  private:
@@ -86,36 +86,36 @@ class ConfigStringSelector : public AbstracButtonState {
   char _actual = '0';
   String _tmp;
   uint8_t _pos = 0;
-  const char* _hint_line0 = "1click: select";
-  const char* _hint_line1 = "2click takes";
+  const char *_hint_line0 = "1click: select";
+  const char *_hint_line1 = "2click takes";
   uint16_t _wait = 2000;
-  const char* _head;
+  const char *_head;
   String _arrow_line = "^";
   boolean _count = false;
 
-  void _showText(const char* line0, const char* line1);
+  void _showText(const char *line0, const char *line1);
   void _xdelay(uint16_t w);
 };
 
 class StateConfigWiFi : public AbstracButtonState {
  public:
-  explicit StateConfigWiFi(const char* head);
-  virtual void singleClick(APRSControler& aprs_controler);
-  virtual void doubleClick(APRSControler& aprs_controler);
+  explicit StateConfigWiFi(const char *head);
+  virtual void singleClick(APRSControler &aprs_controler);
+  virtual void doubleClick(APRSControler &aprs_controler);
 
  private:
-  const char* _head;
+  const char *_head;
   void _show(void);
 };
 
 class StateConfigRun : public AbstracButtonState {
  public:
-  explicit StateConfigRun(const char* head);
-  virtual void singleClick(APRSControler& aprs_controler);
-  virtual void doubleClick(APRSControler& aprs_controler);
+  explicit StateConfigRun(const char *head);
+  virtual void singleClick(APRSControler &aprs_controler);
+  virtual void doubleClick(APRSControler &aprs_controler);
 
  private:
-  const char* _head;
+  const char *_head;
   void _show(void);
 };
 

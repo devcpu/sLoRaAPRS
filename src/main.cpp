@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-15 2:33
+ * Last Modified: 2021-09-15 11:58
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -12,8 +12,6 @@
  */
 
 #include <main.h>
-
-
 
 void singleClick() { ESP_LOGE(TAG, "singleClick"); }
 
@@ -83,7 +81,6 @@ void setup() {
   xob.attachDoubleClick(doubleClick);
   xob.attachDuringLongPress(longClick);
 
-
   switch (cfg.current_run_mode) {
     case mode_tracker:
 
@@ -135,8 +132,6 @@ void setup() {
     WebserverStart();
   }
 
-
-
   write3Line("sLoRaAPRS", "  up &", " running", true, 0);
   delay(2000);
   write3Line("  Hello", (String("  ") + cfg.call).c_str(), "  nice to be back",
@@ -149,13 +144,12 @@ void setup() {
 }
 
 void loop() {
-  vTaskDelay(portMAX_DELAY); // don't remove it!
+  vTaskDelay(portMAX_DELAY);  // don't remove it!
   ESP_LOGE(TAG, "xxxxxxxxxxxxxxxxx   IN LOOP   xxxxxxxxxxxxxxxxxxxxxxxx");
 }
 
-/*
 void button_tick(void *pvParameters) {
-  (void) pvParameters;
+  (void)pvParameters;
   int btn_old = 0;
   int btn_now = 0;
   int bstate = LOW;
@@ -165,20 +159,20 @@ void button_tick(void *pvParameters) {
   int longPressFlag = false;
 
   while (1) {
-    //ESP_LOGE(TAG, "check button ...");
+    // ESP_LOGE(TAG, "check button ...");
     bstate = digitalRead(BUTTON);
-    if(bstate == LOW) {
+    if (bstate == LOW) {
       btn_now = 1;
     } else {
       btn_now = 0;
     }
     if (btn_now != btn_old) {
       if (btn_now == 1) {  // btn pressed down
-        //ESP_LOGE(TAG, "BTN get pressed down.");
+        // ESP_LOGE(TAG, "BTN get pressed down.");
         btn_long_press_old = xTaskGetTickCount();
         longPressFlag = false;
       } else {  // btn released
-        //ESP_LOGE(TAG, "BTN get released.");
+        // ESP_LOGE(TAG, "BTN get released.");
         if (abs(xTaskGetTickCount() - btn_long_press_old) <
                 1000 / portTICK_PERIOD_MS &&
             !longPressFlag) {
@@ -197,10 +191,8 @@ void button_tick(void *pvParameters) {
         longPressFlag = true;
       }
     } else {
-      //ESP_LOGE(TAG, "Button stays unpressed.");
-
+      // ESP_LOGE(TAG, "Button stays unpressed.");
     }
     vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
-*/

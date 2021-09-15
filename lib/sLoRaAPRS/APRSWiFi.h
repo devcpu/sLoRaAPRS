@@ -7,13 +7,12 @@
  * Last Modified: 2021-03-28 1:05
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
- * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt 
+ * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
 #ifndef LIB_SLORAAPRS_APRSWIFI_H_
 #define LIB_SLORAAPRS_APRSWIFI_H_
-
 
 #include <Arduino.h>
 #ifdef ESP32
@@ -29,7 +28,6 @@
 #include <ESPAsyncTCP.h>
 #endif
 
-
 void WifiAPInit(void);
 void WIFIAP_start(void);
 void WIFIAP_stop();
@@ -37,7 +35,5 @@ void WifiConnect(void);
 void WifiDisconnect(void);
 
 void WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info);
-
-
 
 #endif  // LIB_SLORAAPRS_APRSWIFI_H_

@@ -15,8 +15,8 @@
 #define LIB_SLORAAPRS_APRS_MSG_H_
 
 #include <Arduino.h>
-#include <LoRaAPRSConfig.h>
 #include <Config.h>
+#include <LoRaAPRSConfig.h>
 #include <TinyGPS++.h>
 
 extern Config cfg;
@@ -29,11 +29,11 @@ class APRS_MSG {
  public:
   enum aprs_symbol_table_e { primary = '/', alternate = '\\' };
 
-  static char* computeAPRSPos(char* aprs_buf);
-  static char* computeWXField(char* rv);
-  static char* computeTrackInfo(char* rv);
-  static char* calcHumidity(char* rv, float humidity);
-  static char* computeTimestamp(char* rv);
+  static char *computeAPRSPos(char *aprs_buf);
+  static char *computeWXField(char *rv);
+  static char *computeTrackInfo(char *rv);
+  static char *calcHumidity(char *rv, float humidity);
+  static char *computeTimestamp(char *rv);
   /**
    * @brief converts given miles/hour to km/h (imperial2metric)
    *
@@ -101,7 +101,7 @@ class APRS_MSG {
    */
 
   // static String dc2gms(double gpsdata, boolean lng);
-  static char* dc2gms(char* rv, double gpsdata, boolean lng);
+  static char *dc2gms(char *rv, double gpsdata, boolean lng);
 
   static double_t feed2meter(double_t feed);
   static double_t meter2feed(double_t meter);

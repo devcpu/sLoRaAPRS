@@ -23,7 +23,7 @@
 AXP20X_Class axp;
 
 bool initAXP() {
-  if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) { // "!" is correct here
+  if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) {  // "!" is correct here
     axp.setPowerOutPut(AXP192_LDO2, AXP202_ON);
     axp.setPowerOutPut(AXP192_LDO3, AXP202_ON);
     axp.setPowerOutPut(AXP192_DCDC2, AXP202_ON);

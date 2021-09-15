@@ -46,7 +46,7 @@ class APRSControler {
   void doubleClick();
   void longClick();
 
-  AbstracButtonState* button_state;
+  AbstracButtonState *button_state;
 
  private:
   uint8_t display_mode;

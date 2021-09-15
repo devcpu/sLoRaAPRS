@@ -4,7 +4,7 @@
  * File Created: 2020-09-26 21:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-27 23:55
+ * Last Modified: 2021-09-15 12:58
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -20,7 +20,7 @@
 #define DDD(x) \
   Serial.printf("DDD>: %s::%d %s\n", __FILE__, __LINE__, String(x).c_str());
 #else
-#define DDD(x);
+#define DDD(x) {};
 #endif
 
 #ifdef MODDEBUG
@@ -28,7 +28,7 @@
   Serial.printf("DDE>: %s::%d %s => %s\n", __FILE__, __LINE__, \
                 String(x).c_str(), String(y).c_str());
 #else
-#define DDE(x, y);
+#define DDE(x, y) {};
 #endif
 
 #endif  // LIB_CONFIG_UXA_DEBUG_H_

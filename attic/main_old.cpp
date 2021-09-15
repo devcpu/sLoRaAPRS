@@ -1,3 +1,16 @@
+/*
+ * File: main_old.cpp
+ * Project: attic
+ * File Created: 2021-09-15 2:45
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-09-15 3:17
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
+
 #include <APRSControler.h>
 #include <APRSWebServer.h>
 #include <APRSWiFi.h>
@@ -13,16 +26,16 @@
 #include <OneButton.h>
 #include <SPI.h>
 #include <TrackerDisplay.h>
-//#include <fap.h>
+// #include <fap.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
-#include <main.h>
+#include <main_old.h>
 
 #include "freertos/timers.h"
 
-//#include <iGate.h>
+// #include <iGate.h>
 
 extern Config reg;  // config & system status
 
@@ -48,7 +61,7 @@ char txmsg[254];
 uint8_t odd = 0;
 char satbuf[24] = "";
 
-char* input;
+char *input;
 unsigned int input_len;
 // fap_packet_t* packet;
 
@@ -65,7 +78,8 @@ void setup() {
    */
 
   ConfigInit();
-  // write3Line("Init Pref.", "Prefernces", "   +OK", true, DISPLAY_DELAY_SHORT);
+  // write3Line("Init Pref.", "Prefernces", "   +OK", true,
+  // DISPLAY_DELAY_SHORT);
 
   if (Wire.begin(SDA, SCL)) {
     // write3toSerial("Init I2C", "  System", "   +OK", DISPLAY_DELAY_SHORT);
@@ -82,28 +96,29 @@ void setup() {
     reg.hardware.OLED = false;
   }
 
-/*
-  // write3Line({{""}, {""}, {""}}, true, 1);
-#ifdef T_BEAM_V1_0
-  if (initAXP()) {
-    // write3Line("Init AXP", " AXP 192", "   +OK", true, DISPLAY_DELAY_SHORT);
-    reg.hardware.AXP192 = true;
-  } else {
-    // write3Line("Init AXP", "   -ERR", "check wire", true, DISPLAY_DELAY_LONG);
-    reg.hardware.AXP192 = false;
-  }
-#endif
-*/
+  /*
+    // write3Line({{""}, {""}, {""}}, true, 1);
+  #ifdef T_BEAM_V1_0
+    if (initAXP()) {
+      // write3Line("Init AXP", " AXP 192", "   +OK", true,
+  DISPLAY_DELAY_SHORT); reg.hardware.AXP192 = true; } else {
+      // write3Line("Init AXP", "   -ERR", "check wire", true,
+  DISPLAY_DELAY_LONG); reg.hardware.AXP192 = false;
+    }
+  #endif
+  */
   if (BMEHandlerInit()) {
     // write3Line("Init BME", "  BME280", "   +OK", true, DISPLAY_DELAY_SHORT);
     reg.hardware.BME280 = true;
   } else {
-    // write3Line("Init BME", "   -ERR", "check wire", true, DISPLAY_DELAY_LONG);
+    // write3Line("Init BME", "   -ERR", "check wire", true,
+    // DISPLAY_DELAY_LONG);
     reg.hardware.BME280 = false;
   }
 
   if (ESPFSInit()) {
-    // write3Line("Init SPIFS", "  SPIFFS", "   +OK", true, DISPLAY_DELAY_SHORT);
+    // write3Line("Init SPIFS", "  SPIFFS", "   +OK", true,
+    // DISPLAY_DELAY_SHORT);
   } else {
     // write3Line("Init SPIFS", "   -ERR", "check chip", true,
     // DISPLAY_DELAY_SHORT);
@@ -127,10 +142,12 @@ void setup() {
     button.attachClick(singleClick_CB);
     button.attachDoubleClick(doubleClick_CB);
     button.attachLongPressStop(longClick_CB);
-    // write3Line("Init 1BUT", "OneButton", "   +OK", true, DISPLAY_DELAY_SHORT);
+    // write3Line("Init 1BUT", "OneButton", "   +OK", true,
+    // DISPLAY_DELAY_SHORT);
     int timerid = 2;
-    button_timer = xTimerCreate("ButtonTimer", pdMS_TO_TICKS(100), pdTRUE,
-                                (void*)timerid, &button_tick);
+    button_timer =
+        xTimerCreate("ButtonTimer", pdMS_TO_TICKS(100), pdTRUE,
+                     reinterpret_cast<void *>(timerid), &button_tick);
     if (NULL == button_timer) {
       Serial.printf("-ERR: can't create ButtonTimer\n");
     }
@@ -179,7 +196,8 @@ void setup() {
   reg.current_wifi_mode = wifi_ap;
 
   write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLAY_DELAY_MEDIUM);
-  write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLAY_DELAY_MEDIUM);
+  write3Line("WiFi MODE", getWifiMode().c_str(), "", true,
+             DISPLAY_DELAY_MEDIUM);
 
   if (reg.current_wifi_mode == wifi_ap) {
     Serial.println("start wifi_ap");
@@ -309,7 +327,7 @@ bool initAXP() {
 }
 
 static void smartDelay(uint32_t ms) {
-  unsigned long start = millis();
+  uint64_t start = millis();
   do {
     while (ss.available()) {
       gps.encode(ss.read());
@@ -348,7 +366,6 @@ void restart(void) {
   delay(300);
   ESP.restart();
 }
-
 
 void setGPSInfo(void) {
   if (gps.location.isValid()) {

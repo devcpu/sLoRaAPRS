@@ -16,25 +16,24 @@
 
 extern APRSControler maincontroler;
 
-
 /**
  * APRSControler::getCurrentDisplayMode.
- * 
+ *
  * returns current DisplayMode
  *
  * @author	(DL7UXA) Johannes G.  Arlt
  * @global
- * @param	void	
+ * @param	void
  * @return	DisplayMode current DisplayMode
  */
 DisplayMode APRSControler::getCurrentDisplayMode(void) {
   return (DisplayMode)display_mode;
 }
 
-
 /**
- * @brief sets the next display mode by calling APRSControler::nextDisplayMode() and return it.
- * 
+ * @brief sets the next display mode by calling APRSControler::nextDisplayMode()
+ * and return it.
+ *
  * @return <DisplayMode> next disply mode
  */
 DisplayMode APRSControler::getNextDisplayMode(void) {
@@ -44,7 +43,7 @@ DisplayMode APRSControler::getNextDisplayMode(void) {
 
 /**
  * @brief set the next display mode for status display
- * 
+ *
  */
 void APRSControler::nextDisplayMode(void) {
   uint8_t max = displayModeEND - 1;
@@ -59,8 +58,8 @@ void APRSControler::nextDisplayMode(void) {
 // }
 
 /**
- * @brief callback 
- * 
+ * @brief callback
+ *
  */
 void APRSControler::singleClick() { button_state->singleClick(*this); }
 

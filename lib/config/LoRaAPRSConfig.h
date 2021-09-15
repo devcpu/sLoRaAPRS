@@ -21,8 +21,8 @@
 #define DISPLAY_DELAY_LONG 500
 
 /**
- * @brief how long ervery info is shown in display change mode 
- * 
+ * @brief how long ervery info is shown in display change mode
+ *
  */
 #define DISPLAY_KINO_TIME 5000
 

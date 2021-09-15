@@ -13,9 +13,9 @@
 
 #include <APRSControler.h>
 #include <Arduino.h>
+#include <Config.h>
 #include <GPSSensor.h>
 #include <LoRaAPRSConfig.h>
-#include <Config.h>
 #include <TinyGPS++.h>
 
 extern Config reg;

@@ -1,3 +1,16 @@
+/*
+ * File: main.cpp
+ * Project: attic
+ * File Created: 2021-09-15 2:45
+ * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
+ * -----
+ * Last Modified: 2021-09-15 3:14
+ * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
+ * -----
+ * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
+ * License: MIT License  http://www.opensource.org/licenses/MIT
+ */
+
 // /*
 //  *  This sketch demonstrates how to scan WiFi networks.
 //  *  The API is almost the same as with the WiFi Shield library,
@@ -8,8 +21,6 @@
 // #include "AsyncTCP.h"
 // #include "WiFi.h"
 // #include <Arduino.h>
-
-
 
 // void ProcessMessage(char* value);
 // void SendToServer(char* value);
@@ -33,8 +44,6 @@
 // int button3state = LOW;
 // int button4state = LOW;
 // QueueHandle_t xQueuesend, xQueuereceive;
-
-
 
 // void setup() {
 //   pinMode(led1, OUTPUT);

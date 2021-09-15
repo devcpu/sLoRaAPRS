@@ -13,8 +13,8 @@
 
 #include <Arduino.h>
 #include <BMEHandler.h>
-#include <LoRaAPRSConfig.h>
 #include <Config.h>
+#include <LoRaAPRSConfig.h>
 #include <uxa_debug.h>
 
 extern Config reg;  // config & system status
