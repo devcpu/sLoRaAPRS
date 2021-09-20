@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-29 0:28
+ * Last Modified: 2021-09-18 23:50
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -18,7 +18,7 @@
 #include <LoRaAPRSConfig.h>
 #include <TinyGPS++.h>
 
-extern Config reg;
+extern Config cfg;
 extern TinyGPSPlus gps;
 extern APRSControler maincontroler;
 
@@ -31,38 +31,38 @@ void setGPSData() {
   double tmp = 0;
 
   if (gps.time.isValid()) {
-    reg.gps_time.hour = gps.time.hour();
-    reg.gps_time.minute = gps.time.minute();
-    reg.gps_time.second = gps.time.second();
+    cfg.gps_time.hour = gps.time.hour();
+    cfg.gps_time.minute = gps.time.minute();
+    cfg.gps_time.second = gps.time.second();
   }
 
   if (gps.date.isValid()) {
-    reg.gps_time.year = gps.date.year();
-    reg.gps_time.month = gps.date.month();
-    reg.gps_time.day = gps.date.day();
+    cfg.gps_time.year = gps.date.year();
+    cfg.gps_time.month = gps.date.month();
+    cfg.gps_time.day = gps.date.day();
   }
 
   if (gps.location.isValid()) {
-    reg.gps_location.latitude = gps.location.lat();
-    reg.gps_location.longitude = gps.location.lng();
-    reg.gps_location.altitude = gps.altitude.meters();
+    cfg.gps_location.latitude = gps.location.lat();
+    cfg.gps_location.longitude = gps.location.lng();
+    cfg.gps_location.altitude = gps.altitude.meters();
 
     // dynamic update distace last position
-    distance = TinyGPSPlus::distanceBetween(lat, lng, reg.gps_location.latitude,
-                                            reg.gps_location.longitude);
+    distance = TinyGPSPlus::distanceBetween(lat, lng, cfg.gps_location.latitude,
+                                            cfg.gps_location.longitude);
   }
   if (gps.course.isValid()) {
-    reg.gps_move.course = gps.course.deg();
+    cfg.gps_move.course = gps.course.deg();
   }
   if (gps.speed.isValid()) {
-    reg.gps_move.speed = gps.speed.kmph();
+    cfg.gps_move.speed = gps.speed.kmph();
   }
   // needs ~ 100µs (72 - 204 µs!)
   if (gps.satellites.isValid()) {
-    reg.gps_meta.sat = gps.satellites.value();
+    cfg.gps_meta.sat = gps.satellites.value();
   }
   if (gps.hdop.isValid()) {
-    reg.gps_meta.hdop = gps.hdop.hdop();
+    cfg.gps_meta.hdop = gps.hdop.hdop();
     // Serial.printf("Hdop age: %d\n", gps.hdop.age());
     // Serial.printf("Hdop value: %d\n", gps.hdop.value());
     // Serial.printf("Hdop hdop %f\n", gps.hdop.hdop());
@@ -73,22 +73,22 @@ void setGPSData() {
   }
 
   // @TODO @see https://www.aprs-berlin.de/
-  if (course < 180 && reg.gps_move.course > 180) {
+  if (course < 180 && cfg.gps_move.course > 180) {
     tmp = course + 180;
-    if ((course - reg.gps_move.course) > APRS_UPDATE_ANGLE)
+    if ((course - cfg.gps_move.course) > APRS_UPDATE_ANGLE)
       maincontroler.gps_update = true;
   }
-  if (reg.gps_move.course < 180 && course > 180) {
-    tmp = reg.gps_move.course + 180;
-    if ((reg.gps_move.course - course) > APRS_UPDATE_ANGLE)
+  if (cfg.gps_move.course < 180 && course > 180) {
+    tmp = cfg.gps_move.course + 180;
+    if ((cfg.gps_move.course - course) > APRS_UPDATE_ANGLE)
       maincontroler.gps_update = true;
   }
-  if (abs(course - reg.gps_move.course) > APRS_UPDATE_ANGLE) {
+  if (abs(course - cfg.gps_move.course) > APRS_UPDATE_ANGLE) {
     maincontroler.gps_update = true;
   }
 
-  if (reg.gps_move.course > course &&
-      reg.gps_move.course - course > APRS_UPDATE_ANGLE) {
+  if (cfg.gps_move.course > course &&
+      cfg.gps_move.course - course > APRS_UPDATE_ANGLE) {
     maincontroler.gps_update = true;
   }
 
@@ -97,9 +97,9 @@ void setGPSData() {
   }
 
   if (maincontroler.gps_update == true) {
-    lat = reg.gps_location.latitude;
-    lng = reg.gps_location.longitude;
-    course = reg.gps_move.course;
+    lat = cfg.gps_location.latitude;
+    lng = cfg.gps_location.longitude;
+    course = cfg.gps_move.course;
     last_update = millis() + APRS_UPDATE_INTERVAL;
   }
 }

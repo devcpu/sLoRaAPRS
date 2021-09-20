@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-28 1:36
+ * Last Modified: 2021-09-18 18:44
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -15,7 +15,6 @@
 #include <ButtonState.h>
 #include <Config.h>
 #include <TrackerDisplay.h>
-#include <uxa_debug.h>
 #include <xOneButton.h>
 
 #include "freertos/FreeRTOS.h"
@@ -28,7 +27,7 @@ char run_mode_txt[6][16] = {"Tracker", "WXTracker", "WX Fix",
 TimerHandle_t call_config_timer;
 
 AbstracButtonState::~AbstracButtonState() {
-  // DDD("AbstracButtonState::~AbstracButtonState");
+  ESP_LOGD(TAG, "AbstracButtonState::~AbstracButtonState");
 }
 
 void AbstracButtonState::setState(APRSControler &aprs_controler,
@@ -51,12 +50,12 @@ void AbstracButtonState::longClick(APRSControler &aprs_controler) {
 /* -------------------------------------------------------------------------- */
 
 void StateDisplayMode::singleClick(APRSControler &aprs_controler) {
-  // DDD("StateDisplayMode.singleClick");
+  ESP_LOGD(TAG, "StateDisplayMode.singleClick");
   aprs_controler.nextDisplayMode();
   aprs_controler.next_display_time = 0;
 }
 void StateDisplayMode::doubleClick(APRSControler &aprs_controler) {
-  // DDD("StateDisplayMode.doubleClick");
+  ESP_LOGD(TAG, "StateDisplayMode.doubleClick");
   aprs_controler.display_change = true;
   aprs_controler.nextDisplayMode();
   aprs_controler.next_display_time = 0;
@@ -68,17 +67,17 @@ void StateDisplayMode::doubleClick(APRSControler &aprs_controler) {
 /* -------------------------------------------------------------------------- */
 
 void StateDefault::singleClick(APRSControler &aprs_controler) {
-  // DDD("StateDefault.singleClick");
+  ESP_LOGD(TAG, "StateDefault.singleClick");
   aprs_controler.display_change = false;
   setState(aprs_controler, new StateDisplayMode());
 }
 
 void StateDefault::doubleClick(APRSControler &aprs_controler) {
-  // DDD("StateDefault.doubleClick");
+  ESP_LOGD(TAG, "StateDefault.doubleClick");
 }
 
 void StateDefault::longClick(APRSControler &aprs_controler) {
-  // DDD("StateDefault.longClick()");
+  ESP_LOGD(TAG, "StateDefault.longClick()");
   aprs_controler.display_change = false;
   aprs_controler.display_update = false;
   setState(aprs_controler, new StateConfigMenue());
@@ -89,13 +88,13 @@ void StateDefault::longClick(APRSControler &aprs_controler) {
 /* -------------------------------------------------------------------------- */
 
 StateConfigMenue::StateConfigMenue(void) {
-  // DDD("StateConfigMenue::StateConfigMenue");
+  ESP_LOGD(TAG, "StateConfigMenue::StateConfigMenue");
   // vTaskDelay(pdMS_TO_TICKS(500));
   write3Line("Cnfg Mode", "1clck nxt, 2clck ", "long click exit", false, 0);
 }
 
 void StateConfigMenue::singleClick(APRSControler &aprs_controler) {
-  // DDD("StateConfigMenue.singleClick");
+  ESP_LOGD(TAG, "StateConfigMenue.singleClick");
   uint8_t max_items = 3;  // count menue items
   if (button_config_mode < max_items - 1) {
     button_config_mode++;
@@ -121,11 +120,11 @@ void StateConfigMenue::singleClick(APRSControler &aprs_controler) {
       setState(aprs_controler, new StateConfigMenue());
       break;
   }
-  DDE("button_config_mode=", String(button_config_mode));
+  ESP_LOGD(TAG, "got %d config", button_config_mode);
 }
 
 void StateConfigMenue::doubleClick(APRSControler &aprs_controler) {
-  // DDD("StateConfigMenue.doubleClick");
+  ESP_LOGD(TAG, "StateConfigMenue.doubleClick");
   const char select_list_call[40] = {
       ' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
       'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
@@ -158,7 +157,7 @@ void StateConfigMenue::doubleClick(APRSControler &aprs_controler) {
 
 ConfigStringSelector::ConfigStringSelector(const char *head,
                                            const char *select_list) {
-  // DDD("ConfigStringSelector::ConfigStringSelector");
+  ESP_LOGD(TAG, "ConfigStringSelector::ConfigStringSelector");
 
   strncpy(_select_list, select_list, 40);
   _head = head;
@@ -185,7 +184,7 @@ ConfigStringSelector::ConfigStringSelector(const char *head,
 }
 
 void ConfigStringSelector::singleClick(APRSControler &aprs_controler) {
-  // DDD("ConfigStringSelector.singleClick");
+  ESP_LOGD(TAG, "ConfigStringSelector.singleClick");
   _pos++;
   if (_pos > 7) {
     _pos = 0;
@@ -230,7 +229,7 @@ void ConfigStringSelector::kino(void) {
 }
 
 void ConfigStringSelector::doubleClick(APRSControler &aprs_controler) {
-  // DDD("ConfigStringSelector.doubleClick");
+  ESP_LOGD(TAG, "ConfigStringSelector.doubleClick");
   xTimerStop(call_config_timer, 0);
   _tmp.trim();
   cfg.call = _tmp;
@@ -255,14 +254,14 @@ void ConfigStringSelector::longClick(APRSControler &aprs_controler) {
 /* -------------------------------------------------------------------------- */
 
 StateConfigWiFi::StateConfigWiFi(const char *head) {
-  // DDD("StateConfigMenu.StateConfigMenu");
+  ESP_LOGD(TAG, "StateConfigMenu.StateConfigMenu");
   _head = head;
   _show();
 }
 
 void StateConfigWiFi::singleClick(APRSControler &aprs_controler) {
-  // DDD("StateConfigWiFi.singleClick");
-  // DDD(String(cfg.current_wifi_mode));
+  ESP_LOGD(TAG, "StateConfigWiFi.singleClick");
+  ESP_LOGD(TAG, "%s", cfg.current_wifi_mode);
   if (cfg.current_wifi_mode > 1) {
     cfg.current_wifi_mode = wifi_off;
   } else {
@@ -274,7 +273,7 @@ void StateConfigWiFi::singleClick(APRSControler &aprs_controler) {
 }
 
 void StateConfigWiFi::doubleClick(APRSControler &aprs_controler) {
-  // DDD("StateConfigWiFi.doubleClick");
+  ESP_LOGD(TAG, "StateConfigWiFi.doubleClick");
   setState(aprs_controler, new StateConfigMenue());
   ESP.restart();
 }
@@ -290,14 +289,14 @@ void StateConfigWiFi::_show(void) {
 /* -------------------------------------------------------------------------- */
 
 StateConfigRun::StateConfigRun(const char *head) {
-  // DDD("StateConfigMenu.StateConfigMenu");
+  ESP_LOGD(TAG, "StateConfigMenu.StateConfigMenu");
   _head = head;
   _show();
 }
 
 void StateConfigRun::singleClick(APRSControler &aprs_controler) {
-  // DDD("StateConfigRun.singleClick");
-  // DDD(String(cfg.current_run_mode));
+  ESP_LOGD(TAG, "StateConfigRun.singleClick");
+  ESP_LOGD(TAG, "%s", cfg.current_run_mode);
   if (cfg.current_run_mode > 4) {
     cfg.current_run_mode = mode_tracker;
   } else {
@@ -309,7 +308,7 @@ void StateConfigRun::singleClick(APRSControler &aprs_controler) {
 }
 
 void StateConfigRun::doubleClick(APRSControler &aprs_controler) {
-  // DDD("StateConfigRun.doubleClick");
+  ESP_LOGD(TAG, "StateConfigRun.doubleClick");
   setState(aprs_controler, new StateConfigMenue());
   ESP.restart();
 }
@@ -323,21 +322,21 @@ void StateConfigRun::_show(void) {
 /***************************************************************************/
 
 // void StateConfigMenue::singleClick(APRSControler& aprs_controler) {
-//   DDD("StateConfigMenue.singleClick");
+//   ESP_LOGD(TAG, "StateConfigMenue.singleClick");
 // }
 
 // void StateConfigMenue::doubleClick(APRSControler& aprs_controler) {
-//   DDD("StateConfigMenue.doubleClick");
+//   ESP_LOGD(TAG, "StateConfigMenue.doubleClick");
 // }
 
 /***************************************************************************/
 
 // void StateConfigMenue::singleClick(APRSControler& aprs_controler) {
-//   DDD("StateConfigMenue.singleClick");
+//   ESP_LOGD(TAG, "StateConfigMenue.singleClick");
 // }
 
 // void StateConfigMenue::doubleClick(APRSControler& aprs_controler) {
-//   DDD("StateConfigMenue.doubleClick");
+//   ESP_LOGD(TAG, "StateConfigMenue.doubleClick");
 // }
 
 /***************************************************************************/

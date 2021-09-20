@@ -4,7 +4,7 @@
  * File Created: 2021-09-15 1:16
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-15 12:43
+ * Last Modified: 2021-09-20 9:59
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -16,7 +16,10 @@
 
 #include <APRSWebServer.h>
 #include <Arduino.h>
+#include <GPSSensor.h>
 #include <LoRaAPRSConfig.h>
+#include <TinyGPS++.h>
+#include <esp_freertos_hooks.h>
 #include <xOneButton.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
@@ -35,7 +38,13 @@ void xbutton_tick(void *pvParameters);
  */
 void xws_tick(void *pvParameters);
 
+void gps_read(void *pvParameters);
+
 void DisplayTimerCB(TimerHandle_t pxTimer);
+
+bool GPSReadIdleHookCB();
+void GPSSetTimerCB(TimerHandle_t pxTimer);
+void GPSReadTimerCB(TimerHandle_t pxTimer);
 
 void scheduler_init();
 

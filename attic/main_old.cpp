@@ -4,7 +4,7 @@
  * File Created: 2021-09-15 2:45
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-15 3:17
+ * Last Modified: 2021-09-18 23:21
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -337,7 +337,7 @@ static void smartDelay(uint32_t ms) {
 
 /**
  * @brief restarts system if millis() is overruned.
- * This function must called in every loop.:q
+ * This function must called in every loop.
  *
  *
  * after ~50 days, millis() will start by 0, because

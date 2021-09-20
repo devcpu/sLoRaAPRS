@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-29 0:24
+ * Last Modified: 2021-09-18 15:52
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -17,7 +17,6 @@
 #include <APRSControler.h>
 #include <Arduino.h>
 #include <apptypes.h>
-#include <uxa_debug.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"

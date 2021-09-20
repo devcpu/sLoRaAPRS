@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-13 1:35
+ * Last Modified: 2021-09-18 15:54
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -12,7 +12,6 @@
  */
 
 #include <APRSControler.h>
-#include <uxa_debug.h>
 
 extern APRSControler maincontroler;
 

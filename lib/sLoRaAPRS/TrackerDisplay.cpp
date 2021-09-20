@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-13 2:07
+ * Last Modified: 2021-09-18 22:49
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -15,7 +15,6 @@
 
 #include <Arduino.h>
 
-#include "../config/uxa_debug.h"
 #include "APRSControler.h"
 #include "Config.h"
 #include "freertos/FreeRTOS.h"
@@ -353,14 +352,7 @@ void write3toSerial(const char *head, const char *line1, const char *line2,
   s2.trim();
   String s3 = String(line2);
   s3.trim();
-
-  //  Serial.println("\n+----------------------");
-  //  Serial.printf("| %s\n", head);
-  //  Serial.println("+----------------------");
-  //  Serial.printf("| %s\n", line1);
-  //  Serial.printf("| %s\n", line2);
-  //  Serial.println("+----------------------\n\n");
-  Serial.printf("[ %s %s %s ]\n", s1.c_str(), s2.c_str(), s3.c_str());
+  Serial.printf("+++ %s %s %s +++\n", s1.c_str(), s2.c_str(), s3.c_str());
   if (sleep) {
     vTaskDelay(sleep / portTICK_PERIOD_MS);
   }

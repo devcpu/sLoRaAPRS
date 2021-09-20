@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-28 1:07
+ * Last Modified: 2021-09-18 23:53
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -15,9 +15,8 @@
 #include <BMEHandler.h>
 #include <Config.h>
 #include <LoRaAPRSConfig.h>
-#include <uxa_debug.h>
 
-extern Config reg;  // config & system status
+extern Config cfg;  // config & system status
 
 // 1013.25 ^= -50.96m
 // 1100.00 ^= 634.93m
@@ -71,9 +70,9 @@ bool BMEHandlerInit() {
 }
 
 void setWXData(void) {
-  reg.WXdata.humidity = humidity;
-  reg.WXdata.temp = temperature;
-  reg.WXdata.pressure = pressure;
+  cfg.WXdata.humidity = humidity;
+  cfg.WXdata.temp = temperature;
+  cfg.WXdata.pressure = pressure;
 }
 
 void Sensor_tick() {

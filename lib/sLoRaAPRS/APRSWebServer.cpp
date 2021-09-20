@@ -4,14 +4,13 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-15 12:40
+ * Last Modified: 2021-09-19 0:36
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
-// #include <uxa_debug.h>
 #include <APRSWebServer.h>
 #include <APRSWiFi.h>
 #include <APRS_MSG.h>
@@ -34,7 +33,7 @@ extern Preferences preferences;
 
 // @TODO remove together with restart()
 
-extern Config reg;
+extern Config cfg;
 
 AsyncWebServer *WebServer;
 AsyncWebSocket *ws;
@@ -75,27 +74,27 @@ struct SendMsgForm {
 SendMsgForm send_msg_form_tmp;
 
 // void onRequest(AsyncWebServerRequest *request) {
-//   Serial.println("onRequest");
+//   ESP_LOGD(TAG, "onRequest");
 //   request->send(404);
 // }
 
 // void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len,
 //             size_t index, size_t total) {
-//   Serial.println("onBody");
+//   ESP_LOGD(TAG, "onBody");
 // }
 
 // void onUpload(AsyncWebServerRequest *request, String filename, size_t index,
 //               uint8_t *data, size_t len, bool final) {
-//   Serial.println("onUpload");
+//   ESP_LOGD(TAG, "onUpload");
 // }
 
 // void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 //              AwsEventType type, void *arg, uint8_t *data, size_t len) {
-//   Serial.println("onEvent");
+//   ESP_LOGD(TAG, "onEvent");
 // }
 
 void WebserverStart(void) {
-  Serial.println("starting Webserver");
+  ESP_LOGD(TAG, "starting Webserver");
   WebServer = new AsyncWebServer(80);
   ws = new AsyncWebSocket("/ws");
 
@@ -111,13 +110,13 @@ void WebserverStart(void) {
   WebServer->serveStatic("/rebootinfo", SPIFFS, "/reboot.html");
 
   WebServer->on("/sloraaprs.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/sloraaprs.js");
+    ESP_LOGD(TAG, "/sloraaprs.js");
     request->send(SPIFFS, "/sloraaprs.js", "application/javascript", false,
                   ProcessorJS);
   });
 
   WebServer->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/");
+    ESP_LOGD(TAG, "/");
     // first run wizard
     if (cfg.call == "CHANGEME") {  // first run wizard
       request->redirect("/cc");
@@ -127,17 +126,17 @@ void WebserverStart(void) {
 
   // System Info
   WebServer->on("/si", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/si");
+    ESP_LOGD(TAG, "/si");
     request->send(SPIFFS, "/main.html", "text/html", false,
                   systemInfoProcessor);
   });
 
   // Configure Call
   WebServer->on("/cc", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/cc");
+    ESP_LOGD(TAG, "/cc");
     showRequest(request);
     if (request->params() > 0) {
-      DDD("/cc");
+      ESP_LOGD(TAG, "/cc");
       handleRequestConfigCall(request);
       if (cfg.APCredentials.auth_tocken == "letmein42") {  // first run wizard
         request->redirect("/ca");
@@ -151,7 +150,7 @@ void WebserverStart(void) {
 
   // Send Message
   WebServer->on("/sm", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/sm");
+    ESP_LOGD(TAG, "/sm");
     showRequest(request);
     if (request->params() > 0) {
       handleRequestSendMessage(request);
@@ -165,20 +164,19 @@ void WebserverStart(void) {
   // Change Mode
   WebServer->on("/cm", HTTP_GET, [](AsyncWebServerRequest *request) {
     bool changed = false;
-    Serial.println("/cm");
+    ESP_LOGD(TAG, "/cm");
     showRequest(request);
-    DDD("Change Mode");
+    ESP_LOGD(TAG, "Change Mode");
     if (request->params() == 2) {
-      DDD(request->params());
+      ESP_LOGD(TAG, "got 2 params");
       changed = handleRequestChangeMode(request);
-      Serial.printf("new run_mode: %d / new_wifi_mode %d\n",
-                    static_cast<uint8_t>(cfg.current_run_mode),
-                    static_cast<uint8_t>(cfg.current_wifi_mode));
+      ESP_LOGD(TAG, "new run_mode: %d / new_wifi_mode %d",
+               static_cast<uint8_t>(cfg.current_run_mode),
+               static_cast<uint8_t>(cfg.current_wifi_mode));
       // @FIXME cast error? see debug console
-      Serial.printf(
-          "new run_mode: %d / new_wifi_mode %d\n",
-          static_cast<uint8_t>(getPrefsDouble(PREFS_CURRENT_SYSTEM_MODE)),
-          static_cast<uint8_t>(getPrefsDouble(PREFS_CURRENT_WIFI_MODE)));
+      ESP_LOGD(TAG, "new run_mode: %d / new_wifi_mode %d\n",
+               static_cast<uint8_t>(getPrefsDouble(PREFS_CURRENT_SYSTEM_MODE)),
+               static_cast<uint8_t>(getPrefsDouble(PREFS_CURRENT_WIFI_MODE)));
       request->redirect("/");
     }
     if (changed) {
@@ -190,28 +188,28 @@ void WebserverStart(void) {
 
   // GPS Info
   WebServer->on("/gi", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/gi");
+    ESP_LOGD(TAG, "/gi");
     showRequest(request);
     request->send(SPIFFS, "/main.html", "text/html", false, ProcessorGPSInfo);
   });
 
   // WX Info
   WebServer->on("/wx", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/wx");
+    ESP_LOGD(TAG, "/wx");
     showRequest(request);
     request->send(SPIFFS, "/main.html", "text/html", false, ProcessorWXInfo);
   });
 
   // Wifi AP
   WebServer->on("/ca", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/ca");
+    ESP_LOGD(TAG, "/ca");
     showRequest(request);
     if (request->params()) {
       if (request->params() == 2) {
         handleRequestConfigAP(request);
         request->redirect("/");
       } else {
-        Serial.println("ERR: wrong request");
+        ESP_LOGD(TAG, "ERR: wrong request");
       }
     }
 
@@ -221,7 +219,7 @@ void WebserverStart(void) {
 
   // Config Gateway
   WebServer->on("/cg", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/cg");
+    ESP_LOGD(TAG, "/cg");
     showRequest(request);
     if (request->params()) {
       handleRequestConfigGateway(request);
@@ -233,20 +231,20 @@ void WebserverStart(void) {
 
   // reboot
   WebServer->on("/reboot", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/reboot");
+    ESP_LOGD(TAG, "/reboot");
     reboot(request);
   });
 
   // ConfigWLAN
   WebServer->on("/cl", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/cl");
+    ESP_LOGD(TAG, "/cl");
     showRequest(request);
     if (request->params()) {
       if (request->params() == 2) {
         handleRequestConfigWLAN(request);
         request->redirect("/");
       } else {
-        Serial.println("ERR: wrong request");
+        ESP_LOGD(TAG, "ERR: wrong request");
       }
     }
     request->send(SPIFFS, "/main.html", "text/html", false,
@@ -255,43 +253,43 @@ void WebserverStart(void) {
 
   // Config Web Admin
   WebServer->on("/cw", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/cw");
+    ESP_LOGD(TAG, "/cw");
     showRequest(request);
     // handle Request in /ca
   });
 
   // Config Web Admin
   WebServer->on("/APRSSymbol", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/APRSSymbol");
+    ESP_LOGD(TAG, "/APRSSymbol");
     showRequest(request);
     request->send(SPIFFS, "/APRS_Symbol_Chart.pdf", "application/pdf", false);
   });
 
   WebServer->on("/bb", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("/bb");
+    ESP_LOGD(TAG, "/bb");
     showRequest(request);
     // no Processor !
   });
 
   WebServer->begin();
-  Serial.println("HTTP WebServer started");
+  ESP_LOGD(TAG, "HTTP WebServer started");
 }
 
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                AwsEventType type, void *arg, uint8_t *data, size_t len) {
   if (type == WS_EVT_CONNECT) {
-    Serial.println("Websocket client connection received");
+    ESP_LOGD(TAG, "Websocket client connection received");
     globalClient = client;
 
   } else if (type == WS_EVT_DISCONNECT) {
-    Serial.println("Websocket client connection finished");
+    ESP_LOGD(TAG, "Websocket client connection finished");
     globalClient = NULL;
   }
 }
 
 String ProcessorJS(const String &var) {
   if (var == "SERVER_IP") {
-    DDD(cfg.SERVER_IP);
+    ESP_LOGD(TAG, "%s", cfg.SERVER_IP.c_str());
     return cfg.SERVER_IP;
   }
 
@@ -560,7 +558,7 @@ String ProcessorConfigCall(const String &var) {
   }
 
   if (var == "wx_ext_options") {
-    DDD(cfg.wx_call_ext);
+    ESP_LOGD(TAG, "%s", cfg.wx_call_ext.c_str());
     return optionsFeldGenerator(cfg.wx_call_ext.toInt(), PREFS_WX_CALL_EX,
                                 options, 16);
   }
@@ -587,7 +585,7 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
       setPrefsString(PREFS_CALL, new_call);
     } else {
       html_error.ErrorMsg = String("call to short or to long");
-      Serial.println("ERR: call not valide! " + new_call);
+      ESP_LOGD(TAG, "ERR: call not valide! %s", new_call.c_str());
     }
   }
 
@@ -595,7 +593,7 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
   getWebParam(request, PREFS_APRS_CALL_EX, &cfg.aprs_call_ext);
   getWebParam(request, PREFS_WX_CALL_EX, &cfg.wx_call_ext);
 
-  DDD("wx_ext +OK");
+  ESP_LOGD(TAG, "wx_ext +OK");
 
   String new_aprs_symbol = "";
   if (request->hasParam(PREFS_APRS_SYMBOL)) {
@@ -603,7 +601,7 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
     cfg.aprs_symbol.symbol = static_cast<char>(new_aprs_symbol.charAt(0));
     setPrefsChar(PREFS_APRS_SYMBOL, new_aprs_symbol.charAt(0));
   } else {
-    Serial.println("ERR: APRS Symbol not valide!" + new_aprs_symbol);
+    ESP_LOGD(TAG, "ERR: APRS Symbol not valide! %s", new_aprs_symbol.c_str());
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -837,7 +835,7 @@ void handleRequestSendMessage(AsyncWebServerRequest *request) {
   // @FIXME
   //  if (xQueueSend(LoRaTXQueue, reinterpret_cast<SendMsgForm *>(&sform),
   //                 (TickType_t)100) != pdPASS) {
-  //    Serial.printf("ERROR: Can't put APRS msg to LoRaTXQueue\n to:%s msg:%s",
+  //    ESP_LOGD(TAG, "ERROR: Can't put APRS msg to LoRaTXQueue\n to:%s msg:%s",
   //                  sform.to.c_str(), sform.msg.c_str());
   //  }
   cfg.TxMsg.to = to;
@@ -972,7 +970,7 @@ String ProcessorChangeMode(const String &var) {
 
 bool handleRequestChangeMode(AsyncWebServerRequest *request) {
   bool rv = false;
-  DDD("handleRequestChangeMode");
+  ESP_LOGD(TAG, "handleRequestChangeMode");
   if (request->hasParam(PREFS_CURRENT_SYSTEM_MODE)) {
     String new_run_mode = getWebParam(request, PREFS_CURRENT_SYSTEM_MODE);
     rv = setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE,
@@ -1073,7 +1071,7 @@ String readSPIFFS2String(const char *path) {
   char buf[64] = {0};  // Flawfinder: ignore
   if (!SPIFFS.exists(path)) {
     snprintf(buf, sizeof(buf), "ERROR, %s do not exists.", path);
-    Serial.println(buf);
+    ESP_LOGD(TAG, "%s", buf);
     return String(buf);
   }
   File f = SPIFFS.open(path, "r");  // Flawfinder: ignore
@@ -1095,8 +1093,8 @@ String readSPIFFS2String(const char *path) {
  */
 String optionsFeldGenerator(uint8_t selected, const char *name,
                             String data[][2], uint8_t size) {
-  DDD(name);
-  DDD(selected);
+  ESP_LOGD(TAG, "%s", name);
+  ESP_LOGD(TAG, "%s", selected);
   char buf[1200] = {0};     // Flawfinder: ignore
   char zbuf[1200] = {0};    // Flawfinder: ignore
   char selectxt[32] = {0};  // Flawfinder: ignore
@@ -1115,41 +1113,41 @@ String optionsFeldGenerator(uint8_t selected, const char *name,
 
   strncat(buf, "</select>\n\n", sizeof(buf));
 
-  DDD(name);
+  ESP_LOGD(TAG, "%s", name);
 
   return String(buf);
 }
 
 void showRequest(AsyncWebServerRequest *request) {
   if (request->method() == HTTP_GET)
-    Serial.printf("GET");
+    ESP_LOGD(TAG, "GET");
   else if (request->method() == HTTP_POST)
-    Serial.printf("POST");
+    ESP_LOGD(TAG, "POST");
   else if (request->method() == HTTP_DELETE)
-    Serial.printf("DELETE");
+    ESP_LOGD(TAG, "DELETE");
   else if (request->method() == HTTP_PUT)
-    Serial.printf("PUT");
+    ESP_LOGD(TAG, "PUT");
   else if (request->method() == HTTP_PATCH)
-    Serial.printf("PATCH");
+    ESP_LOGD(TAG, "PATCH");
   else if (request->method() == HTTP_HEAD)
-    Serial.printf("HEAD");
+    ESP_LOGD(TAG, "HEAD");
   else if (request->method() == HTTP_OPTIONS)
-    Serial.printf("OPTIONS");
+    ESP_LOGD(TAG, "OPTIONS");
   else
-    Serial.printf("UNKNOWN");
-  Serial.printf(" http://%s%s\n", request->host().c_str(),
-                request->url().c_str());
+    ESP_LOGD(TAG, "UNKNOWN");
+  ESP_LOGD(TAG, " http://%s%s\n", request->host().c_str(),
+           request->url().c_str());
 
   if (request->contentLength()) {
-    Serial.printf("_CONTENT_TYPE: %s\n", request->contentType().c_str());
-    Serial.printf("_CONTENT_LENGTH: %u\n", request->contentLength());
+    ESP_LOGD(TAG, "_CONTENT_TYPE: %s\n", request->contentType().c_str());
+    ESP_LOGD(TAG, "_CONTENT_LENGTH: %u\n", request->contentLength());
   }
 
   int i;
   // int headers = request->headers();
   // for (i = 0; i < headers; i++) {
   //   AsyncWebHeader *h = request->getHeader(i);
-  //   Serial.printf("_HEADER[%s]: %s\n", h->name().c_str(),
+  //   ESP_LOGD(TAG, "_HEADER[%s]: %s\n", h->name().c_str(),
   //   h->value().c_str());
   //  }
 
@@ -1157,12 +1155,12 @@ void showRequest(AsyncWebServerRequest *request) {
   for (i = 0; i < params; i++) {
     AsyncWebParameter *p = request->getParam(i);
     if (p->isFile()) {
-      Serial.printf("_FILE[%s]: %s, size: %u\n", p->name().c_str(),
-                    p->value().c_str(), p->size());
+      ESP_LOGD(TAG, "_FILE[%s]: %s, size: %u\n", p->name().c_str(),
+               p->value().c_str(), p->size());
     } else if (p->isPost()) {
-      Serial.printf("_POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+      ESP_LOGD(TAG, "_POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
     } else {
-      Serial.printf("_GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+      ESP_LOGD(TAG, "_GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
     }
   }
 }
@@ -1212,7 +1210,7 @@ void sendGPSDataJson(void) {
   root["sat"] = cfg.gps_meta.sat;
   root["hdop"] = cfg.gps_meta.hdop;
   uint16_t len = measureJson(root);
-  // Serial.println(len);
+  // ESP_LOGD(TAG, "%d", len);
   // serializeJson(root, Serial);
 
   AsyncWebSocketMessageBuffer *buffer = globalClient->server()->makeBuffer(
@@ -1232,8 +1230,8 @@ String getWebParam(AsyncWebServerRequest *request, const char *key,
     new_var = request->getParam(key)->value();
     if (new_var.length() > 0 && new_var.length() < 32) {
       *prefsvar = new_var;
-      Serial.printf("set new var to reg key=%s value=%s\n", key,
-                    new_var.c_str());
+      ESP_LOGD(TAG, "set new var to cfg key=%s value=%s\n", key,
+               new_var.c_str());
       setPrefsString(key, new_var);
     }
     return new_var;
@@ -1241,7 +1239,7 @@ String getWebParam(AsyncWebServerRequest *request, const char *key,
     char buf[32] = {0};  // Flawfinder: ignore
     snprintf(buf, sizeof(buf),
              "ERR> key %s not found in request,  no value written", key);
-    DDD(buf);
+    ESP_LOGD(TAG, "%s", buf);
     return String("");
   }
   return new_var;
@@ -1260,7 +1258,7 @@ String getWebParam(AsyncWebServerRequest *request, const char *key,
     char buf[32] = {0};  // Flawfinder: ignore
     snprintf(buf, sizeof(buf), "key %s not found in request, no value written",
              key);
-    DDD(buf);
+    ESP_LOGD(TAG, "%s", buf);
     return String("");
   }
   return new_var;
@@ -1277,7 +1275,7 @@ String getWebParam(AsyncWebServerRequest *request, const char *key) {
     char buf[32] = {0};  // Flawfinder: ignore
     snprintf(buf, sizeof(buf), "key %s not found in request, no value written",
              key);
-    DDD(buf);
+    ESP_LOGD(TAG, "%s", buf);
     return String("");
   }
   return new_var;

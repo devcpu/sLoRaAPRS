@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-15 12:59
+ * Last Modified: 2021-09-18 18:42
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -15,7 +15,6 @@
 #include <LoRaAPRSConfig.h>
 #include <Preferences.h>
 #include <apptypes.h>
-#include <uxa_debug.h>
 
 Config cfg;
 
@@ -197,15 +196,15 @@ bool setPrefsUInt(const char *key, uint16_t value) {
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
   uint16_t old_value = getPrefsInt(key);
-  DDE("new value: %d", value);
-  DDE("old value: %d", old_value);
+  ESP_LOGD(TAG, "old value = %d; got one = %d", old_value, value);
   if (old_value != value) {
+    ESP_LOGD(TAG, "write %s=%d", key, value);
     preferences.putUInt(key, value);
     rv = true;
-    DDD("update");
+    ESP_LOGD(TAG, "update");
   }
   preferences.end();
-  DDD("setPrefsUInt END");
+  ESP_LOGD(TAG, "setPrefsUInt END");
   return rv;
 }
 
@@ -213,9 +212,9 @@ void setPrefsDouble(const char *key, double value) {
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
   double old_value = getPrefsDouble(key);
-  DDE("old_val", String(old_value));
+  ESP_LOGD(TAG, "old value = %l; got %l", old_value, value);
   if (old_value != value) {
-    DDE(String(key), String(value));
+    ESP_LOGD(TAG, "write %s=%l", key, value);
     preferences.putDouble(key, value);
   }
 
@@ -236,6 +235,7 @@ void setPrefsChar(const char *key, char value) {
   preferences.end();
 }
 
+#ifdef MODDEBUG
 void ConfigToString(void) {
   Serial.printf("boot_count: %d\n", cfg.boot_count);
   Serial.printf("Version: %s\n", cfg.Version.c_str());
@@ -274,6 +274,7 @@ void ConfigToString(void) {
   Serial.printf("Lng Fix %3.8f\n", cfg.posfix.longitude);
   Serial.printf("Alt Fix %3.8f\n", cfg.posfix.altitude);
 }
+#endif
 
 String getWifiMode() {
   switch (cfg.current_wifi_mode) {

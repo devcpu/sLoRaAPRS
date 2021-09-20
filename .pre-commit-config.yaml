@@ -17,12 +17,12 @@ repos:
   - id: check-merge-conflict
 
 
-# -   repo: github.com/pre-commit/mirrors-csslint
-#     rev: master
-#     hooks:
-#     -   id: csslint
+- repo: https://github.com/pre-commit/mirrors-csslint
+  rev: master
+  hooks:
+  - id: csslint
 
-#-   repo: github.com/Lucas-C/pre-commit-hooks-java
+#-   repo: https://github.com/Lucas-C/pre-commit-hooks-java
 #    rev: master
 #    hooks:
 #    -   id: validate-html

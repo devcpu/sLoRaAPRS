@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-29 1:12
+ * Last Modified: 2021-09-18 19:05
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -114,13 +114,7 @@ void clienttcp(void *c) {
     char missatge[255] = {0};
     vTaskDelay(10);
     if (xQueueReceive(xQueuesend, missatge, (TickType_t)10)) {
-      Serial.printf("\nDDD:> in clienttcp line %d got from xQueuesend: %s\n",
-                    __LINE__, missatge);
-      Serial.printf("\nDDD:> in clienttcp line %d sizeof mess: %d\n", __LINE__,
-                    sizeof(missatge));
-      // strncpy(missatge, "Hallo Test!!\n", 255);
-      Serial.printf("\nDDD:> in clienttcp line %d sizeof mess: %d\n", __LINE__,
-                    strlen(missatge));
+      ESP_LOGD(TAG, "%s", missatge);
       client.add(missatge, strlen(missatge));
       client.send();
     }
@@ -138,8 +132,8 @@ void loop() {
   //   if (tt + 10000 < millis()) {
   //     printf(".");
   //     tt = millis();
-  //     Serial.printf("\n\nDDD:> in loop line: %d sending data: %s \n",
-  //     __LINE__, pos); SendToServer(pos);
+  //     ESP_LOGD(TAG, pos);
+  //     SendToServer(pos);
   //     //SendToServer("DB0ABC>APRS,TCPIP*:> Hallo Test");
   //   }
 
@@ -148,16 +142,14 @@ void loop() {
   vTaskDelay(10);
   char missatge[255];
   if (xQueueReceive(xQueuereceive, missatge, (TickType_t)10)) {
-    // Serial.printf("\nDDD:> in loop line %d got data from xQueuereceive: %s
-    // \n", __LINE__, missatge);
+    ESP_LOGD(TAG, "%s", missatge);
     ProcessMessage(missatge);
   }
   // while (true);//client.connected)
 }
 
 void SendToServer(char *value) {
-  Serial.printf("\nDDD:> in SendToServer line: %d sending %s \n", __LINE__,
-                value);
+  ESP_LOGD(TAG, "%s", value);
   if (xQueueSend(xQueuesend, reinterpret_cast<char *>(value), (TickType_t)10) !=
       pdPASS) {
     /* Failed to post the message, even after 10 ticks. */

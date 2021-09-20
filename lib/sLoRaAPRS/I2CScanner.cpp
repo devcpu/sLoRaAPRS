@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 19:53
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-12 19:38
+ * Last Modified: 2021-09-18 19:08
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -20,9 +20,9 @@
  */
 void I2CScanner::scan() {
   // byte* ic2scan(byte* devices) {
+
   byte device_count = 0;
-  Serial.println();
-  Serial.println("I2C scanner. Scanning ...");
+  ESP_LOGW(TAG, "scanning I2C bus ...");
 
   // the scanner didn't found AXP-Device
 
@@ -34,27 +34,17 @@ void I2CScanner::scan() {
   for (byte i = 58; i < 62; i++) {
     Wire.beginTransmission(i);          // Begin I2C transmission Address (i)
     if (Wire.endTransmission() == 0) {  // Receive 0 = success (ACK response)
-      Serial.print("Found device on address ");
-      Serial.print("DEC: ");
-      Serial.print(i, DEC);
-      Serial.print(" HEX: ");
-      Serial.print("(0x");
-      Serial.print(i, HEX);
-      Serial.println(")");
-
+      ESP_LOGW(TAG, "found I2C-dev at DEC: %d HEX: (0x%02X)", i, i);
       devices.push_back(i);
       device_count++;
-      Serial.println();
     } else {
       if (Wire.endTransmission() == 4) {
-        Serial.print("Found error");
+        ESP_LOGD(TAG, "I2C error on %02X", i);
       }
     }
-    delay(500);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
   }
-  Serial.print("Found ");
-  Serial.print(device_count, DEC);  // numbers of devices
-  Serial.println(" device(s).");
+  ESP_LOGI(TAG, "found %d I2C devices", device_count);
   scannend = true;
 }
 
@@ -64,30 +54,30 @@ void I2CScanner::scan() {
  */
 void I2CScanner::initialize() {
   if (!devices.empty()) {
-    Serial.println("Mist");
     for (std::vector<byte>::iterator it = devices.begin(); it != devices.end();
          ++it) {
       switch (*it) {
         // AXP192
         case 52:
-          Serial.println("Init for address 0x34");
-          Serial.print("\tTry to initialize AXP Device ..");
+          ESP_LOGD(TAG, "Init for address 0x34");
+          ESP_LOGI(TAG, "\tTry to initialize AXP Device at 0x%02X", 52);
           if (initAXP()) {
-            Serial.println("+OK");
+            ESP_LOGD(TAG, "\t\t+OK");
             cfg.hardware.AXP192 = true;
           } else {
-            Serial.println("ERROR :no AXP Device found!");
+            ESP_LOGE(TAG, "ERROR :no AXP Device found!");
             cfg.hardware.AXP192 = false;
           }
-          // break;
+          break;
+
         case 60:
-          Serial.println("Init for address 0x3C");
-          Serial.print("\tTry to initialize OLED Display ...");
+          ESP_LOGD(TAG, "Init for address 0x%02X", 60);
+          ESP_LOGI(TAG, "\tTry to initialize OLED Display at 0x%02X", 60);
           if (DisplayInit()) {
-            Serial.println("+OK");
+            ESP_LOGI(TAG, "\t\t+OK");
             cfg.hardware.OLED = true;
           } else {
-            Serial.println("ERROR! Can't initialize OLED Display");
+            ESP_LOGE(TAG, "ERROR! Can't initialize OLED Display");
             cfg.hardware.OLED = false;
           }
           break;
@@ -110,13 +100,13 @@ void I2CScanner::initialize() {
         case 78:
           break;
         case 79:
-          Serial.println("Init for 0x40 - 0x4F");
-          Serial.println("\tTODO: init for INA219 not implemented yet");
+          ESP_LOGD(TAG, "Init for 0x40 - 0x4F");
+          ESP_LOGD(TAG, "\tTODO: init for INA219 not implemented yet");
           break;
         case 118:
         case 119:
-          Serial.println("Init for 0x77");
-          Serial.println("\tTODO: Init for BME280 not implemented yet");
+          ESP_LOGD(TAG, "Init for 0x77");
+          ESP_LOGD(TAG, "\tTODO: Init for BME280 not implemented yet");
           break;
 
         default:
