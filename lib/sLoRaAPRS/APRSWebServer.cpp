@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-19 0:36
+ * Last Modified: 2021-09-25 23:32
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -1094,7 +1094,7 @@ String readSPIFFS2String(const char *path) {
 String optionsFeldGenerator(uint8_t selected, const char *name,
                             String data[][2], uint8_t size) {
   ESP_LOGD(TAG, "%s", name);
-  ESP_LOGD(TAG, "%s", selected);
+  ESP_LOGD(TAG, "%d", selected);
   char buf[1200] = {0};     // Flawfinder: ignore
   char zbuf[1200] = {0};    // Flawfinder: ignore
   char selectxt[32] = {0};  // Flawfinder: ignore
