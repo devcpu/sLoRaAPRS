@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-13 3:40
+ * Last Modified: 2021-09-26 2:37
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -58,6 +58,9 @@ void reboot(AsyncWebServerRequest *request);
 
 String optionsFeldGenerator(uint8_t selected, const char *name,
                             String data[][2], uint8_t size);
+
+String optionsFeldGeneratorString(String selected, const char *name,
+                                  String data[][2], uint8_t size);
 
 void showRequest(AsyncWebServerRequest *request);
 // boolean validateNumber(String test);

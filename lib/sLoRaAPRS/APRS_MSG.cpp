@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-18 15:35
+ * Last Modified: 2021-09-26 3:21
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -54,14 +54,20 @@ char *APRS_MSG::calcHumidity(char *rv, float humidity) {
   }
   return rv;
 }
-
+/**
+ * @brief
+ *
+ * @param rv
+ * @return char*
+ */
 char *APRS_MSG::computeAPRSPos(char *rv) {
   char buf_lat[16] = {0};
   char buf_lng[16] = {0};
-  snprintf(
-      rv, 32, "%s%c%s%c", dc2gms(buf_lat, cfg.gps_location.latitude, false),
-      cfg.aprs_symbol.table, dc2gms(buf_lng, cfg.gps_location.longitude, true),
-      cfg.aprs_symbol.symbol);
+  snprintf(rv, sizeof(rv), "%s%c%s%c",
+           dc2gms(buf_lat, cfg.gps_location.latitude, false),
+           cfg.aprs_symbol.charAt(0),
+           dc2gms(buf_lng, cfg.gps_location.longitude, true),
+           cfg.aprs_symbol.charAt(1));
   return rv;
 }
 

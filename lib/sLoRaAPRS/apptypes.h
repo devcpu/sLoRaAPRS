@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-27 23:58
+ * Last Modified: 2021-09-26 2:34
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -108,10 +108,10 @@ struct Credentials {
   String auth_tocken;
 };
 
-struct APRSSymbol {
-  char table = '/';
-  char symbol = '_';
-};
+// struct APRSSymbol {
+//   char table = '/';
+//   char symbol = '_';
+// };
 
 struct HardWare {
   boolean OLED = false;
@@ -147,7 +147,7 @@ struct Config {
   Credentials WifiCrendentials[4];
   Credentials APCredentials;
   Credentials WebCredentials;
-  APRSSymbol aprs_symbol;
+  String aprs_symbol;
   String APRSPassword;
   String APRSServer[2];
   uint32_t boot_count = 0;

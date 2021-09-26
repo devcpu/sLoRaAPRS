@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-25 23:32
+ * Last Modified: 2021-09-26 3:20
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -493,7 +493,7 @@ String getResetReason(RESET_REASON reason) {
 #endif
 
 String ProcessorConfigCall(const String &var) {
-  String options[][2] = {
+  String aprs_options[][2] = {
       {" -0: Primärstation", "0"},
       {" -1: weiter allgemeine Std", "1"},
       {" -2: weiter allgemeine Std", "2"},
@@ -510,6 +510,18 @@ String ProcessorConfigCall(const String &var) {
       {"-13: Wetterstation", "13"},
       {"-14: Lastkraftwagen (permanent)", "14"},
       {"-15: weiter allgemeine Std", "15"},
+  };
+
+  String aprs_symbol_options[][2] = {
+      {"Home", "/-"},           {"Campground", "/;"},   {"Motorcycle", "/<"},
+      {"Rail", "/="},           {"Canoe", "/C"},        {"Tractor", "/F"},
+      {"Baloon", "/B"},         {"Bus", "/U"},          {"Heli", "/X"},
+      {"Yacht", "/Y"},          {"Jogger", "/["},       {"WX Station", "/_"},
+      {"Ambulance", "/a"},      {"Fire Station", "/d"}, {"Fire Truck", "/f"},
+      {"Hospital", "/h"},       {"IOTO", "/i"},         {"Jeep", "/j"},
+      {"Truck", "/k"},          {"Power Boat", "/s"},   {"Van", "/v"},
+      {"Weater Station", "/w"}, {"Shelter", "/z"},      {"Horse", "/e"},
+      {"Bike", "/b"},
   };
 
   if (var == "HTMLTILE") {
@@ -545,12 +557,14 @@ String ProcessorConfigCall(const String &var) {
   }
 
   if (var == PREFS_APRS_SYMBOL) {
-    return String(cfg.aprs_symbol.symbol);
+    return optionsFeldGeneratorString(cfg.aprs_symbol, PREFS_APRS_SYMBOL,
+                                      aprs_symbol_options, 25);
+    // return String(cfg.aprs_symbol.symbol);
   }
 
   if (var == "aprs_ext_options") {
     return optionsFeldGenerator(cfg.aprs_call_ext.toInt(), PREFS_APRS_CALL_EX,
-                                options, 16);
+                                aprs_options, 16);
   }
 
   if (var == PREFS_APRS_CALL_EX) {
@@ -560,7 +574,7 @@ String ProcessorConfigCall(const String &var) {
   if (var == "wx_ext_options") {
     ESP_LOGD(TAG, "%s", cfg.wx_call_ext.c_str());
     return optionsFeldGenerator(cfg.wx_call_ext.toInt(), PREFS_WX_CALL_EX,
-                                options, 16);
+                                aprs_options, 16);
   }
 
   if (var == PREFS_WX_CALL_EX) {
@@ -598,8 +612,8 @@ void handleRequestConfigCall(AsyncWebServerRequest *request) {
   String new_aprs_symbol = "";
   if (request->hasParam(PREFS_APRS_SYMBOL)) {
     new_aprs_symbol = getWebParam(request, PREFS_APRS_SYMBOL);
-    cfg.aprs_symbol.symbol = static_cast<char>(new_aprs_symbol.charAt(0));
-    setPrefsChar(PREFS_APRS_SYMBOL, new_aprs_symbol.charAt(0));
+    setPrefsString(PREFS_APRS_SYMBOL, new_aprs_symbol);
+    cfg.aprs_symbol = new_aprs_symbol;
   } else {
     ESP_LOGD(TAG, "ERR: APRS Symbol not valide! %s", new_aprs_symbol.c_str());
   }
@@ -1102,6 +1116,33 @@ String optionsFeldGenerator(uint8_t selected, const char *name,
   strncat(buf, zbuf, sizeof(buf));
   for (uint8_t i = 0; i < size; i++) {
     if (i == selected) {
+      strncpy(selectxt, " selected ", sizeof(selectxt));
+    } else {
+      strncpy(selectxt, "", sizeof(selectxt));
+    }
+    snprintf(zbuf, sizeof(zbuf), "<option value=\"%s\"%s>%s</option>\n",
+             data[i][1].c_str(), selectxt, data[i][0].c_str());
+    strncat(buf, zbuf, sizeof(buf));
+  }  // END for
+
+  strncat(buf, "</select>\n\n", sizeof(buf));
+
+  ESP_LOGD(TAG, "%s", name);
+
+  return String(buf);
+}
+
+String optionsFeldGeneratorString(String selected, const char *name,
+                                  String data[][2], uint8_t size) {
+  ESP_LOGD(TAG, "%s", name);
+  ESP_LOGD(TAG, "%s", selected);
+  char buf[1200] = {0};     // Flawfinder: ignore
+  char zbuf[1200] = {0};    // Flawfinder: ignore
+  char selectxt[32] = {0};  // Flawfinder: ignore
+  snprintf(zbuf, sizeof(zbuf), "\n\n<select name='%s'>\n", name);
+  strncat(buf, zbuf, sizeof(buf));
+  for (uint8_t i = 0; i < size; i++) {
+    if (selected.compareTo(data[i][1]) == 0) {
       strncpy(selectxt, " selected ", sizeof(selectxt));
     } else {
       strncpy(selectxt, "", sizeof(selectxt));

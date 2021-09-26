@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-18 18:42
+ * Last Modified: 2021-09-26 3:13
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -39,7 +39,7 @@ void ConfigInit(void) {
   cfg.call = preferences.getString(PREFS_CALL, CHANGE_ME);
   cfg.aprs_call_ext = preferences.getString(PREFS_APRS_CALL_EX, "3");
   cfg.wx_call_ext = preferences.getString(PREFS_WX_CALL_EX, "13");
-  cfg.aprs_symbol.symbol = preferences.getChar(PREFS_APRS_SYMBOL, '[');
+  cfg.aprs_symbol = preferences.getString(PREFS_APRS_SYMBOL, "/[");
 
   cfg.WebCredentials.auth_name =
       preferences.getString(PREFS_WEB_ADMIN, "admin");
@@ -105,7 +105,7 @@ void ConfigWriteInit(void) {
   preferences.putString(PREFS_CALL, cfg.call);
   preferences.putString(PREFS_APRS_CALL_EX, cfg.aprs_call_ext);
   preferences.putString(PREFS_WX_CALL_EX, cfg.wx_call_ext);
-  preferences.putChar(PREFS_APRS_SYMBOL, cfg.aprs_symbol.symbol);
+  preferences.putString(PREFS_APRS_SYMBOL, cfg.aprs_symbol);
 
   preferences.putString(PREFS_WEB_ADMIN, cfg.WebCredentials.auth_name);
   preferences.putString(PREFS_WEB_PASS, cfg.WebCredentials.auth_tocken);
@@ -177,16 +177,17 @@ void setPrefsString(const char *key, String value) {
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
   delay(500);
-  Serial.println("2");
+  ESP_LOGD(TAG, "key=%s value=%s", key, value);
   String old_value = getPrefsString(key);
-  Serial.println(old_value);
+  ESP_LOGD(TAG, "old_value=%s", old_value);
   if (old_value != value) {
     Serial.printf("write %s\n", value.c_str());
+    ESP_LOGD(TAG, "write %s", value);
     uint32_t rv = preferences.putString(key, value);
-    Serial.printf("write of key=%s value=%s returns: %lu\n", key, value.c_str(),
-                  rv);
+    ESP_LOGD(TAG, "write of key=%s value=%s returns: %lu\n", key, value.c_str(),
+             rv);
     String new_var = preferences.getString(key);
-    Serial.printf("got var from NVS: %s\n", new_var.c_str());
+    ESP_LOGD(TAG, "got var from NVS: %s\n", new_var.c_str());
   }
   preferences.end();
 }

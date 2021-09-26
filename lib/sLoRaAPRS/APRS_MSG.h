@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-28 0:10
+ * Last Modified: 2021-09-26 2:35
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -27,7 +27,7 @@ extern Config cfg;
 
 class APRS_MSG {
  public:
-  enum aprs_symbol_table_e { primary = '/', alternate = '\\' };
+  // enum aprs_symbol_table_e { primary = '/', alternate = '\\' };
 
   static char *computeAPRSPos(char *aprs_buf);
   static char *computeWXField(char *rv);
