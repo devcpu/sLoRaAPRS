@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-19 0:46
+ * Last Modified: 2021-09-26 17:28
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -125,7 +125,7 @@ void setup() {
 
   write3Line("sLoRaAPRS", "  up &", " running", true, DISPLAY_DELAY_MEDIUM);
   write3Line("  Hello", (String("  ") + cfg.call).c_str(), "  nice to be back",
-             true, 2000);
+             true, DISPLAY_DELAY_MEDIUM);
   write3Line("  Enjoy", "   the", "   day", true, DISPLAY_DELAY_MEDIUM);
 }
 

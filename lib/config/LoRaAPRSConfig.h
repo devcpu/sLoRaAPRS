@@ -4,7 +4,7 @@
  * File Created: 2020-09-26 21:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-18 22:52
+ * Last Modified: 2021-09-26 17:29
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -17,7 +17,8 @@
 #include <Arduino.h>
 
 #define DISPLAY_DELAY_SHORT 1000
-#define DISPLAY_DELAY_MEDIUM 3000
+// @FIXME set to 3000
+#define DISPLAY_DELAY_MEDIUM 30
 #define DISPLAY_DELAY_LONG 5000
 
 /**

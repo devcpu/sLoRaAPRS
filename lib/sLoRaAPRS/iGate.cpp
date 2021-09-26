@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-18 19:05
+ * Last Modified: 2021-09-26 17:55
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -125,7 +125,7 @@ void clienttcp(void *c) {
 
 void loop() {
   // char pos[64] = {0};
-  // strncpy(pos, "DL7UXA>APRS,TCPIP*:!5252.37N/1332.29E[\n", 64);
+  // strncpy(pos, "DL7UXA>APRS,TCPIP*:!5252.37N/1332.29E[\n", sizeof(pos) - 1);
 
   // char pos[64] = "DL7UXA>APRS,TCPIP*:!5252.37N/1332.29E[\n";
 

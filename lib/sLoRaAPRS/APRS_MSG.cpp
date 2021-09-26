@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-26 3:21
+ * Last Modified: 2021-09-26 22:03
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -145,9 +145,9 @@ char *APRS_MSG::dc2gms(char *rv, double gpsdata, boolean lng) {
   tmp = tmp - minute;
   uint8_t secunde = tmp * 60;
   if (lng) {
-    strncpy(fstr, "%03d%02d.%02d%c", sizeof(fstr));
+    strncpy(fstr, "%03d%02d.%02d%c", sizeof(fstr) - 1);
   } else {
-    strncpy(fstr, "%02d%02d.%02d%c", sizeof(fstr));
+    strncpy(fstr, "%02d%02d.%02d%c", sizeof(fstr) - 1);
   }
   snprintf(rv, sizeof(rv),  // Flawfinder: ignore
            fstr, grad, minute, secunde, ew);

@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-18 15:53
+ * Last Modified: 2021-09-26 22:03
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -73,11 +73,11 @@ void sendMessage(char *outgoing, boolean toDigi) {
   if (toDigi) {
     LoRa.setFrequency(LoRaTXFREQ);
     LoRa.disableInvertIQ();
-    strncpy(txmsgbuf, "  2digi", 16);
+    strncpy(txmsgbuf, "  2digi", sizeof(txmsgbuf) - 1);
   } else {
     LoRa.setFrequency(LoRaRXFREQ);
     LoRa.enableInvertIQ();
-    strncpy(txmsgbuf, " 2tracker", 16);
+    strncpy(txmsgbuf, " 2tracker", sizeof(txmsgbuf) - 1);
   }
   writeTX(txmsgbuf);
 

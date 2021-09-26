@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-26 3:20
+ * Last Modified: 2021-09-26 17:50
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -353,9 +353,11 @@ String getSystemInfoTable(void) {
   FlashMode_t ideMode = ESP.getFlashChipMode();
 
   String systemdata[][2] = {
+      {"SoftwareVersion", cfg.Version},
+      {"ReleaseName", cfg.Release},
       {"Build DateTime: ", GetBuildDateAndTime()},
       {"SDKVersion: ", String(ESP.getSdkVersion())},
-      {"BootCount: ", String(cfg.boot_count)},
+      //      {"BootCount: ", String(cfg.boot_count)},
       {"Uptime: ", String(millis() / 1000 / 60, DEC) + "min"},
 #ifdef ESP32
       {"Chip Revision:", String(ESP.getChipRevision())},
@@ -419,21 +421,8 @@ String getSystemInfoTable(void) {
       {"BME280", String(cfg.hardware.BME280)},
   };
 
-  return table2DGenerator(systemdata, 32, true) +
+  return table2DGenerator(systemdata, 33, true) +
          table2DGenerator(hwdata, 4, true) + "<br /><br />" + mainmenue;
-
-  //   //     if (ideSize != realSize)
-  //   //     {
-  //   //         snprintf(flash_config_ok, 64, "<tr><td colspan=\"2\"><b>Flash
-  //   Chip
-  //   //         configuration wrong!</b></td></tr>");
-  //   //     }
-  //   //     else
-  //   //     {
-  //   //         snprintf(flash_config_ok, 64, "<tr><td colspan=\"2\">Flash
-  //   Chip
-  //   //         configuration ok. </td></tr>");
-  //   //     }
 }
 
 #ifdef ESP32
@@ -512,6 +501,7 @@ String ProcessorConfigCall(const String &var) {
       {"-15: weiter allgemeine Std", "15"},
   };
 
+  // remember! if you add or remove some items here, you ahve to change
   String aprs_symbol_options[][2] = {
       {"Home", "/-"},           {"Campground", "/;"},   {"Motorcycle", "/<"},
       {"Rail", "/="},           {"Canoe", "/C"},        {"Tractor", "/F"},
@@ -523,6 +513,16 @@ String ProcessorConfigCall(const String &var) {
       {"Weater Station", "/w"}, {"Shelter", "/z"},      {"Horse", "/e"},
       {"Bike", "/b"},
   };
+
+  // ESP_LOGW(TAG, "xxx aprs_options xxx");
+  // ESP_LOGD(TAG, "ArrayLen %d", sizeof(aprs_options));
+  // ESP_LOGD(TAG, "ArrayLen[0] %d", sizeof(aprs_options[0]));
+  // ESP_LOGD(TAG, "ArrayLen[2] %d", sizeof(aprs_options[2]));
+  // row = sizeof(aprs_options) / sizeof(aprs_options[0]);
+  // ESP_LOGD(TAG, "ArrayRows %d", row);
+  // ESP_LOGD(TAG, "ArrayLen[0][0] %d", sizeof(aprs_options[0][0]));
+  // column = sizeof(aprs_options[0]) / sizeof(aprs_options[0][0]);
+  // ESP_LOGD(TAG, "ArrayCloumn %d", column);
 
   if (var == "HTMLTILE") {
     return String("simple LoRaAPRS system by DL7UXA");
@@ -557,14 +557,16 @@ String ProcessorConfigCall(const String &var) {
   }
 
   if (var == PREFS_APRS_SYMBOL) {
-    return optionsFeldGeneratorString(cfg.aprs_symbol, PREFS_APRS_SYMBOL,
-                                      aprs_symbol_options, 25);
+    return optionsFeldGenerator(
+        cfg.aprs_symbol, PREFS_APRS_SYMBOL, aprs_symbol_options,
+        sizeof(aprs_symbol_options) / sizeof(aprs_symbol_options[0]));
     // return String(cfg.aprs_symbol.symbol);
   }
 
   if (var == "aprs_ext_options") {
-    return optionsFeldGenerator(cfg.aprs_call_ext.toInt(), PREFS_APRS_CALL_EX,
-                                aprs_options, 16);
+    return optionsFeldGenerator(
+        cfg.aprs_call_ext, PREFS_APRS_CALL_EX, aprs_options,
+        sizeof(aprs_symbol_options) / sizeof(aprs_symbol_options[0]));
   }
 
   if (var == PREFS_APRS_CALL_EX) {
@@ -573,8 +575,8 @@ String ProcessorConfigCall(const String &var) {
 
   if (var == "wx_ext_options") {
     ESP_LOGD(TAG, "%s", cfg.wx_call_ext.c_str());
-    return optionsFeldGenerator(cfg.wx_call_ext.toInt(), PREFS_WX_CALL_EX,
-                                aprs_options, 16);
+    return optionsFeldGenerator(cfg.wx_call_ext, PREFS_WX_CALL_EX, aprs_options,
+                                sizeof(aprs_options) / sizeof(aprs_options[0]));
   }
 
   if (var == PREFS_WX_CALL_EX) {
@@ -814,8 +816,8 @@ String ProcessorSendMessage(const String &var) {
     String options[][2] = {
         {"local", "0"}, {"WIDE1-1", "1"}, {"WIDE2-2", "2"}, {"WIDE3-3", "3"}};
 
-    return optionsFeldGenerator(send_msg_form_tmp.wide.toInt(), MSG_FORM_WIDE,
-                                options, 4);
+    return optionsFeldGenerator(send_msg_form_tmp.wide, MSG_FORM_WIDE, options,
+                                sizeof(options) / sizeof(options[0]));
   }
 
   if (var == MSG_FORM_MSG) {
@@ -962,17 +964,22 @@ String ProcessorChangeMode(const String &var) {
         {"APRS LoRa Repeater & APRS Gateway", String(mode_digi_gateway)},
     };
 
-    return optionsFeldGenerator(cfg.current_run_mode, PREFS_CURRENT_SYSTEM_MODE,
-                                options, 6);
+    // @TODO change cfg.current_run_mode to String to elimate
+    // optionsFeldGenerator()
+    return optionsFeldGenerator(String(cfg.current_run_mode),
+                                PREFS_CURRENT_SYSTEM_MODE, options,
+                                sizeof(options) / sizeof(options[0]));
   }
 
   // enum wifi_mode {wifi_off, wifi_ap, wifi_client};
   if (var == PREFS_CURRENT_WIFI_MODE) {
     String options[][2] = {
         {"Wifi OFF", "0"}, {"Wifi AP", "1"}, {"WLAN Connect", "2"}};
-
-    return optionsFeldGenerator(cfg.current_wifi_mode, PREFS_CURRENT_WIFI_MODE,
-                                options, 3);
+    // @TODO change cfg.current_wifi_mode to String to elimate
+    // optionsFeldGenerator()
+    return optionsFeldGenerator(String(cfg.current_wifi_mode),
+                                PREFS_CURRENT_WIFI_MODE, options,
+                                sizeof(options) / sizeof(options[0]));
   }
 
   if (var == "BODY") {
@@ -1105,54 +1112,27 @@ String readSPIFFS2String(const char *path) {
  * @param size count elements
  * @return String
  */
-String optionsFeldGenerator(uint8_t selected, const char *name,
-                            String data[][2], uint8_t size) {
-  ESP_LOGD(TAG, "%s", name);
-  ESP_LOGD(TAG, "%d", selected);
-  char buf[1200] = {0};     // Flawfinder: ignore
-  char zbuf[1200] = {0};    // Flawfinder: ignore
-  char selectxt[32] = {0};  // Flawfinder: ignore
-  snprintf(zbuf, sizeof(zbuf), "\n\n<select name='%s'>\n", name);
-  strncat(buf, zbuf, sizeof(buf));
-  for (uint8_t i = 0; i < size; i++) {
-    if (i == selected) {
-      strncpy(selectxt, " selected ", sizeof(selectxt));
-    } else {
-      strncpy(selectxt, "", sizeof(selectxt));
-    }
-    snprintf(zbuf, sizeof(zbuf), "<option value=\"%s\"%s>%s</option>\n",
-             data[i][1].c_str(), selectxt, data[i][0].c_str());
-    strncat(buf, zbuf, sizeof(buf));
-  }  // END for
-
-  strncat(buf, "</select>\n\n", sizeof(buf));
-
-  ESP_LOGD(TAG, "%s", name);
-
-  return String(buf);
-}
-
-String optionsFeldGeneratorString(String selected, const char *name,
-                                  String data[][2], uint8_t size) {
+String optionsFeldGenerator(String selected, const char *name, String data[][2],
+                            uint8_t size) {
   ESP_LOGD(TAG, "%s", name);
   ESP_LOGD(TAG, "%s", selected);
   char buf[1200] = {0};     // Flawfinder: ignore
   char zbuf[1200] = {0};    // Flawfinder: ignore
   char selectxt[32] = {0};  // Flawfinder: ignore
   snprintf(zbuf, sizeof(zbuf), "\n\n<select name='%s'>\n", name);
-  strncat(buf, zbuf, sizeof(buf));
+  strncat(buf, zbuf, sizeof(buf) - 1);
   for (uint8_t i = 0; i < size; i++) {
     if (selected.compareTo(data[i][1]) == 0) {
-      strncpy(selectxt, " selected ", sizeof(selectxt));
+      strncpy(selectxt, " selected ", sizeof(selectxt) - 1);
     } else {
-      strncpy(selectxt, "", sizeof(selectxt));
+      strncpy(selectxt, "", sizeof(selectxt) - 1);
     }
     snprintf(zbuf, sizeof(zbuf), "<option value=\"%s\"%s>%s</option>\n",
              data[i][1].c_str(), selectxt, data[i][0].c_str());
-    strncat(buf, zbuf, sizeof(buf));
+    strncat(buf, zbuf, sizeof(buf) - 1);
   }  // END for
 
-  strncat(buf, "</select>\n\n", sizeof(buf));
+  strncat(buf, "</select>\n\n", sizeof(buf) - 1);
 
   ESP_LOGD(TAG, "%s", name);
 

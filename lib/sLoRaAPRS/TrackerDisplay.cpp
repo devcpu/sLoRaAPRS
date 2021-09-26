@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-18 22:49
+ * Last Modified: 2021-09-26 17:53
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -274,8 +274,8 @@ void writeHead(const char *head) {
     snprintf(hdop, sizeof(hdop), "%d",
              static_cast<int>(round(cfg.gps_meta.hdop)));
   } else {
-    strncpy(sat, "", sizeof(sat));
-    strncpy(hdop, "", sizeof(hdop));
+    strncpy(sat, "", sizeof(sat) - 1);
+    strncpy(hdop, "", sizeof(hdop) - 1);
   }
 
   display.clearDisplay();

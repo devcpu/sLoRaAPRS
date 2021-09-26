@@ -4,7 +4,7 @@
  * File Created: 2021-09-15 1:16
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-25 23:27
+ * Last Modified: 2021-09-26 16:02
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -35,7 +35,7 @@ void scheduler_init() {
     ESP_LOGD(TAG, "Task ButtonTick created!");
   }
 
-  if (xTaskCreate(xws_tick, "WebServerTick", 10000, NULL, 2, &WSHandle) ==
+  if (xTaskCreate(xws_tick, "WebServerTick", 100000, NULL, 2, &WSHandle) ==
       pdPASS) {
     ESP_LOGD(TAG, "Task WebServerTick created!");
   }

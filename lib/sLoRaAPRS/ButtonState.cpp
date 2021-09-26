@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-18 18:44
+ * Last Modified: 2021-09-26 17:52
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -159,7 +159,7 @@ ConfigStringSelector::ConfigStringSelector(const char *head,
                                            const char *select_list) {
   ESP_LOGD(TAG, "ConfigStringSelector::ConfigStringSelector");
 
-  strncpy(_select_list, select_list, 40);
+  strncpy(_select_list, select_list, sizeof(_select_list) - 1);
   _head = head;
   _tmp = cfg.call;
   int id = 1;
@@ -280,8 +280,8 @@ void StateConfigWiFi::doubleClick(APRSControler &aprs_controler) {
 
 void StateConfigWiFi::_show(void) {
   char buf[12] = {0};
-  strncat(buf, "  ", 12);
-  strncat(buf, wifi_mode_txt[cfg.current_wifi_mode], 12);
+  strncat(buf, "  ", sizeof(buf) - 1);
+  strncat(buf, wifi_mode_txt[cfg.current_wifi_mode], sizeof(buf) - 1);
   write3Line(_head, buf, "1clck nxt, 2clck ok", false, 0);
 }
 
