@@ -4,23 +4,22 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-18 23:50
+ * Last Modified: 2021-10-04 9:25
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
-#include <APRSControler.h>
 #include <Arduino.h>
 #include <Config.h>
 #include <GPSSensor.h>
 #include <LoRaAPRSConfig.h>
 #include <TinyGPS++.h>
+// #include "maidenhead.h"
 
 extern Config cfg;
 extern TinyGPSPlus gps;
-extern APRSControler maincontroler;
 
 void setGPSData() {
   static double lat = 0;
@@ -68,38 +67,38 @@ void setGPSData() {
     // Serial.printf("Hdop hdop %f\n", gps.hdop.hdop());
   }
 
-  if (distance > APRS_UPDATE_DISTANCE) {
-    maincontroler.gps_update = true;
-  }
-
+  // @TODO FUTURE
+  // if (distance > APRS_UPDATE_DISTANCE) {
+  //   maincontroler.gps_update = true;
+  // }
   // @TODO @see https://www.aprs-berlin.de/
-  if (course < 180 && cfg.gps_move.course > 180) {
-    tmp = course + 180;
-    if ((course - cfg.gps_move.course) > APRS_UPDATE_ANGLE)
-      maincontroler.gps_update = true;
-  }
-  if (cfg.gps_move.course < 180 && course > 180) {
-    tmp = cfg.gps_move.course + 180;
-    if ((cfg.gps_move.course - course) > APRS_UPDATE_ANGLE)
-      maincontroler.gps_update = true;
-  }
-  if (abs(course - cfg.gps_move.course) > APRS_UPDATE_ANGLE) {
-    maincontroler.gps_update = true;
-  }
+  // if (course < 180 && cfg.gps_move.course > 180) {
+  //   tmp = course + 180;
+  //   if ((course - cfg.gps_move.course) > APRS_UPDATE_ANGLE)
+  //     maincontroler.gps_update = true;
+  // }
+  // if (cfg.gps_move.course < 180 && course > 180) {
+  //   tmp = cfg.gps_move.course + 180;
+  //   if ((cfg.gps_move.course - course) > APRS_UPDATE_ANGLE)
+  //     maincontroler.gps_update = true;
+  // }
+  // if (abs(course - cfg.gps_move.course) > APRS_UPDATE_ANGLE) {
+  //   maincontroler.gps_update = true;
+  // }
 
-  if (cfg.gps_move.course > course &&
-      cfg.gps_move.course - course > APRS_UPDATE_ANGLE) {
-    maincontroler.gps_update = true;
-  }
+  // if (cfg.gps_move.course > course &&
+  //     cfg.gps_move.course - course > APRS_UPDATE_ANGLE) {
+  //   maincontroler.gps_update = true;
+  // }
 
-  if (last_update < millis()) {
-    maincontroler.gps_update = true;
-  }
+  //   if (last_update < millis()) {
+  //     maincontroler.gps_update = true;
+  //   }
 
-  if (maincontroler.gps_update == true) {
-    lat = cfg.gps_location.latitude;
-    lng = cfg.gps_location.longitude;
-    course = cfg.gps_move.course;
-    last_update = millis() + APRS_UPDATE_INTERVAL;
-  }
+  //   if (maincontroler.gps_update == true) {
+  //     lat = cfg.gps_location.latitude;
+  //     lng = cfg.gps_location.longitude;
+  //     course = cfg.gps_move.course;
+  //     last_update = millis() + APRS_UPDATE_INTERVAL;
+  //   }
 }

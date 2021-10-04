@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 19:53
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-18 19:08
+ * Last Modified: 2021-10-03 22:04
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -13,6 +13,8 @@
 
 #include "I2CScanner.h"
 #include "AXP20xDevice.h"
+
+extern TrackerDisplay td;
 
 /**
  * @brief scans  all I2C-addresses (0-127) and print founds
@@ -73,7 +75,7 @@ void I2CScanner::initialize() {
         case 60:
           ESP_LOGD(TAG, "Init for address 0x%02X", 60);
           ESP_LOGI(TAG, "\tTry to initialize OLED Display at 0x%02X", 60);
-          if (DisplayInit()) {
+          if (td.begin(60)) {
             ESP_LOGI(TAG, "\t\t+OK");
             cfg.hardware.OLED = true;
           } else {

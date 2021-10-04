@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-15 12:47
+ * Last Modified: 2021-09-29 0:03
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -17,7 +17,7 @@
 #include <Arduino.h>
 
 #include <freertos/FreeRTOS.h>
-#include "APRSControler.h"
+#include "Scheduler.h"
 #include "freertos/timers.h"
 
 void ConfigInit(void);

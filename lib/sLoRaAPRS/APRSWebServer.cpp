@@ -1,13 +1,13 @@
 /*
  * File: APRSWebServer.cpp
  * Project: sLoRaAPRS
- * File Created: 2020-11-11 20:13
+ * File Created: 2021-09-26 22:05
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-26 17:50
+ * Last Modified: 2021-10-03 23:48
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
- * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
+ * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
@@ -17,6 +17,7 @@
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
 #include <AsyncJson.h>
+#include <AsyncWebSocket.h>
 #include <Config.h>
 #include <Preferences.h>
 #include <SPIFFSEditor.h>
@@ -1214,16 +1215,19 @@ void sendGPSDataJson(void) {
   snprintf(tmpbuf, sizeof(tmpbuf), "%02d:%02d:%02d", cfg.gps_time.hour,
            cfg.gps_time.minute, cfg.gps_time.second);
   root["time"] = tmpbuf;
+  // ESP_LOGD(TAG, "%s", tmpbuf);
 
   snprintf(tmpbuf, sizeof(tmpbuf), "%4d-%02d-%02d", cfg.gps_time.year,
            cfg.gps_time.month, cfg.gps_time.day);
   root["date"] = tmpbuf;
+  // ESP_LOGD(TAG, "%s", tmpbuf);
 
   root["lat"] = cfg.gps_location.latitude;
   root["lng"] = cfg.gps_location.longitude;
   root["alt"] = cfg.gps_location.altitude;
   root["course"] = cfg.gps_move.course;
   root["speed"] = cfg.gps_move.speed;
+  // have to show by more static
   root["temp"] = cfg.WXdata.temp;
   root["humidity"] = cfg.WXdata.humidity;
   root["pressure"] = cfg.WXdata.pressure;
@@ -1231,14 +1235,19 @@ void sendGPSDataJson(void) {
   root["sat"] = cfg.gps_meta.sat;
   root["hdop"] = cfg.gps_meta.hdop;
   uint16_t len = measureJson(root);
-  // ESP_LOGD(TAG, "%d", len);
+  ESP_LOGD(TAG, "%d", len);  // @FIXME remove
   // serializeJson(root, Serial);
 
   AsyncWebSocketMessageBuffer *buffer = globalClient->server()->makeBuffer(
       len);  //  creates a buffer (len + 1) for you.
   if (buffer) {
     serializeJson(root, reinterpret_cast<char *>(buffer->get()), len + 1);
-    globalClient->server()->textAll(buffer);
+    if (!globalClient->queueIsFull() &&
+        globalClient->status() == WS_CONNECTED) {  // paranoia?
+      globalClient->server()->textAll(buffer);
+    } else {
+      ESP_LOGE(TAG, "can't send to websocket");
+    }
   }
 
   // serializeJsonPretty(root, Serial);

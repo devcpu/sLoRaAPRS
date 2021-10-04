@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-26 22:03
+ * Last Modified: 2021-09-26 22:21
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -22,7 +22,7 @@ extern TinyGPSPlus gps;
 
 char *APRS_MSG::computeWXField(char *rv) {
   char hum_buf[16] = {0};
-  snprintf(rv, sizeof(rv), "%s/%sg%st%03dr%sp%sP%sh%sb%05d %s",
+  snprintf(rv, sizeof(rv) - 1, "%s/%sg%st%03dr%sp%sP%sh%sb%05d %s",
            "...",  // winddirection 0-360
            "...",  // windspeed in mph
            "...",  // gust

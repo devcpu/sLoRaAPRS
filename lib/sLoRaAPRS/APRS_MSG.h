@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-26 2:35
+ * Last Modified: 2021-09-29 0:21
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -18,6 +18,7 @@
 #include <Config.h>
 #include <LoRaAPRSConfig.h>
 #include <TinyGPS++.h>
+#include <apptypes.h>
 
 extern Config cfg;
 

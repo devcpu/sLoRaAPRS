@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-26 22:03
+ * Last Modified: 2021-10-03 22:00
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -15,6 +15,8 @@
 #include <TrackerDisplay.h>
 
 LoRaRXControl lora_control;
+
+extern TrackerDisplay td;
 
 bool LoRa_init() {
   LoRa.setPins(LoRaCsPin, LoRaResetPin, LoRaIRQPin);
@@ -59,7 +61,7 @@ void reciveMessages() {
   LoRa.enableInvertIQ();
   LoRa.receive();
   lora_control.isSend = false;
-  writeUTC();
+  td.writeUTC();
 }
 
 void sendMessage(char *outgoing, boolean toDigi) {
@@ -79,7 +81,7 @@ void sendMessage(char *outgoing, boolean toDigi) {
     LoRa.enableInvertIQ();
     strncpy(txmsgbuf, " 2tracker", sizeof(txmsgbuf) - 1);
   }
-  writeTX(txmsgbuf);
+  td.writeTX(txmsgbuf);
 
   char destination = 0x3C;   // '<' it seems that we have to use it, but really?
   char localAddress = 0xFF;  // in LoRa it stands for broadcat

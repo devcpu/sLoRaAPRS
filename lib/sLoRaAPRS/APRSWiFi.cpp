@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-13 1:26
+ * Last Modified: 2021-10-03 21:57
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -19,6 +19,7 @@
 #include <apptypes.h>
 
 extern Config cfg;
+extern TrackerDisplay td;
 
 #ifdef ESP32
 #elif defined(ESP8266)
@@ -54,14 +55,15 @@ void WifiAPInit(void) {
     Serial.println("++++++++++   Password: " + cfg.APCredentials.auth_tocken +
                    "         ++++++++++");
     Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
-    write3Line(" WIFI AP", cfg.APCredentials.auth_name.c_str(),
-               cfg.APCredentials.auth_tocken.c_str(), false, 3000);
+    td.write3Line(" WIFI AP", cfg.APCredentials.auth_name.c_str(),
+                  cfg.APCredentials.auth_tocken.c_str(), false,
+                  DISPLAY_DELAY_LONG);
   } else {
     Serial.print("AP IP address: ");
     Serial.println(myIP);
     Serial.println("SSID: " + cfg.APCredentials.auth_name);
-    write3Line(" WIFI AP", "  SSID:", cfg.APCredentials.auth_name.c_str(), true,
-               3000);
+    td.write3Line(" WIFI AP", "  SSID:", cfg.APCredentials.auth_name.c_str(),
+                  true, DISPLAY_DELAY_LONG);
   }
   cfg.lan_status.SSID = WiFi.SSID();
   cfg.lan_status.IP = myIP.toString();
@@ -92,8 +94,8 @@ void WifiConnect(void) {
   Serial.println(WiFi.localIP());
   IPAddress myIP = WiFi.localIP();
   cfg.SERVER_IP = myIP.toString();
-  write3Line("WiFiclient", APRSWiFI_SSID.c_str(), myIP.toString().c_str(), true,
-             3000);
+  td.write3Line("WiFiclient", APRSWiFI_SSID.c_str(), myIP.toString().c_str(),
+                true, DISPLAY_DELAY_LONG);
 
   cfg.lan_status.SSID = WiFi.SSID();
   cfg.lan_status.IP = myIP.toString();

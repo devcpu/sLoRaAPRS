@@ -4,25 +4,24 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-26 17:53
+ * Last Modified: 2021-10-04 10:10
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
-#include "TrackerDisplay.h"
-
 #include <Arduino.h>
-
-#include "APRSControler.h"
+#include <TrackerDisplay.h>
 #include "Config.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
 
-extern APRSControler maincontroler;
-extern TimerHandle_t button_timer;
-portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+extern TinyGPSPlus gps;
+extern Config cfg;
+
+// interrupt lock?
+// portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED; // DHTesp.h
 
 Adafruit_SSD1306 display(128, 64, &Wire, OLED_RESET);
 
@@ -32,41 +31,30 @@ Adafruit_SSD1306 display(128, 64, &Wire, OLED_RESET);
  */
 bool displayChange = true;
 
-/**
- * @brief time until nex display info
- * @TODO move to LoRaAPRSConfig.h
- */
-uint16_t tracker_display_time = 5000;
+TrackerDisplay::TrackerDisplay() {
+  // vPortCPUInitializeMutex(&my_mutex);
+}
 
-/**
- * @brief for getting gps data
- *
- * @var	extern	TinyGPSPlus
- */
-extern TinyGPSPlus gps;
+bool TrackerDisplay::begin() {
+  TrackerDisplay::begin(60);  // 60  == 0x3C"
+}
 
-/**
- * @brief Initialize SSD1306 OLED Display on 0x3C.
- * Not FreeRTOS save!
- *
- * @return true if +OK
- * @return false if error
- */
-bool DisplayInit(void) {
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {  // Address 0x3D for 128x64
-    Serial.println("Dsiplay SSD1306 on 0x3c not ready!");
+bool TrackerDisplay::begin(uint8_t i2c_address) {
+  if (!display.begin(SSD1306_SWITCHCAPVCC,
+                     i2c_address)) {  // Address 0x3D for 128x64
+    ESP_LOGE(TAG, "Dsiplay SSD1306 on %s not ready!", i2c_address);
     return false;
   }
   display.display();
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
   return true;
 }
 
-// TextSize(1) ^= 21 Zeichen
-// TextSize(2) ^= 10 Zeichen
-void write2Display(String head = "", String line1 = "", String line2 = "",
-                   String line3 = "", String line4 = "") {
+void TrackerDisplay::write2Display(String head, String line1, String line2,
+                                   String line3, String line4) {
+  // TextSize(1) ^= 21 Zeichen
+  // TextSize(2) ^= 10 Zeichen
   display.clearDisplay();
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.setTextColor(WHITE);
   display.setTextSize(2);
   display.setCursor(0, 0);
@@ -80,17 +68,20 @@ void write2Display(String head = "", String line1 = "", String line2 = "",
   display.print(line3);
   display.setCursor(0, 56);  // TextSize 1 needs 8 pixel minimum
   display.print(line4);
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.display();
 }
 
-void write2Display(String head = "", String line1 = "", String line2 = "",
-                   String line3 = "") {
+void TrackerDisplay::write2Display(String head, String line1, String line2,
+                                   String line3) {
   write2Display(head, line1, line2, line3, "");
 }
 
-void write2Display(const char *head, const char *line1, const char *line2,
-                   const char *line3, const char *line4) {
+void TrackerDisplay::write2Display(const char *head, const char *line1,
+                                   const char *line2, const char *line3,
+                                   const char *line4) {
   display.clearDisplay();
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.setTextColor(WHITE);
   display.setTextSize(2);
   display.setCursor(0, 0);
@@ -104,25 +95,22 @@ void write2Display(const char *head, const char *line1, const char *line2,
   display.print(line3);
   display.setCursor(0, 56);  // TextSize 1 needs 8 pixel minimum
   display.print(line4);
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.display();
 }
 
-void tracker_display_tick(void) {
-  DisplayMode dm = displayModeUTC;
-  if (!maincontroler.display_update) {
-    return;
-  }
-  if (maincontroler.next_display_time > millis()) {
-    return;
-  }
-
-  maincontroler.next_display_time = millis() + tracker_display_time;
-  if (maincontroler.display_change) {
-    dm = maincontroler.getNextDisplayMode();
+void TrackerDisplay::nextDisplayMode(void) {
+  uint8_t max = displayModeEND - 1;
+  if (current_display_mode < max) {
+    uint8_t x = static_cast<int>(current_display_mode) + 1;
+    current_display_mode = (DisplayMode)x;
   } else {
-    dm = maincontroler.getCurrentDisplayMode();
+    current_display_mode = (DisplayMode)0;
   }
-  switch (dm) {
+}
+
+void TrackerDisplay::showDisplayMode(void) {
+  switch (current_display_mode) {
     case displayModeGPS:
       writeGPS();
       break;
@@ -145,11 +133,7 @@ void tracker_display_tick(void) {
   }
 }
 
-/**
- * @brief writes time in utc to OLED display
- *
- */
-void writeUTC() {
+void TrackerDisplay::writeUTC() {
   if (gps.time.isValid() && gps.date.isValid()) {
     char date[25], time[25];
     snprintf(date, sizeof(date), "%04d-%02d-%02d", cfg.gps_time.year,
@@ -163,14 +147,7 @@ void writeUTC() {
   }
 }
 
-/**
- * @brief writes current gps position to OLED display
- *
- */
-void writeGPS() {
-  display.clearDisplay();
-  writeHead("   GPS");
-
+void TrackerDisplay::writeGPS() {
   if (gps.location.isValid()) {
     char lat[22], lng[22], speed_course[22], alt_hdop[22];
     snprintf(lat, sizeof(lat), "lat: %8.4f", cfg.gps_location.latitude);
@@ -180,6 +157,14 @@ void writeGPS() {
     snprintf(alt_hdop, sizeof(alt_hdop), "alt: %5.1fm sat: %d",
              cfg.gps_location.altitude, cfg.gps_meta.sat);
 
+    // portENTER_CRITICAL(&my_mutex);
+    // rtc_wdt_feed();
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+    display.clearDisplay();
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+    _writeHead("   GPS");
+    // rtc_wdt_feed();
+    // portEXIT_CRITICAL(&my_mutex);
     display.setTextSize(1);
     display.setCursor(0, 20);
     display.print(lat);
@@ -189,6 +174,7 @@ void writeGPS() {
     display.print(speed_course);
     display.setCursor(0, 56);  // TextSize 1 needs 8 pixel minimum
     display.print(alt_hdop);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
     display.display();
 
   } else {
@@ -196,11 +182,7 @@ void writeGPS() {
   }
 }
 
-/**
- * @brief writes wether info to OLED display
- *
- */
-void writeWX() {
+void TrackerDisplay::writeWX() {
   char temp_buf[24] = {0};
   char hum_buf[24] = {0};
   char press_buf[24] = {0};
@@ -210,8 +192,10 @@ void writeWX() {
            round(cfg.WXdata.humidity));
   snprintf(press_buf, sizeof(press_buf), "Pressure: %4.0f hPa",
            round(cfg.WXdata.pressure));
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.clearDisplay();
-  writeHead("   WX");
+  vTaskDelay(50 / portTICK_PERIOD_MS);
+  _writeHead("   WX");
   display.setTextSize(1);
   display.setCursor(0, 22);
   display.print(temp_buf);
@@ -219,18 +203,16 @@ void writeWX() {
   display.print(hum_buf);
   display.setCursor(0, 50);
   display.print(press_buf);
-
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.display();
 }
 
-/**
- * @brief writes current WIFI status to OLED display
- *
- */
-void writeWiFiStatus() {
+void TrackerDisplay::writeWiFiStatus() {
   display.clearDisplay();
+  vTaskDelay(50 / portTICK_PERIOD_MS);
+
   if (cfg.lan_status.mode == wifi_ap) {
-    writeHead("Wifi AP");
+    _writeHead("Wifi AP");
     display.setTextSize(1);
     display.setCursor(0, 22);
     display.print(cfg.lan_status.SSID.c_str());
@@ -240,7 +222,7 @@ void writeWiFiStatus() {
     display.print(cfg.lan_status.IP.c_str());
   }
   if (cfg.lan_status.mode == wifi_client) {
-    writeHead("Wifi Clnt");
+    _writeHead("Wifi Clnt");
     display.setTextSize(1);
     display.setCursor(0, 22);
     display.print(cfg.lan_status.SSID.c_str());
@@ -251,21 +233,16 @@ void writeWiFiStatus() {
   }
 
   if (cfg.lan_status.mode == wifi_off) {
-    writeHead("  Wifi");
+    _writeHead("  Wifi");
     display.setTextSize(2);
     display.setCursor(0, 32);
     display.print("OFF");
   }
-
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.display();
 }
 
-/**
- * @brief fuer Erweiterungen in der Hauptzeile z.B. ttl next tx
- *
- * @param head
- */
-void writeHead(const char *head) {
+void TrackerDisplay::_writeHead(const char *head) {
   char sat[3];
   char hdop[3];
 
@@ -277,8 +254,6 @@ void writeHead(const char *head) {
     strncpy(sat, "", sizeof(sat) - 1);
     strncpy(hdop, "", sizeof(hdop) - 1);
   }
-
-  display.clearDisplay();
   display.setTextColor(WHITE);
   display.setTextSize(2);
   display.setCursor(0, 0);
@@ -290,33 +265,23 @@ void writeHead(const char *head) {
   display.print(hdop);
 }
 
-/**
- * @brief if gps / time is not valid prints this to OLED display
- *
- */
-void _write_no_vaild_data() {
+void TrackerDisplay::_write_no_vaild_data() {
   display.clearDisplay();
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.setCursor(0, 22);
   display.print("no valid");
   display.setCursor(0, 44);
   display.print("data yet");
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.display();
 }
 
-/**
- * @brief prints head + lines to OLED display.
- * Attention! Not FreeRTOS save!
- *
- * @param const char *head head line
- * @param const char *line1
- * @param const char *line2
- * @param bool toSerial
- * @param u_long sleep
- */
-void write3Line(const char *head, const char *line1, const char *line2,
-                bool toSerial, u_long sleep) {
+void TrackerDisplay::write3Line(const char *head, const char *line1,
+                                const char *line2, bool toSerial,
+                                u_long sleep) {
   display.clearDisplay();
-  writeHead(head);
+  vTaskDelay(50 / portTICK_PERIOD_MS);
+  _writeHead(head);
 
   if (strlen(line1) > 10) {
     display.setTextSize(1);
@@ -333,7 +298,10 @@ void write3Line(const char *head, const char *line1, const char *line2,
   }
   display.setCursor(0, 44);
   display.print(line2);
+
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.display();
+  vTaskDelay(50 / portTICK_PERIOD_MS);
 
   if (toSerial) {
     write3toSerial(head, line1, line2, sleep);
@@ -344,8 +312,8 @@ void write3Line(const char *head, const char *line1, const char *line2,
   }
 }
 
-void write3toSerial(const char *head, const char *line1, const char *line2,
-                    u_long sleep) {
+void TrackerDisplay::write3toSerial(const char *head, const char *line1,
+                                    const char *line2, u_long sleep) {
   String s1 = String(head);
   s1.trim();
   String s2 = String(line1);
@@ -358,17 +326,25 @@ void write3toSerial(const char *head, const char *line1, const char *line2,
   }
 }
 
-/**
- * @brief show that LoRa is sending
- *
- * @param to
- */
-void writeTX(const char *to) {
+void TrackerDisplay::writeTX(String to) {
   display.clearDisplay();
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.setTextSize(2);
   display.setCursor(0, 22);
   display.print(" << TX >> ");
   display.setCursor(0, 44);
   display.print(to);
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.display();
 }
+
+// char *TrackerDisplay::_center_line(char *rv, char *in) {
+//   uint8_t in_len = sizeof(in);
+//   uint8_t rv_len = sizeof(rv);
+//   if (in_len > rv_len) {
+//     sniprintf(rv, sizeof(rv), "to long");
+//     ESP_LOGE(TAG, "ERROR %s to long!", in);
+//   }
+//   snprintf(rv,"%*s%s", 10+(rv_len - in_len) / 2, in);
+//   return rv;
+// }

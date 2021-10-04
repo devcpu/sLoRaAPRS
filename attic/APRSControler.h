@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-28 0:35
+ * Last Modified: 2021-09-27 23:58
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -17,13 +17,6 @@
 #include <Arduino.h>
 #include <ButtonState.h>
 
-enum DisplayMode {
-  displayModeUTC,
-  displayModeGPS,
-  displayModeWX,
-  displayModeWiFiStatus,
-  displayModeEND
-};
 
 class AbstracButtonState;
 
@@ -31,16 +24,9 @@ class APRSControler {
   friend class AbstracButtonState;
 
  public:
-  boolean config_mode = false;
 
-  boolean gps_update = false;
+  APRSControler();
 
-  boolean display_change = true;
-  boolean display_update = true;
-  uint64_t next_display_time = 0;
-  void nextDisplayMode(void);
-  DisplayMode getCurrentDisplayMode(void);
-  DisplayMode getNextDisplayMode(void);
 
   void singleClick();
   void doubleClick();

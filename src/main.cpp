@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-26 17:28
+ * Last Modified: 2021-10-04 9:27
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -13,18 +13,9 @@
 
 #include <main.h>
 
-void singleClick() { ESP_LOGE(TAG, "singleClick"); }
-
-void doubleClick() { ESP_LOGE(TAG, "doubleClick"); }
-
-void longClick() {
-  ESP_LOGE(TAG, "longClick");
-  vTaskDelay(500 / portTICK_PERIOD_MS);
-}
-
 xOneButton xob(BUTTON, true);
-
-APRSControler maincontroler;
+Scheduler taskScheduler;
+TrackerDisplay td;
 
 // TTGO has HW serial to GPS // 1 = first UART
 HardwareSerial ss(1);
@@ -46,7 +37,7 @@ void setup() {
   }
 
   // Init UART1 for GPS device
-  ss.begin(GPS_BAUD, SERIAL_8N1, TXPin, RXPin);
+  // ss.begin(GPS_BAUD, SERIAL_8N1, TXPin, RXPin);
 
   /****   Init misc device END   ****/
 
@@ -68,9 +59,9 @@ void setup() {
 
   pinMode(TXLED, OUTPUT);
 
-  xob.attachClick(singleClick);
-  xob.attachDoubleClick(doubleClick);
-  xob.attachDuringLongPress(longClick);
+  xob.attachClick(singleClick_CB);
+  xob.attachDoubleClick(doubleClick_CB);
+  xob.attachLongPressStop(longClick_CB);
 
   switch (cfg.current_run_mode) {
     case mode_tracker:
@@ -105,8 +96,10 @@ void setup() {
   // cfg.current_wifi_mode = wifi_client;
   // cfg.current_wifi_mode = wifi_ap;
 
-  write3Line(" RUN MODE", getRunMode().c_str(), "", true, DISPLAY_DELAY_LONG);
-  write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLAY_DELAY_LONG);
+  td.write3Line(" RUN MODE", getRunMode().c_str(), "", true,
+                DISPLAY_DELAY_LONG);
+  td.write3Line("WiFi MODE", getWifiMode().c_str(), "", true,
+                DISPLAY_DELAY_LONG);
 
   if (cfg.current_wifi_mode == wifi_ap) {
     ESP_LOGD(TAG, "start wifi_ap");
@@ -121,12 +114,14 @@ void setup() {
     WebserverStart();
   }
 
-  scheduler_init();
+  td.write3Line("sLoRaAPRS", "  up &", " running", true, DISPLAY_DELAY_MEDIUM);
+  td.write3Line("  Hello", (String("  ") + cfg.call).c_str(),
+                "  nice to be back", true, DISPLAY_DELAY_MEDIUM);
+  td.write3Line("  Enjoy", "   the", "   day", true, DISPLAY_DELAY_MEDIUM);
 
-  write3Line("sLoRaAPRS", "  up &", " running", true, DISPLAY_DELAY_MEDIUM);
-  write3Line("  Hello", (String("  ") + cfg.call).c_str(), "  nice to be back",
-             true, DISPLAY_DELAY_MEDIUM);
-  write3Line("  Enjoy", "   the", "   day", true, DISPLAY_DELAY_MEDIUM);
+  taskScheduler.button_state = new StateDefault();
+
+  taskScheduler.init();
 }
 
 void loop() {

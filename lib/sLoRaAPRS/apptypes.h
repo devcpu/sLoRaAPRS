@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-26 2:34
+ * Last Modified: 2021-09-28 0:32
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -159,6 +159,7 @@ struct Config {
   Location gps_location;
   Move gps_move;
   DateTime gps_time;
+
   GPSMeta gps_meta;
   Location posfix;
   String SERVER_IP;

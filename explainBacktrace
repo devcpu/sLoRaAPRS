@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#str="'$*'"
+
+
+#if [ "$str" == "" ]; then
+#    echo "No backtrace given"
+#fi
+
+/home/jan/.platformio/packages/toolchain-xtensa32@2.50200.97/bin/xtensa-esp32-elf-addr2line -fe .pio/build/esp32-v2z/firmware.elf $@

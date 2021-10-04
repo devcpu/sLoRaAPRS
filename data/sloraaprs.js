@@ -9,7 +9,7 @@ ws.onmessage = function (evt) {
 
     var data = JSON.parse(evt.data);
 
-    //window.alert(data);
+    // window.alert(data);
 
     var time = document.getElementById("time");
     var date = document.getElementById("date");

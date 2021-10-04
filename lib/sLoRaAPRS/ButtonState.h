@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-18 15:52
+ * Last Modified: 2021-09-29 0:02
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -14,8 +14,8 @@
 #ifndef LIB_SLORAAPRS_BUTTONSTATE_H_
 #define LIB_SLORAAPRS_BUTTONSTATE_H_
 
-#include <APRSControler.h>
 #include <Arduino.h>
+#include <Scheduler.h>
 #include <apptypes.h>
 
 #include "freertos/FreeRTOS.h"
@@ -24,45 +24,45 @@
 // https://stackoverflow.com/questions/14676709/c-code-for-state-machine
 // https://www.philipphauer.de/study/se/design-pattern/state.php
 
-class APRSControler;
+class Scheduler;
 
 class AbstracButtonState {
  public:
   virtual ~AbstracButtonState();
 
-  virtual void singleClick(APRSControler &aprs_controler) = 0;
-  virtual void doubleClick(APRSControler &aprs_controler) = 0;
-  virtual void longClick(APRSControler &aprs_controler);
+  virtual void singleClick(Scheduler &taskScheduler) = 0;
+  virtual void doubleClick(Scheduler &taskScheduler) = 0;
+  virtual void longClick(Scheduler &taskScheduler);
   virtual void kino();
 
  protected:
-  void setState(APRSControler &aprs_controler, AbstracButtonState *st);
+  void setState(Scheduler &taskScheduler, AbstracButtonState *st);
 };
 
 class StateDisplayMode : public AbstracButtonState {
  public:
-  virtual void singleClick(APRSControler &aprs_controler);
-  virtual void doubleClick(APRSControler &aprs_controler);
+  virtual void singleClick(Scheduler &taskScheduler);
+  virtual void doubleClick(Scheduler &taskScheduler);
 };
 
 class StateDefault : public AbstracButtonState {
  public:
-  virtual void singleClick(APRSControler &aprs_controler);
-  virtual void doubleClick(APRSControler &aprs_controler);
-  virtual void longClick(APRSControler &aprs_controler);
+  virtual void singleClick(Scheduler &taskScheduler);
+  virtual void doubleClick(Scheduler &taskScheduler);
+  virtual void longClick(Scheduler &taskScheduler);
 };
 
 class StateConfigCall : public AbstracButtonState {
  public:
-  virtual void singleClick(APRSControler &aprs_controler);
-  virtual void doubleClick(APRSControler &aprs_controler);
+  virtual void singleClick(Scheduler &taskScheduler);
+  virtual void doubleClick(Scheduler &taskScheduler);
 };
 
 class StateConfigMenue : public AbstracButtonState {
  public:
   StateConfigMenue(void);
-  virtual void singleClick(APRSControler &aprs_controler);
-  virtual void doubleClick(APRSControler &aprs_controler);
+  virtual void singleClick(Scheduler &taskScheduler);
+  virtual void doubleClick(Scheduler &taskScheduler);
 
  private:
   /**
@@ -74,9 +74,9 @@ class StateConfigMenue : public AbstracButtonState {
 class ConfigStringSelector : public AbstracButtonState {
  public:
   ConfigStringSelector(const char *head, const char *select_list);
-  virtual void singleClick(APRSControler &aprs_controler);
-  virtual void doubleClick(APRSControler &aprs_controler);
-  virtual void longClick(APRSControler &aprs_controler);
+  virtual void singleClick(Scheduler &taskScheduler);
+  virtual void doubleClick(Scheduler &taskScheduler);
+  virtual void longClick(Scheduler &taskScheduler);
   void kino(void);
 
  private:
@@ -99,8 +99,8 @@ class ConfigStringSelector : public AbstracButtonState {
 class StateConfigWiFi : public AbstracButtonState {
  public:
   explicit StateConfigWiFi(const char *head);
-  virtual void singleClick(APRSControler &aprs_controler);
-  virtual void doubleClick(APRSControler &aprs_controler);
+  virtual void singleClick(Scheduler &taskScheduler);
+  virtual void doubleClick(Scheduler &taskScheduler);
 
  private:
   const char *_head;
@@ -110,8 +110,8 @@ class StateConfigWiFi : public AbstracButtonState {
 class StateConfigRun : public AbstracButtonState {
  public:
   explicit StateConfigRun(const char *head);
-  virtual void singleClick(APRSControler &aprs_controler);
-  virtual void doubleClick(APRSControler &aprs_controler);
+  virtual void singleClick(Scheduler &taskScheduler);
+  virtual void doubleClick(Scheduler &taskScheduler);
 
  private:
   const char *_head;
@@ -120,15 +120,15 @@ class StateConfigRun : public AbstracButtonState {
 
 // class  : public AbstracButtonState {
 //     public:
-//     virtual void singleClick(APRSControler&);
-//     virtual void doubleClick(APRSControler&);
+//     virtual void singleClick(Scheduler&);
+//     virtual void doubleClick(Scheduler&);
 
 // };
 
 // class  : public AbstracButtonState {
 //     public:
-//     virtual void singleClick(APRSControler&);
-//     virtual void doubleClick(APRSControler&);
+//     virtual void singleClick(Scheduler&);
+//     virtual void doubleClick(Scheduler&);
 
 // };
 
