@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-03 22:00
+ * Last Modified: 2021-10-05 23:11
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -21,7 +21,7 @@ extern TrackerDisplay td;
 bool LoRa_init() {
   LoRa.setPins(LoRaCsPin, LoRaResetPin, LoRaIRQPin);
   if (!LoRa.begin(LoRaRXFREQ)) {
-    Serial.println("Starting LoRa failed!");
+    ESP_LOGE(TAG, "Starting LoRa failed!");
     return false;
   }
   LoRa.setSpreadingFactor(LoRaSpreadingFactor);
@@ -53,10 +53,10 @@ void LoRa_tick(void) {
     return;
   }
   reciveMessages();
-  Serial.println("set LoRa device to recive");
 }
 
 void reciveMessages() {
+  ESP_LOGD(TAG, "set LoRa device to recive");
   LoRa.setFrequency(LoRaRXFREQ);
   LoRa.enableInvertIQ();
   LoRa.receive();
@@ -84,7 +84,7 @@ void sendMessage(char *outgoing, boolean toDigi) {
 
   char destination = 0x3C;  // '<' it seems that we have to use it, but really?
   char localAddress = 0xFF; // in LoRa it stands for broadcat
-  LoRa.beginPacket();       // start packet
+  LoRa.beginPacket();       // start packet returns false on error
   LoRa.write(destination);  // add destination address
   LoRa.write(localAddress); // add sender address
   LoRa.write(0x01);         // head end?
@@ -111,7 +111,7 @@ void sendMessage(char *outgoing, boolean toDigi) {
 
 void onReceive(int packetSize) {
   lora_control.isMessage = packetSize;
-  Serial.println("fire spi");
+  ESP_LOGD(TAG, "fire spi");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ void processMessage(void) {
   2json
   generate filename
   open file
-  wite content
+  write content
   close file
   schreibe text zum client wenn connected via socket
 */

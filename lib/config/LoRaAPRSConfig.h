@@ -4,7 +4,7 @@
  * File Created: 2020-09-26 21:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-05 0:26
+ * Last Modified: 2021-10-05 22:51
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -64,12 +64,13 @@
 #define LoRaSignalBandwidth 125000
 #define LoRaCodingRate4 5
 #define LoRaenableCrc true
+#define LoRaSyncWord 18 // == 0x12 == (default)
 
+// @FIXME LoRaTXFREQ 433900000
 #define LoRaTXFREQ 433775000 // Transmit frequency in MHz
+#define LoRaRXFREQ 433775000 // Receive frequency in MHz
 #define LoRaTXdbmW 12        // Transmit power in dBm PA needs 23 /18 normal
 #define LoRaTXenablePA 0     // switch internal power amplifier on (1) or off (0)
-
-#define LoRaRXFREQ 433775000 // Transmit frequency in MHz
 
 #define LoRaCsPin 18    // LoRa radio chip select
 #define LoRaResetPin 23 // LoRa radio reset
