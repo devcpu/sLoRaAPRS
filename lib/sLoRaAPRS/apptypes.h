@@ -55,14 +55,7 @@
 
 enum wifi_mode { wifi_off, wifi_ap, wifi_client };
 
-enum run_mode {
-  mode_tracker,
-  mode_wxtracker,
-  mode_wxfix,
-  mode_digi,
-  mode_gateway,
-  mode_digi_gateway
-};
+enum run_mode { mode_tracker, mode_wxtracker, mode_wxfix, mode_digi, mode_gateway, mode_digi_gateway };
 
 struct APRSMessage {
   String msg;
@@ -168,4 +161,4 @@ struct Config {
   WXData WXdata;
 };
 
-#endif  // LIB_SLORAAPRS_APPTYPES_H_
+#endif // LIB_SLORAAPRS_APPTYPES_H_

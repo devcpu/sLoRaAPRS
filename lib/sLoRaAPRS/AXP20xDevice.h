@@ -23,7 +23,7 @@
 AXP20X_Class axp;
 
 bool initAXP() {
-  if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) {  // "!" is correct here
+  if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) { // "!" is correct here
     axp.setPowerOutPut(AXP192_LDO2, AXP202_ON);
     axp.setPowerOutPut(AXP192_LDO3, AXP202_ON);
     axp.setPowerOutPut(AXP192_DCDC2, AXP202_ON);
@@ -36,6 +36,6 @@ bool initAXP() {
   }
 }
 
-#endif  // T_BEAM_V1_0
+#endif // T_BEAM_V1_0
 
-#endif  // LIB_SLORAAPRS_AXP20XDEVICE_H_
+#endif // LIB_SLORAAPRS_AXP20XDEVICE_H_

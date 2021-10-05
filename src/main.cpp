@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-04 9:27
+ * Last Modified: 2021-10-05 1:21
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -37,7 +37,7 @@ void setup() {
   }
 
   // Init UART1 for GPS device
-  // ss.begin(GPS_BAUD, SERIAL_8N1, TXPin, RXPin);
+  ss.begin(GPS_BAUD, SERIAL_8N1, TXPin, RXPin);
 
   /****   Init misc device END   ****/
 
@@ -64,60 +64,57 @@ void setup() {
   xob.attachLongPressStop(longClick_CB);
 
   switch (cfg.current_run_mode) {
-    case mode_tracker:
+  case mode_tracker:
 
-      break;
+    break;
 
-    case mode_wxtracker:
+  case mode_wxtracker:
 
-      break;
+    break;
 
-    case mode_wxfix:
+  case mode_wxfix:
 
-      break;
+    break;
 
-    case mode_digi:
+  case mode_digi:
 
-      break;
+    break;
 
-    case mode_gateway:
+  case mode_gateway:
 
-      break;
+    break;
 
-    case mode_digi_gateway:
+  case mode_digi_gateway:
 
-      break;
+    break;
 
-    default:
-      break;
+  default:
+    break;
   }
 
   // Debughilfe!
   // cfg.current_wifi_mode = wifi_client;
   // cfg.current_wifi_mode = wifi_ap;
 
-  td.write3Line(" RUN MODE", getRunMode().c_str(), "", true,
-                DISPLAY_DELAY_LONG);
-  td.write3Line("WiFi MODE", getWifiMode().c_str(), "", true,
-                DISPLAY_DELAY_LONG);
+  td.write3Line("RUN MODE", getRunMode().c_str(), "", true, DISPLAY_DELAY_LONG);
+  td.write3Line("WiFi MODE", getWifiMode().c_str(), "", true, DISPLAY_DELAY_LONG);
 
   if (cfg.current_wifi_mode == wifi_ap) {
     ESP_LOGD(TAG, "start wifi_ap");
     WifiAPInit();
   }
   if (cfg.current_wifi_mode == wifi_client) {
-    ESP_LOGD(TAG, " start wifi_client");
+    ESP_LOGD(TAG, "start wifi_client");
     WifiConnect();
   }
   if (cfg.current_wifi_mode != wifi_off) {
-    ESP_LOGD(TAG, " start WebServer");
+    ESP_LOGD(TAG, "start WebServer");
     WebserverStart();
   }
 
-  td.write3Line("sLoRaAPRS", "  up &", " running", true, DISPLAY_DELAY_MEDIUM);
-  td.write3Line("  Hello", (String("  ") + cfg.call).c_str(),
-                "  nice to be back", true, DISPLAY_DELAY_MEDIUM);
-  td.write3Line("  Enjoy", "   the", "   day", true, DISPLAY_DELAY_MEDIUM);
+  td.write3Line("sLoRaAPRS", "up &", "running", true, DISPLAY_DELAY_MEDIUM);
+  td.write3Line("Hello", cfg.call.c_str(), "nice to be back", true, DISPLAY_DELAY_MEDIUM);
+  td.write3Line("Enjoy", "the", "day", true, DISPLAY_DELAY_MEDIUM);
 
   taskScheduler.button_state = new StateDefault();
 
@@ -125,7 +122,7 @@ void setup() {
 }
 
 void loop() {
-  vTaskDelay(portMAX_DELAY);  // don't remove it!
+  vTaskDelay(portMAX_DELAY); // don't remove it!
   ESP_LOGE(TAG, "xxxxxxxxxx   ERROR xxx IN xxx LOOP   xxxxxxxxxx");
 }
 

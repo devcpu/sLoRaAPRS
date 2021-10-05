@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-04 1:37
+ * Last Modified: 2021-10-05 0:51
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -14,16 +14,19 @@
 #ifndef LIB_SLORAAPRS_TRACKERDISPLAY_H_
 #define LIB_SLORAAPRS_TRACKERDISPLAY_H_
 
+#include <soc/rtc_wdt.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/timers.h>
 #include <APRS_MSG.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SPITFT.h>
 #include <Adafruit_SPITFT_Macros.h>
 #include <Adafruit_SSD1306.h>
-#include <Arduino.h>
-#include <TinyGPS++.h>
 #include <gfxfont.h>
 #include <splash.h>
-#include "soc/rtc_wdt.h"
+#include <Arduino.h>
+#include <Config.h>
+#include <TinyGPS++.h>
 
 #define OLED_RESET 4
 
@@ -31,11 +34,11 @@
  * @brief differnet modes/screens on OLED
  */
 typedef enum {
-  displayModeUTC,         // shows date + time in UTC
-  displayModeGPS,         // shows GPS data
-  displayModeWX,          // shows weather sensor data
-  displayModeWiFiStatus,  // shows wifi infos
-  displayModeEND          // for intern only @TODO to fix? obsolete?
+  displayModeUTC,        // shows date + time in UTC
+  displayModeGPS,        // shows GPS data
+  displayModeWX,         // shows weather sensor data
+  displayModeWiFiStatus, // shows wifi infos
+  displayModeEND         // for intern only @TODO to fix? obsolete?
 } DisplayMode;
 
 class TrackerDisplay {
@@ -76,8 +79,7 @@ class TrackerDisplay {
    * @param line3 text size 1 (normal)
    * @param line4 text size 1 (normal)
    */
-  void write2Display(const char *head, const char *line1, const char *line2,
-                     const char *line3, const char *line4);
+  void write2Display(const char *head, const char *line1, const char *line2, const char *line3, const char *line4);
 
   /**
    * @brief writes head + 3 lines to OLED
@@ -97,8 +99,7 @@ class TrackerDisplay {
    * @param line3 text size 1 (normal)
    * @param line4 text size 1 (normal)
    */
-  void write2Display(String head, String line1, String line2, String line3,
-                     String line4);
+  void write2Display(String head, String line1, String line2, String line3, String line4);
 
   /**
    * @brief set current_display_mode to next DisplayMode
@@ -145,8 +146,7 @@ class TrackerDisplay {
    * @param toSerial if has to print to serial too
    * @param sleep time for wait for return
    */
-  void write3Line(const char *head, const char *line1, const char *line2,
-                  bool toSerial, u_long sleep);
+  void write3Line(const char *head, const char *line1, const char *line2, bool toSerial, u_long sleep);
 
   /**
    * @brief show that LoRa is sending
@@ -163,8 +163,7 @@ class TrackerDisplay {
    * @param line2
    * @param sleep default 0
    */
-  void write3toSerial(const char *head, const char *line1, const char *line2,
-                      u_long sleep = 0);
+  void write3toSerial(const char *head, const char *line1, const char *line2, u_long sleep = 0);
 
  private:
   /**
@@ -180,14 +179,16 @@ class TrackerDisplay {
    */
   void _writeHead(const char *head);
 
-  // /**
-  //  * @brief center string in in rv
-  //  *
-  //  * @param rv
-  //  * @param in
-  //  * @return char*
-  //  */
-  // char* _center_line(char *rv, char *in);
+  /**
+   * @brief center string in in rv
+   *
+   * @param rv
+   * @param in
+   * @return char*
+   */
+  char *_center_line(char *rv, const char *in);
+
+  void _center_line(const char *in);
 };
 
-#endif  // LIB_SLORAAPRS_TRACKERDISPLAY_H_
+#endif // LIB_SLORAAPRS_TRACKERDISPLAY_H_

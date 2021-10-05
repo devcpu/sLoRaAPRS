@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-27 9:23
+ * Last Modified: 2021-10-04 22:12
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -19,6 +19,18 @@
 #ifdef ESP32
 #include <rom/rtc.h>
 #endif
+#include <freertos/FreeRTOS.h>
+#include <apptypes.h>
+#include <APRSWiFi.h>
+#include <APRS_MSG.h>
+#include <ArduinoJson.h>
+#include <ArduinoOTA.h>
+#include <AsyncJson.h>
+#include <AsyncWebSocket.h>
+#include <Config.h>
+#include <Preferences.h>
+#include <SPIFFSEditor.h>
+#include <TinyGPS++.h>
 
 void WebserverStart(void);
 
@@ -56,15 +68,14 @@ String GetBuildDateAndTime(void);
 String readSPIFFS2String(const char *path);
 void reboot(AsyncWebServerRequest *request);
 
-String optionsFeldGenerator(String selected, const char *name, String data[][2],
-                            uint8_t size);
+String optionsFeldGenerator(String selected, const char *name, String data[][2], uint8_t size);
 
 void showRequest(AsyncWebServerRequest *request);
 // boolean validateNumber(String test);
 // boolean isNumeric(String str);
 
-void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
-               AwsEventType type, void *arg, uint8_t *data, size_t len);
+void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data,
+               size_t len);
 void APRSWebServerTick(void);
 
 void resetHTMLError(void);
@@ -77,10 +88,8 @@ String ProcessorWXInfo(const String &var);
 String getResetReason(RESET_REASON reason);
 #endif
 
-String getWebParam(AsyncWebServerRequest *request, const char *key,
-                   String *prefsvar);
-String getWebParam(AsyncWebServerRequest *request, const char *key,
-                   double *prefsvar);
+String getWebParam(AsyncWebServerRequest *request, const char *key, String *prefsvar);
+String getWebParam(AsyncWebServerRequest *request, const char *key, double *prefsvar);
 String getWebParam(AsyncWebServerRequest *request, const char *key);
 
-#endif  // LIB_SLORAAPRS_APRSWEBSERVER_H_
+#endif // LIB_SLORAAPRS_APRSWEBSERVER_H_

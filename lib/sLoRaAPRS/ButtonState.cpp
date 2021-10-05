@@ -24,18 +24,14 @@
 extern TrackerDisplay td;
 
 char wifi_mode_txt[3][16] = {"OFF", "AP", "STA"};
-char run_mode_txt[6][16] = {"Tracker", "WXTracker", "WX Fix",
-                            "Digi",    "Gateway",   "GW-Digi"};
+char run_mode_txt[6][16] = {"Tracker", "WXTracker", "WX Fix", "Digi", "Gateway", "GW-Digi"};
 
 TimerHandle_t call_config_timer;
 extern Config cfg;
 
-AbstracButtonState::~AbstracButtonState() {
-  ESP_LOGD(TAG, "AbstracButtonState::~AbstracButtonState");
-}
+AbstracButtonState::~AbstracButtonState() { ESP_LOGD(TAG, "AbstracButtonState::~AbstracButtonState"); }
 
-void AbstracButtonState::setState(Scheduler &taskScheduler,
-                                  AbstracButtonState *state) {
+void AbstracButtonState::setState(Scheduler &taskScheduler, AbstracButtonState *state) {
   AbstracButtonState *aux = taskScheduler.button_state;
   taskScheduler.button_state = state;
   delete aux;
@@ -76,9 +72,7 @@ void StateDefault::singleClick(Scheduler &taskScheduler) {
   setState(taskScheduler, new StateDisplayMode());
 }
 
-void StateDefault::doubleClick(Scheduler &taskScheduler) {
-  ESP_LOGD(TAG, "StateDefault.doubleClick");
-}
+void StateDefault::doubleClick(Scheduler &taskScheduler) { ESP_LOGD(TAG, "StateDefault.doubleClick"); }
 
 void StateDefault::longClick(Scheduler &taskScheduler) {
   ESP_LOGD(TAG, "StateDefault.longClick()");
@@ -99,59 +93,52 @@ StateConfigMenue::StateConfigMenue(void) {
 
 void StateConfigMenue::singleClick(Scheduler &taskScheduler) {
   ESP_LOGD(TAG, "StateConfigMenue.singleClick");
-  uint8_t max_items = 3;  // count menue items
+  uint8_t max_items = 3; // count menue items
   if (button_config_mode < max_items - 1) {
     button_config_mode++;
   } else {
     button_config_mode = 0;
   }
   switch (button_config_mode) {
-    case 0:
-      td.write3Line("Cnfg Call", "configure call", "double click to enter",
-                    false, 0);
-      break;
-    case 1:
-      td.write3Line("Cfg WiFi", "configure WiFi mode", "double click to enter",
-                    false, 0);
-      break;
-    case 2:
-      td.write3Line("Cfg Run", "configure run mode", "double click to enter",
-                    false, 0);
-      break;
-    default:
-      td.write3Line("ERROR", "something wars going wrong", "please try again",
-                    false, 2000);
-      setState(taskScheduler, new StateConfigMenue());
-      break;
+  case 0:
+    td.write3Line("Cnfg Call", "configure call", "double click to enter", false, 0);
+    break;
+  case 1:
+    td.write3Line("Cfg WiFi", "configure WiFi mode", "double click to enter", false, 0);
+    break;
+  case 2:
+    td.write3Line("Cfg Run", "configure run mode", "double click to enter", false, 0);
+    break;
+  default:
+    td.write3Line("ERROR", "something wars going wrong", "please try again", false, 2000);
+    setState(taskScheduler, new StateConfigMenue());
+    break;
   }
   ESP_LOGD(TAG, "got %d config", button_config_mode);
 }
 
 void StateConfigMenue::doubleClick(Scheduler &taskScheduler) {
   ESP_LOGD(TAG, "StateConfigMenue.doubleClick");
-  const char select_list_call[40] = {
-      ' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-      'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
-      'Z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+  const char select_list_call[40] = {' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+                                     'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
+                                     'Z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
   switch (button_config_mode) {
-    case 0:
-      setState(taskScheduler,
-               new ConfigStringSelector("Cfg Call", select_list_call));
-      break;
-    case 1:
-      // setState(taskScheduler, new StateConfigWiFi("Cfg WiFi"));
-      break;
+  case 0:
+    setState(taskScheduler, new ConfigStringSelector("Cfg Call", select_list_call));
+    break;
+  case 1:
+    // setState(taskScheduler, new StateConfigWiFi("Cfg WiFi"));
+    break;
 
-    case 2:
-      // setState(taskScheduler, new StateConfigRun("Cfg Run"));
-      break;
+  case 2:
+    // setState(taskScheduler, new StateConfigRun("Cfg Run"));
+    break;
 
-    default:
-      td.write3Line("ERROR", "something wars going wrong", "please try again",
-                    false, 2000);
-      // setState(taskScheduler, new StateConfigMenue());
-      break;
+  default:
+    td.write3Line("ERROR", "something wars going wrong", "please try again", false, 2000);
+    // setState(taskScheduler, new StateConfigMenue());
+    break;
   }
 }
 
@@ -159,8 +146,7 @@ void StateConfigMenue::doubleClick(Scheduler &taskScheduler) {
 /* String Selector (Abstrakt String Config)   */
 /* -------------------------------------------------------------------------- */
 
-ConfigStringSelector::ConfigStringSelector(const char *head,
-                                           const char *select_list) {
+ConfigStringSelector::ConfigStringSelector(const char *head, const char *select_list) {
   ESP_LOGD(TAG, "ConfigStringSelector::ConfigStringSelector");
 
   strncpy(_select_list, select_list, sizeof(_select_list) - 1);

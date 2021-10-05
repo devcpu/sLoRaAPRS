@@ -30,4 +30,4 @@ void Sensor_tick();
 
 extern Adafruit_BME280 bme;
 
-#endif  // LIB_SLORAAPRS_BMEHANDLER_H_
+#endif // LIB_SLORAAPRS_BMEHANDLER_H_

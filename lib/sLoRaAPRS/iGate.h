@@ -17,4 +17,4 @@
 void iGate_udp_connect(void);
 void iGate_process_udp(void);
 
-#endif  // LIB_SLORAAPRS_IGATE_H_
+#endif // LIB_SLORAAPRS_IGATE_H_

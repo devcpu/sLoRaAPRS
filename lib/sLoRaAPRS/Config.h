@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-29 0:03
+ * Last Modified: 2021-10-04 22:05
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -15,10 +15,9 @@
 #define LIB_SLORAAPRS_CONFIG_H_
 
 #include <Arduino.h>
-
+#include <Scheduler.h>
 #include <freertos/FreeRTOS.h>
-#include "Scheduler.h"
-#include "freertos/timers.h"
+#include <freertos/timers.h>
 
 void ConfigInit(void);
 
@@ -45,4 +44,4 @@ void ConfigToString(void);
 String getRunMode();
 String getWifiMode();
 
-#endif  // LIB_SLORAAPRS_CONFIG_H_
+#endif // LIB_SLORAAPRS_CONFIG_H_

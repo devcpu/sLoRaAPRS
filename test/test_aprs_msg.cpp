@@ -76,55 +76,41 @@ void test_meter2feed(void) {
 
 void test_getWXField(void) {
   amsg.reset();
-  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p...P...h..b....",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p...P...h..b....", amsg.getWXField());
   amsg.setHumidity(100);
-  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p...P...h00b....",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p...P...h00b....", amsg.getWXField());
   amsg.setHumidity(10);
-  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p...P...h10b....",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p...P...h10b....", amsg.getWXField());
   amsg.setTemperatureCelsius(0);
-  TEST_ASSERT_EQUAL_STRING(".../...g...t032r...p...P...h10b....",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../...g...t032r...p...P...h10b....", amsg.getWXField());
   amsg.setTemperatureCelsius(-38);
-  TEST_ASSERT_EQUAL_STRING(".../...g...t-36r...p...P...h10b....",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../...g...t-36r...p...P...h10b....", amsg.getWXField());
   amsg.setTemperatureFahrenheit(0);
-  TEST_ASSERT_EQUAL_STRING(".../...g...t000r...p...P...h10b....",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../...g...t000r...p...P...h10b....", amsg.getWXField());
   amsg.reset();
   amsg.setGustKmh(13);
-  TEST_ASSERT_EQUAL_STRING(".../...g008t...r...p...P...h..b....",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../...g008t...r...p...P...h..b....", amsg.getWXField());
   amsg.reset();
   amsg.setWindDirection(321);
-  TEST_ASSERT_EQUAL_STRING("321/...g...t...r...p...P...h..b....",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING("321/...g...t...r...p...P...h..b....", amsg.getWXField());
   amsg.reset();
   amsg.setWindSpeedKmh(100);
-  TEST_ASSERT_EQUAL_STRING(".../062g...t...r...p...P...h..b....",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../062g...t...r...p...P...h..b....", amsg.getWXField());
   amsg.reset();
   amsg.setRainFallLastHourMM(25);
-  TEST_ASSERT_EQUAL_STRING(".../...g...t...r098p...P...h..b....",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../...g...t...r098p...P...h..b....", amsg.getWXField());
   amsg.reset();
   amsg.setRainFallLast24MM(15);
-  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p059P...h..b....",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p059P...h..b....", amsg.getWXField());
   amsg.reset();
   amsg.setRainFallSinceMidNightMM(42);
-  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p...P165h..b....",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p...P165h..b....", amsg.getWXField());
   amsg.reset();
   amsg.setPressure(1024);
-  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p...P...h..b1024",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p...P...h..b1024", amsg.getWXField());
   amsg.reset();
   amsg.setWXDevice("BMC280");
-  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p...P...h..b....BMC280",
-                           amsg.getWXField());
+  TEST_ASSERT_EQUAL_STRING(".../...g...t...r...p...P...h..b....BMC280", amsg.getWXField());
 }
 
 void test_setLng(void) {
@@ -188,8 +174,7 @@ void test_getTrackInfo(void) {
   amsg.setAltitudeFeed(121);
   amsg.setSpeedmph(6);
   amsg.setCourse(142);
-  TEST_ASSERT_EQUAL_STRING("3359.52S\\01824.34E>006/142/A=000121",
-                           amsg.getTrackInfo());
+  TEST_ASSERT_EQUAL_STRING("3359.52S\\01824.34E>006/142/A=000121", amsg.getTrackInfo());
 }
 
 int main(int argc, char **argv) {

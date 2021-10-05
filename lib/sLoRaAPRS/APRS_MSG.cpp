@@ -23,19 +23,17 @@ extern TinyGPSPlus gps;
 char *APRS_MSG::computeWXField(char *rv) {
   char hum_buf[16] = {0};
   snprintf(rv, sizeof(rv) - 1, "%s/%sg%st%03dr%sp%sP%sh%sb%05d %s",
-           "...",  // winddirection 0-360
-           "...",  // windspeed in mph
-           "...",  // gust
-           static_cast<int8_t>(
-               round(APRS_MSG::c2f(cfg.WXdata.temp))),  // temperature
-           "...",                                       // rainfalllasthourhinch
-           "...",                                       // rainfalllast24hinch
-           "...",  // rainfallsinceMidnightinch
-           APRS_MSG::calcHumidity(hum_buf, cfg.WXdata.humidity),  // humidity
-           static_cast<uint8_t>(round(
-               cfg.WXdata.pressure * 10)),  // pressure @FIXME / 100.00L * 10 ??
-           "Sensor: BME280");  // wx sensor @FIXME sensor from i2c-scanner, not
-                               // staticly
+           "...",                                                      // winddirection 0-360
+           "...",                                                      // windspeed in mph
+           "...",                                                      // gust
+           static_cast<int8_t>(round(APRS_MSG::c2f(cfg.WXdata.temp))), // temperature
+           "...",                                                      // rainfalllasthourhinch
+           "...",                                                      // rainfalllast24hinch
+           "...",                                                      // rainfallsinceMidnightinch
+           APRS_MSG::calcHumidity(hum_buf, cfg.WXdata.humidity),       // humidity
+           static_cast<uint8_t>(round(cfg.WXdata.pressure * 10)),      // pressure @FIXME / 100.00L * 10 ??
+           "Sensor: BME280");                                          // wx sensor @FIXME sensor from i2c-scanner, not
+                                                                       // staticly
   return rv;
 }
 
@@ -63,24 +61,20 @@ char *APRS_MSG::calcHumidity(char *rv, float humidity) {
 char *APRS_MSG::computeAPRSPos(char *rv) {
   char buf_lat[16] = {0};
   char buf_lng[16] = {0};
-  snprintf(rv, sizeof(rv), "%s%c%s%c",
-           dc2gms(buf_lat, cfg.gps_location.latitude, false),
-           cfg.aprs_symbol.charAt(0),
-           dc2gms(buf_lng, cfg.gps_location.longitude, true),
-           cfg.aprs_symbol.charAt(1));
+  snprintf(rv, sizeof(rv), "%s%c%s%c", dc2gms(buf_lat, cfg.gps_location.latitude, false), cfg.aprs_symbol.charAt(0),
+           dc2gms(buf_lng, cfg.gps_location.longitude, true), cfg.aprs_symbol.charAt(1));
   return rv;
 }
 
 char *APRS_MSG::computeTrackInfo(char *rv) {
-  snprintf(rv, sizeof(rv), "%03.0f/%03.0f/A=%06.0f", cfg.gps_move.speed,
-           cfg.gps_move.course, cfg.gps_location.altitude);
+  snprintf(rv, sizeof(rv), "%03.0f/%03.0f/A=%06.0f", cfg.gps_move.speed, cfg.gps_move.course,
+           cfg.gps_location.altitude);
   return rv;
 }
 
 char *APRS_MSG::computeTimestamp(char *rv) {
   // day/hour/minute
-  snprintf(rv, sizeof(rv), "@%02d%02d%02dz", cfg.gps_time.day,
-           cfg.gps_time.hour, cfg.gps_time.minute);
+  snprintf(rv, sizeof(rv), "@%02d%02d%02dz", cfg.gps_time.day, cfg.gps_time.hour, cfg.gps_time.minute);
   return rv;
 }
 
@@ -96,13 +90,9 @@ char *APRS_MSG::computeTimestamp(char *rv) {
 /***************************************************************************/
 /**************************   static converters   **************************/
 /***************************************************************************/
-double_t APRS_MSG::feed2meter(double_t feed) {
-  return round(feed / CONVERT_FEED_METER);
-}
+double_t APRS_MSG::feed2meter(double_t feed) { return round(feed / CONVERT_FEED_METER); }
 
-double_t APRS_MSG::meter2feed(double_t meter) {
-  return round(meter * CONVERT_FEED_METER);
-}
+double_t APRS_MSG::meter2feed(double_t meter) { return round(meter * CONVERT_FEED_METER); }
 
 double_t APRS_MSG::mph2kmh(double_t mph) { return round(mph / 0.62137); }
 
@@ -149,7 +139,7 @@ char *APRS_MSG::dc2gms(char *rv, double gpsdata, boolean lng) {
   } else {
     strncpy(fstr, "%02d%02d.%02d%c", sizeof(fstr) - 1);
   }
-  snprintf(rv, sizeof(rv),  // Flawfinder: ignore
+  snprintf(rv, sizeof(rv), // Flawfinder: ignore
            fstr, grad, minute, secunde, ew);
   return rv;
 }

@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-29 0:21
+ * Last Modified: 2021-10-04 21:51
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -24,7 +24,7 @@ extern Config cfg;
 
 #define CONVERT_FEED_METER 3.28084
 #define WX_DEVICE_STR_LENGHT 12
-#define CALL_LENGHT 12  // @TODO needs check if it is in APRS OK
+#define CALL_LENGHT 12 // @TODO needs check if it is in APRS OK
 
 class APRS_MSG {
  public:
@@ -113,4 +113,4 @@ class APRS_MSG {
   void computeTrackInfo(void);
 };
 
-#endif  // LIB_SLORAAPRS_APRS_MSG_H_
+#endif // LIB_SLORAAPRS_APRS_MSG_H_

@@ -16,7 +16,7 @@
 #include <Config.h>
 #include <LoRaAPRSConfig.h>
 
-extern Config cfg;  // config & system status
+extern Config cfg; // config & system status
 
 // 1013.25 ^= -50.96m
 // 1100.00 ^= 634.93m
@@ -41,16 +41,15 @@ bool BMEHandlerInit() {
     Serial.printf("found BME280 on %#x\n", BME280_ADDRESS);
     bme280_ok = true;
   } else {
-    Serial.printf("ERR> sorry, no BME280 found on %x nor %x\n", BME280_ADDRESS,
-                  BME280_ADDRESS_ALTERNATE);
+    Serial.printf("ERR> sorry, no BME280 found on %x nor %x\n", BME280_ADDRESS, BME280_ADDRESS_ALTERNATE);
     bme280_ok = false;
     return false;
   }
 
   bme.setSampling(Adafruit_BME280::MODE_FORCED,
-                  Adafruit_BME280::SAMPLING_X1,  // temperature
-                  Adafruit_BME280::SAMPLING_X1,  // pressure
-                  Adafruit_BME280::SAMPLING_X1,  // humidity
+                  Adafruit_BME280::SAMPLING_X1, // temperature
+                  Adafruit_BME280::SAMPLING_X1, // pressure
+                  Adafruit_BME280::SAMPLING_X1, // humidity
                   Adafruit_BME280::FILTER_OFF);
 
   // suggested rate is 1 / 60Hz(1m)

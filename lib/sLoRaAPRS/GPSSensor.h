@@ -16,4 +16,4 @@
 
 void setGPSData();
 
-#endif  // LIB_SLORAAPRS_GPSSENSOR_H_
+#endif // LIB_SLORAAPRS_GPSSENSOR_H_

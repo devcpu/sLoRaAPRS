@@ -132,4 +132,4 @@ class StateConfigRun : public AbstracButtonState {
 
 // };
 
-#endif  // LIB_SLORAAPRS_BUTTONSTATE_H_
+#endif // LIB_SLORAAPRS_BUTTONSTATE_H_

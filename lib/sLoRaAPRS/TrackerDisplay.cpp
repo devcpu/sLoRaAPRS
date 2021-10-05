@@ -4,18 +4,14 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-04 10:10
+ * Last Modified: 2021-10-05 2:03
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
-#include <Arduino.h>
 #include <TrackerDisplay.h>
-#include "Config.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/timers.h"
 
 extern TinyGPSPlus gps;
 extern Config cfg;
@@ -36,12 +32,12 @@ TrackerDisplay::TrackerDisplay() {
 }
 
 bool TrackerDisplay::begin() {
-  TrackerDisplay::begin(60);  // 60  == 0x3C"
+  TrackerDisplay::begin(60); // 60  == 0x3C"
 }
 
 bool TrackerDisplay::begin(uint8_t i2c_address) {
   if (!display.begin(SSD1306_SWITCHCAPVCC,
-                     i2c_address)) {  // Address 0x3D for 128x64
+                     i2c_address)) { // Address 0x3D for 128x64
     ESP_LOGE(TAG, "Dsiplay SSD1306 on %s not ready!", i2c_address);
     return false;
   }
@@ -49,39 +45,31 @@ bool TrackerDisplay::begin(uint8_t i2c_address) {
   return true;
 }
 
-void TrackerDisplay::write2Display(String head, String line1, String line2,
-                                   String line3, String line4) {
+void TrackerDisplay::write2Display(String head, String line1, String line2, String line3, String line4) {
   // TextSize(1) ^= 21 Zeichen
   // TextSize(2) ^= 10 Zeichen
   display.clearDisplay();
-  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.setTextColor(WHITE);
-  display.setTextSize(2);
   display.setCursor(0, 0);
-  display.print(head);
-  display.setTextSize(1);
+  _center_line(head.c_str());
   display.setCursor(0, 20);
-  display.print(line1);
+  _center_line(line1.c_str());
   display.setCursor(0, 32);
-  display.print(line2);
+  _center_line(line2.c_str());
   display.setCursor(0, 44);
-  display.print(line3);
-  display.setCursor(0, 56);  // TextSize 1 needs 8 pixel minimum
-  display.print(line4);
-  vTaskDelay(50 / portTICK_PERIOD_MS);
+  _center_line(line3.c_str());
+  display.setCursor(0, 56); // TextSize 1 needs 8 pixel minimum
+  _center_line(line4.c_str());
   display.display();
 }
 
-void TrackerDisplay::write2Display(String head, String line1, String line2,
-                                   String line3) {
+void TrackerDisplay::write2Display(String head, String line1, String line2, String line3) {
   write2Display(head, line1, line2, line3, "");
 }
 
-void TrackerDisplay::write2Display(const char *head, const char *line1,
-                                   const char *line2, const char *line3,
+void TrackerDisplay::write2Display(const char *head, const char *line1, const char *line2, const char *line3,
                                    const char *line4) {
   display.clearDisplay();
-  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.setTextColor(WHITE);
   display.setTextSize(2);
   display.setCursor(0, 0);
@@ -93,9 +81,8 @@ void TrackerDisplay::write2Display(const char *head, const char *line1,
   display.print(line2);
   display.setCursor(0, 44);
   display.print(line3);
-  display.setCursor(0, 56);  // TextSize 1 needs 8 pixel minimum
+  display.setCursor(0, 56); // TextSize 1 needs 8 pixel minimum
   display.print(line4);
-  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.display();
 }
 
@@ -111,58 +98,56 @@ void TrackerDisplay::nextDisplayMode(void) {
 
 void TrackerDisplay::showDisplayMode(void) {
   switch (current_display_mode) {
-    case displayModeGPS:
-      writeGPS();
-      break;
+  case displayModeGPS:
+    writeGPS();
+    break;
 
-    case displayModeUTC:
-      writeUTC();
-      break;
+  case displayModeUTC:
+    writeUTC();
+    break;
 
-    case displayModeWX:
-      writeWX();
-      break;
+  case displayModeWX:
+    writeWX();
+    break;
 
-    case displayModeWiFiStatus:
-      writeWiFiStatus();
-      break;
+  case displayModeWiFiStatus:
+    writeWiFiStatus();
+    break;
 
-    default:
-      writeUTC();
-      break;
+  default:
+    writeUTC();
+    break;
   }
 }
 
 void TrackerDisplay::writeUTC() {
+  display.clearDisplay();
+  _writeHead("- UTC -");
+
   if (gps.time.isValid() && gps.date.isValid()) {
     char date[25], time[25];
-    snprintf(date, sizeof(date), "%04d-%02d-%02d", cfg.gps_time.year,
-             cfg.gps_time.month, cfg.gps_time.day);
-    snprintf(time, sizeof(time), "  %02d:%02d", cfg.gps_time.hour,
-             cfg.gps_time.minute);
+    snprintf(date, sizeof(date), "%04d-%02d-%02d", cfg.gps_time.year, cfg.gps_time.month, cfg.gps_time.day);
+    snprintf(time, sizeof(time), "  %02d:%02d", cfg.gps_time.hour, cfg.gps_time.minute);
 
-    write3Line(" - UTC -", time, date, false, 0);
+    write3Line("- UTC -", time, date, false, 0);
   } else {
     _write_no_vaild_data();
   }
 }
 
 void TrackerDisplay::writeGPS() {
+  display.clearDisplay();
+  _writeHead("GPS");
+
   if (gps.location.isValid()) {
     char lat[22], lng[22], speed_course[22], alt_hdop[22];
     snprintf(lat, sizeof(lat), "lat: %8.4f", cfg.gps_location.latitude);
     snprintf(lng, sizeof(lng), "lng: %9.4f", cfg.gps_location.longitude);
-    snprintf(speed_course, sizeof(speed_course), "kmh: %4.1f  dir: %3.1f*",
-             cfg.gps_move.speed, cfg.gps_move.course);
-    snprintf(alt_hdop, sizeof(alt_hdop), "alt: %5.1fm sat: %d",
-             cfg.gps_location.altitude, cfg.gps_meta.sat);
+    snprintf(speed_course, sizeof(speed_course), "kmh: %4.1f  dir: %3.1f*", cfg.gps_move.speed, cfg.gps_move.course);
+    snprintf(alt_hdop, sizeof(alt_hdop), "alt: %5.1fm sat: %d", cfg.gps_location.altitude, cfg.gps_meta.sat);
 
     // portENTER_CRITICAL(&my_mutex);
     // rtc_wdt_feed();
-    vTaskDelay(50 / portTICK_PERIOD_MS);
-    display.clearDisplay();
-    vTaskDelay(50 / portTICK_PERIOD_MS);
-    _writeHead("   GPS");
     // rtc_wdt_feed();
     // portEXIT_CRITICAL(&my_mutex);
     display.setTextSize(1);
@@ -172,12 +157,12 @@ void TrackerDisplay::writeGPS() {
     display.print(lng);
     display.setCursor(0, 44);
     display.print(speed_course);
-    display.setCursor(0, 56);  // TextSize 1 needs 8 pixel minimum
+    display.setCursor(0, 56); // TextSize 1 needs 8 pixel minimum
     display.print(alt_hdop);
-    vTaskDelay(50 / portTICK_PERIOD_MS);
     display.display();
 
   } else {
+
     _write_no_vaild_data();
   }
 }
@@ -186,16 +171,11 @@ void TrackerDisplay::writeWX() {
   char temp_buf[24] = {0};
   char hum_buf[24] = {0};
   char press_buf[24] = {0};
-  snprintf(temp_buf, sizeof(temp_buf), "Temp:      %3.0f *C",
-           round(cfg.WXdata.temp));
-  snprintf(hum_buf, sizeof(hum_buf), "Humidity:  %3.0f %%",
-           round(cfg.WXdata.humidity));
-  snprintf(press_buf, sizeof(press_buf), "Pressure: %4.0f hPa",
-           round(cfg.WXdata.pressure));
-  vTaskDelay(50 / portTICK_PERIOD_MS);
+  snprintf(temp_buf, sizeof(temp_buf), "Temp:      %3.0f *C", round(cfg.WXdata.temp));
+  snprintf(hum_buf, sizeof(hum_buf), "Humidity:  %3.0f %%", round(cfg.WXdata.humidity));
+  snprintf(press_buf, sizeof(press_buf), "Pressure: %4.0f hPa", round(cfg.WXdata.pressure));
   display.clearDisplay();
-  vTaskDelay(50 / portTICK_PERIOD_MS);
-  _writeHead("   WX");
+  _writeHead("WX");
   display.setTextSize(1);
   display.setCursor(0, 22);
   display.print(temp_buf);
@@ -203,61 +183,69 @@ void TrackerDisplay::writeWX() {
   display.print(hum_buf);
   display.setCursor(0, 50);
   display.print(press_buf);
-  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.display();
 }
 
 void TrackerDisplay::writeWiFiStatus() {
   display.clearDisplay();
-  vTaskDelay(50 / portTICK_PERIOD_MS);
 
   if (cfg.lan_status.mode == wifi_ap) {
     _writeHead("Wifi AP");
     display.setTextSize(1);
     display.setCursor(0, 22);
-    display.print(cfg.lan_status.SSID.c_str());
-    display.setCursor(0, 36);
-    display.print(cfg.lan_status.status.c_str());
-    display.setCursor(0, 50);
-    display.print(cfg.lan_status.IP.c_str());
+    _center_line(cfg.lan_status.SSID.c_str());
+    display.setCursor(0, 38);
+    _center_line(cfg.lan_status.status.c_str());
+    display.setCursor(0, 54);
+    _center_line(cfg.lan_status.IP.c_str());
   }
   if (cfg.lan_status.mode == wifi_client) {
     _writeHead("Wifi Clnt");
     display.setTextSize(1);
     display.setCursor(0, 22);
-    display.print(cfg.lan_status.SSID.c_str());
-    display.setCursor(0, 36);
-    display.print(cfg.lan_status.status.c_str());
-    display.setCursor(0, 50);
-    display.print(cfg.lan_status.IP.c_str());
+    _center_line(cfg.lan_status.SSID.c_str());
+    display.setCursor(0, 38);
+    _center_line(cfg.lan_status.status.c_str());
+    display.setCursor(0, 54);
+    _center_line(cfg.lan_status.IP.c_str());
   }
 
   if (cfg.lan_status.mode == wifi_off) {
-    _writeHead("  Wifi");
+    _writeHead("Wifi");
     display.setTextSize(2);
     display.setCursor(0, 32);
-    display.print("OFF");
+    _center_line("OFF");
   }
-  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.display();
 }
 
 void TrackerDisplay::_writeHead(const char *head) {
+  char buf[25] = {0};
   char sat[3];
   char hdop[3];
 
-  if (gps.satellites.isValid() && gps.hdop.isValid()) {  // @FIXME
+  // if (gps.satellites.isValid() && gps.hdop.isValid()) {
+  //   snprintf(sat, sizeof(sat), "%d", cfg.gps_meta.sat);
+  //   snprintf(hdop, sizeof(hdop), "%d", static_cast<int>(round(cfg.gps_meta.hdop)));
+  // } else {
+  //   strncpy(sat, "", sizeof(sat) - 1);
+  //   strncpy(hdop, "", sizeof(hdop) - 1);
+  // }
+
+  if (gps.satellites.isValid()) {
     snprintf(sat, sizeof(sat), "%d", cfg.gps_meta.sat);
-    snprintf(hdop, sizeof(hdop), "%d",
-             static_cast<int>(round(cfg.gps_meta.hdop)));
   } else {
     strncpy(sat, "", sizeof(sat) - 1);
+  }
+  if (gps.hdop.isValid()) {
+    snprintf(hdop, sizeof(hdop), "%d", static_cast<int>(round(cfg.gps_meta.hdop)));
+  } else {
     strncpy(hdop, "", sizeof(hdop) - 1);
   }
   display.setTextColor(WHITE);
   display.setTextSize(2);
   display.setCursor(0, 0);
-  display.print(head);
+  display.print(_center_line(buf, head));
   display.setTextSize(1);
   display.setCursor(116, 0);
   display.print(sat);
@@ -266,42 +254,24 @@ void TrackerDisplay::_writeHead(const char *head) {
 }
 
 void TrackerDisplay::_write_no_vaild_data() {
-  display.clearDisplay();
-  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.setCursor(0, 22);
-  display.print("no valid");
+  _center_line("no valid");
   display.setCursor(0, 44);
-  display.print("data yet");
-  vTaskDelay(50 / portTICK_PERIOD_MS);
+  _center_line("data yet");
   display.display();
 }
 
-void TrackerDisplay::write3Line(const char *head, const char *line1,
-                                const char *line2, bool toSerial,
-                                u_long sleep) {
+void TrackerDisplay::write3Line(const char *head, const char *line1, const char *line2, bool toSerial, u_long sleep) {
   display.clearDisplay();
-  vTaskDelay(50 / portTICK_PERIOD_MS);
   _writeHead(head);
 
-  if (strlen(line1) > 10) {
-    display.setTextSize(1);
-  } else {
-    display.setTextSize(2);
-  }
   display.setCursor(0, 22);
-  display.print(line1);
+  _center_line(line1);
 
-  if (strlen(line2) > 10) {
-    display.setTextSize(1);
-  } else {
-    display.setTextSize(2);
-  }
   display.setCursor(0, 44);
-  display.print(line2);
+  _center_line(line2);
 
-  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.display();
-  vTaskDelay(50 / portTICK_PERIOD_MS);
 
   if (toSerial) {
     write3toSerial(head, line1, line2, sleep);
@@ -312,8 +282,7 @@ void TrackerDisplay::write3Line(const char *head, const char *line1,
   }
 }
 
-void TrackerDisplay::write3toSerial(const char *head, const char *line1,
-                                    const char *line2, u_long sleep) {
+void TrackerDisplay::write3toSerial(const char *head, const char *line1, const char *line2, u_long sleep) {
   String s1 = String(head);
   s1.trim();
   String s2 = String(line1);
@@ -328,23 +297,35 @@ void TrackerDisplay::write3toSerial(const char *head, const char *line1,
 
 void TrackerDisplay::writeTX(String to) {
   display.clearDisplay();
-  vTaskDelay(50 / portTICK_PERIOD_MS);
   display.setTextSize(2);
   display.setCursor(0, 22);
-  display.print(" << TX >> ");
+  _center_line(" << TX >> ");
   display.setCursor(0, 44);
-  display.print(to);
-  vTaskDelay(50 / portTICK_PERIOD_MS);
+  _center_line(to.c_str());
   display.display();
 }
 
-// char *TrackerDisplay::_center_line(char *rv, char *in) {
-//   uint8_t in_len = sizeof(in);
-//   uint8_t rv_len = sizeof(rv);
-//   if (in_len > rv_len) {
-//     sniprintf(rv, sizeof(rv), "to long");
-//     ESP_LOGE(TAG, "ERROR %s to long!", in);
-//   }
-//   snprintf(rv,"%*s%s", 10+(rv_len - in_len) / 2, in);
-//   return rv;
-// }
+void TrackerDisplay::_center_line(const char *in) {
+  char buf[25] = {0};
+  if (strlen(in) > 10) {
+    display.setTextSize(1);
+  } else {
+    display.setTextSize(2);
+  }
+  display.print(_center_line(buf, in));
+}
+
+char *TrackerDisplay::_center_line(char *rv, const char *s) {
+  uint8_t x = 5;
+  if (strlen(s) > 21) {
+    snprintf(rv, sizeof(rv), "to long");
+    ESP_LOGE(TAG, "ERROR %s to long!", s);
+    return rv;
+  }
+  if (strlen(s) > 10) {
+    x = 10;
+  }
+  snprintf(rv, 24, "%*s%*s", x + strlen(s) / 2, s, x - strlen(s) / 2, ""); // NOLINT(runtime/printf)
+  // ESP_LOGD(TAG, "---%s---", rv);
+  return rv;
+}

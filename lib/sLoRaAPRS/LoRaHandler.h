@@ -72,4 +72,4 @@ void LoRa_tick(void);
 void processMessage(void);
 void reciveMessages(void);
 
-#endif  // LIB_SLORAAPRS_LORAHANDLER_H_
+#endif // LIB_SLORAAPRS_LORAHANDLER_H_

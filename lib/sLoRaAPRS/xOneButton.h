@@ -46,8 +46,7 @@ class xOneButton {
    * @param pullupActive Activate the internal pullup when available. Default is
    * true.
    */
-  explicit xOneButton(int pin, boolean activeLow = true,
-                      bool pullupActive = true);
+  explicit xOneButton(int pin, boolean activeLow = true, bool pullupActive = true);
 
   // ----- Set runtime parameters -----
 
@@ -78,8 +77,7 @@ class xOneButton {
    * @param newFunction
    */
   void attachDoubleClick(callbackFunction newFunction);
-  void attachDoubleClick(parameterizedCallbackFunction newFunction,
-                         void *parameter);
+  void attachDoubleClick(parameterizedCallbackFunction newFunction, void *parameter);
 
   /**
    * @deprecated Replaced by longPressStart, longPressStop, and duringLongPress.
@@ -98,8 +96,7 @@ class xOneButton {
    * @param newFunction
    */
   void attachLongPressStart(callbackFunction newFunction);
-  void attachLongPressStart(parameterizedCallbackFunction newFunction,
-                            void *parameter);
+  void attachLongPressStart(parameterizedCallbackFunction newFunction, void *parameter);
 
   /**
    * Attach an event to fire as soon as the button is released after a long
@@ -107,16 +104,14 @@ class xOneButton {
    * @param newFunction
    */
   void attachLongPressStop(callbackFunction newFunction);
-  void attachLongPressStop(parameterizedCallbackFunction newFunction,
-                           void *parameter);
+  void attachLongPressStop(parameterizedCallbackFunction newFunction, void *parameter);
 
   /**
    * Attach an event to fire periodically while the button is held down.
    * @param newFunction
    */
   void attachDuringLongPress(callbackFunction newFunction);
-  void attachDuringLongPress(parameterizedCallbackFunction newFunction,
-                             void *parameter);
+  void attachDuringLongPress(parameterizedCallbackFunction newFunction, void *parameter);
 
   // ----- State machine functions -----
 
@@ -151,12 +146,12 @@ class xOneButton {
   void reset(void);
 
  private:
-  int _pin;                          // hardware pin number.
-  unsigned int _debounceTicks = 50;  // number of ticks for debounce times.
-  unsigned int _clickTicks = 600;    // number of ticks that have to pass by
-                                     // before a click is detected.
-  unsigned int _pressTicks = 1000;   // number of ticks that have to pass by
-                                     // before a long button press is detected
+  int _pin;                         // hardware pin number.
+  unsigned int _debounceTicks = 50; // number of ticks for debounce times.
+  unsigned int _clickTicks = 600;   // number of ticks that have to pass by
+                                    // before a click is detected.
+  unsigned int _pressTicks = 1000;  // number of ticks that have to pass by
+                                    // before a long button press is detected
 
   int _buttonPressed;
 
@@ -190,8 +185,8 @@ class xOneButton {
   // They are initialized once on program start and are updated every time the
   // tick function is called.
   int _state = 0;
-  uint64_t _startTime;  // will be set in state 1
-  uint64_t _stopTime;   // will be set in state 2
+  uint64_t _startTime; // will be set in state 1
+  uint64_t _stopTime;  // will be set in state 2
 };
 
-#endif  // LIB_SLORAAPRS_XONEBUTTON_H_
+#endif // LIB_SLORAAPRS_XONEBUTTON_H_

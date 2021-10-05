@@ -47,8 +47,7 @@ void setGPSData() {
     cfg.gps_location.altitude = gps.altitude.meters();
 
     // dynamic update distace last position
-    distance = TinyGPSPlus::distanceBetween(lat, lng, cfg.gps_location.latitude,
-                                            cfg.gps_location.longitude);
+    distance = TinyGPSPlus::distanceBetween(lat, lng, cfg.gps_location.latitude, cfg.gps_location.longitude);
   }
   if (gps.course.isValid()) {
     cfg.gps_move.course = gps.course.deg();

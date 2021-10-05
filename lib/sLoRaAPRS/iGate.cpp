@@ -42,8 +42,7 @@ QueueHandle_t xQueuesend, xQueuereceive;
 uint64_t tt = 0;
 
 void setup() {
-  snprintf(range_filter, sizeof(range_filter), "r/%02.1f/%03.1f/%d", filterlat,
-           filterlng, filterrange);
+  snprintf(range_filter, sizeof(range_filter), "r/%02.1f/%03.1f/%d", filterlat, filterlng, filterrange);
 
   // task variable to run on core 0 and controls socket communication
   TaskHandle_t Task1;
@@ -83,15 +82,13 @@ void clienttcp(void *c) {
     c->close();
   });
 
-  client.onTimeout([](void *arg, AsyncClient *c, uint32_t time) {
-    Serial.printf("\n}Timeout %d\n\n", (uint32_t)time);
-  });
+  client.onTimeout(
+      [](void *arg, AsyncClient *c, uint32_t time) { Serial.printf("\n}Timeout %d\n\n", (uint32_t)time); });
 
   client.onConnect([](void *arg, AsyncClient *c) {
     char authbuf[255] = {0};
-    snprintf(authbuf, sizeof(authbuf),
-             "user %s-%d pass %s vers %s filter m/25 \r\n", call, call_ext,
-             passcode, clientversion);
+    snprintf(authbuf, sizeof(authbuf), "user %s-%d pass %s vers %s filter m/25 \r\n", call, call_ext, passcode,
+             clientversion);
     Serial.printf("\nConnected! Sending data. %s\n", authbuf);
     c->write(authbuf);
     delay(2000);
@@ -101,11 +98,10 @@ void clienttcp(void *c) {
     // Serial.printf("\n}Data received with length: %d\n", len);
     // Serial.printf("\n->data: %s in line %d", (char*)data, __LINE__);
 
-    char subbuff[len];  // NOLINT(runtime/arrays)
+    char subbuff[len]; // NOLINT(runtime/arrays)
     memcpy(subbuff, &(reinterpret_cast<char *>(data))[0], len);
 
-    if (xQueueSend(xQueuereceive, reinterpret_cast<char *>(data),
-                   (TickType_t)10) != pdPASS) {
+    if (xQueueSend(xQueuereceive, reinterpret_cast<char *>(data), (TickType_t)10) != pdPASS) {
       Serial.printf("\nProblema Problema, %d\n", __LINE__);
     }
   });
@@ -150,11 +146,9 @@ void loop() {
 
 void SendToServer(char *value) {
   ESP_LOGD(TAG, "%s", value);
-  if (xQueueSend(xQueuesend, reinterpret_cast<char *>(value), (TickType_t)10) !=
-      pdPASS) {
+  if (xQueueSend(xQueuesend, reinterpret_cast<char *>(value), (TickType_t)10) != pdPASS) {
     /* Failed to post the message, even after 10 ticks. */
-    Serial.printf("unable to send message %s\n",
-                  reinterpret_cast<char *>(value));
+    Serial.printf("unable to send message %s\n", reinterpret_cast<char *>(value));
   }
 }
 

@@ -4,7 +4,7 @@
  * File Created: 2020-09-26 21:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-29 1:21
+ * Last Modified: 2021-10-05 0:26
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -17,11 +17,11 @@
 #include <Arduino.h>
 
 // @FIXME set to 1000
-#define DISPLAY_DELAY_SHORT 30
+#define DISPLAY_DELAY_SHORT 3000
 // @FIXME set to 3000
-#define DISPLAY_DELAY_MEDIUM 30
+#define DISPLAY_DELAY_MEDIUM 3000
 // @FIXME set to 5000
-#define DISPLAY_DELAY_LONG 30
+#define DISPLAY_DELAY_LONG 3000
 
 /**
  * @brief how long ervery info is shown in display change mode
@@ -35,7 +35,7 @@
 // #define T_BEAM_V0_7
 // use this for older Boards AKA Rev0 (first board release)
 
-#define GPS_BAUD 9600  // GPS
+#define GPS_BAUD 9600 // GPS
 
 /* * * * * WX sensors * * * * */
 #define WX_DHT_SENSOR
@@ -65,16 +65,15 @@
 #define LoRaCodingRate4 5
 #define LoRaenableCrc true
 
-#define LoRaTXFREQ 433775000  // Transmit frequency in MHz
-#define LoRaTXdbmW 12         // Transmit power in dBm PA needs 23 /18 normal
-#define LoRaTXenablePA 0  // switch internal power amplifier on (1) or off (0)
+#define LoRaTXFREQ 433775000 // Transmit frequency in MHz
+#define LoRaTXdbmW 12        // Transmit power in dBm PA needs 23 /18 normal
+#define LoRaTXenablePA 0     // switch internal power amplifier on (1) or off (0)
 
-#define LoRaRXFREQ 433775000  // Transmit frequency in MHz
+#define LoRaRXFREQ 433775000 // Transmit frequency in MHz
 
-#define LoRaCsPin 18     // LoRa radio chip select
-#define LoRaResetPin 23  // LoRa radio reset
-#define LoRaIRQPin \
-  26  // change for your board; must be a hardware interrupt pin
+#define LoRaCsPin 18    // LoRa radio chip select
+#define LoRaResetPin 23 // LoRa radio reset
+#define LoRaIRQPin 26   // change for your board; must be a hardware interrupt pin
 
 /********** LoRa params end **********/
 
@@ -104,18 +103,18 @@ static const uint32_t GPSBaud = 9600;
 
 // LED for signalling
 #ifdef T_BEAM_V1_0
-#define TXLED 33  // pin number for LED on TX Tracker
+#define TXLED 33 // pin number for LED on TX Tracker
 #else
-#define TXLED 14  // pin number for LED on TX Tracker
+#define TXLED 14 // pin number for LED on TX Tracker
 #endif
 
 // Button of TTGO T-Beam
 // @CHANGEME
 // 2 for my test board
 #ifdef T_BEAM_V1_0
-#define BUTTON 2  // GPIO number for Button on TTGO T-Beam
+#define BUTTON 2 // GPIO number for Button on TTGO T-Beam
 #else
-#define BUTTON 39  // pin number for Button on TTGO T-Beam
+#define BUTTON 39 // pin number for Button on TTGO T-Beam
 #endif
 
 #define OLED_RESET_PIN 4
@@ -123,4 +122,4 @@ static const uint32_t GPSBaud = 9600;
 #define OLED_V_SIZE 64
 #define OLED_I2C_ADDR 0x3D
 
-#endif  // LIB_CONFIG_LORAAPRSCONFIG_H_
+#endif // LIB_CONFIG_LORAAPRSCONFIG_H_

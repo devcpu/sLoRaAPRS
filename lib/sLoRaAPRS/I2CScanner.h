@@ -31,4 +31,4 @@ class I2CScanner {
   void initialize();
 };
 
-#endif  // LIB_SLORAAPRS_I2CSCANNER_H_
+#endif // LIB_SLORAAPRS_I2CSCANNER_H_

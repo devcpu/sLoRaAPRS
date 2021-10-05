@@ -36,4 +36,4 @@ void WifiDisconnect(void);
 
 void WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info);
 
-#endif  // LIB_SLORAAPRS_APRSWIFI_H_
+#endif // LIB_SLORAAPRS_APRSWIFI_H_

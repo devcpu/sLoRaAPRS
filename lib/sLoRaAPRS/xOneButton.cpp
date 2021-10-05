@@ -46,7 +46,7 @@ xOneButton::xOneButton(int pin, boolean activeLow, bool pullupActive) {
   } else {
     // the button connects the input pin to VCC when pressed.
     _buttonPressed = HIGH;
-  }  // if
+  } // if
 
   if (pullupActive) {
     // use the given pin as input and activate internal PULLUP resistor.
@@ -54,97 +54,80 @@ xOneButton::xOneButton(int pin, boolean activeLow, bool pullupActive) {
   } else {
     // use the given pin as input
     pinMode(pin, INPUT);
-  }  // if
-}  // xOneButton
+  } // if
+} // xOneButton
 
 // explicitly set the number of millisec that have to pass by before a click is
 // assumed as safe.
-void xOneButton::setDebounceTicks(int ticks) {
-  _debounceTicks = ticks;
-}  // setDebounceTicks
+void xOneButton::setDebounceTicks(int ticks) { _debounceTicks = ticks; } // setDebounceTicks
 
 // explicitly set the number of millisec that have to pass by before a click is
 // detected.
-void xOneButton::setClickTicks(int ticks) {
-  _clickTicks = ticks;
-}  // setClickTicks
+void xOneButton::setClickTicks(int ticks) { _clickTicks = ticks; } // setClickTicks
 
 // explicitly set the number of millisec that have to pass by before a long
 // button press is detected.
-void xOneButton::setPressTicks(int ticks) {
-  _pressTicks = ticks;
-}  // setPressTicks
+void xOneButton::setPressTicks(int ticks) { _pressTicks = ticks; } // setPressTicks
 
 // save function for click event
-void xOneButton::attachClick(callbackFunction newFunction) {
-  _clickFunc = newFunction;
-}  // attachClick
+void xOneButton::attachClick(callbackFunction newFunction) { _clickFunc = newFunction; } // attachClick
 
 // save function for parameterized click event
-void xOneButton::attachClick(parameterizedCallbackFunction newFunction,
-                             void *parameter) {
+void xOneButton::attachClick(parameterizedCallbackFunction newFunction, void *parameter) {
   _paramClickFunc = newFunction;
   _clickFuncParam = parameter;
-}  // attachClick
+} // attachClick
 
 // save function for doubleClick event
 void xOneButton::attachDoubleClick(callbackFunction newFunction) {
   _doubleClickFunc = newFunction;
-}  // attachDoubleClick
+} // attachDoubleClick
 
 // save function for parameterized doubleClick event
-void xOneButton::attachDoubleClick(parameterizedCallbackFunction newFunction,
-                                   void *parameter) {
+void xOneButton::attachDoubleClick(parameterizedCallbackFunction newFunction, void *parameter) {
   _paramDoubleClickFunc = newFunction;
   _doubleClickFuncParam = parameter;
-}  // attachDoubleClick
+} // attachDoubleClick
 
 // save function for press event
 // DEPRECATED, is replaced by attachLongPressStart, attachLongPressStop,
 // attachDuringLongPress,
-void xOneButton::attachPress(callbackFunction newFunction) {
-  _pressFunc = newFunction;
-}  // attachPress
+void xOneButton::attachPress(callbackFunction newFunction) { _pressFunc = newFunction; } // attachPress
 
-void xOneButton::attachPressStart(callbackFunction newFunction) {
-  _pressStartFunc = newFunction;
-}  // attachPressStart
+void xOneButton::attachPressStart(callbackFunction newFunction) { _pressStartFunc = newFunction; } // attachPressStart
 
 // save function for longPressStart event
 void xOneButton::attachLongPressStart(callbackFunction newFunction) {
   _longPressStartFunc = newFunction;
-}  // attachLongPressStart
+} // attachLongPressStart
 
 // save function for parameterized longPressStart event
-void xOneButton::attachLongPressStart(parameterizedCallbackFunction newFunction,
-                                      void *parameter) {
+void xOneButton::attachLongPressStart(parameterizedCallbackFunction newFunction, void *parameter) {
   _paramLongPressStartFunc = newFunction;
   _longPressStartFuncParam = parameter;
-}  // attachLongPressStart
+} // attachLongPressStart
 
 // save function for longPressStop event
 void xOneButton::attachLongPressStop(callbackFunction newFunction) {
   _longPressStopFunc = newFunction;
-}  // attachLongPressStop
+} // attachLongPressStop
 
 // save function for parameterized longPressStop event
-void xOneButton::attachLongPressStop(parameterizedCallbackFunction newFunction,
-                                     void *parameter) {
+void xOneButton::attachLongPressStop(parameterizedCallbackFunction newFunction, void *parameter) {
   _paramLongPressStopFunc = newFunction;
   _longPressStopFuncParam = parameter;
-}  // attachLongPressStop
+} // attachLongPressStop
 
 // save function for during longPress event
 void xOneButton::attachDuringLongPress(callbackFunction newFunction) {
   _duringLongPressFunc = newFunction;
-}  // attachDuringLongPress
+} // attachDuringLongPress
 
 // save function for parameterized during longPress event
-void xOneButton::attachDuringLongPress(
-    parameterizedCallbackFunction newFunction, void *parameter) {
+void xOneButton::attachDuringLongPress(parameterizedCallbackFunction newFunction, void *parameter) {
   _paramDuringLongPressFunc = newFunction;
   _duringLongPressFuncParam = parameter;
-}  // attachDuringLongPress
+} // attachDuringLongPress
 
 // function to get the current long pressed state
 bool xOneButton::isLongPressed() { return _isLongPressed; }
@@ -152,7 +135,7 @@ bool xOneButton::isLongPressed() { return _isLongPressed; }
 int xOneButton::getPressedTicks() { return _stopTime - _startTime; }
 
 void xOneButton::reset(void) {
-  _state = 0;  // restart.
+  _state = 0; // restart.
   _startTime = 0;
   _stopTime = 0;
   _isLongPressed = false;
@@ -175,17 +158,17 @@ void xOneButton::tick(void) {
  * @brief Advance the finite state machine (FSM) using the given level.
  */
 void xOneButton::ticker(bool activeLevel) {
-  uint64_t now = xTaskGetTickCount();  // current (relative) time in msecs.
+  uint64_t now = xTaskGetTickCount(); // current (relative) time in msecs.
 
   // Implementation of the state machine
 
-  if (_state == 0) {  // waiting for menu pin being pressed.
+  if (_state == 0) { // waiting for menu pin being pressed.
     if (activeLevel) {
-      _state = 1;        // step to state 1
-      _startTime = now;  // remember starting time
-    }                    // if
+      _state = 1;       // step to state 1
+      _startTime = now; // remember starting time
+    }                   // if
 
-  } else if (_state == 1) {  // waiting for menu pin being released.
+  } else if (_state == 1) { // waiting for menu pin being released.
 
     if ((!activeLevel) && ((uint64_t)(now - _startTime) < _debounceTicks)) {
       // button was released to quickly so I assume some debouncing.
@@ -193,70 +176,78 @@ void xOneButton::ticker(bool activeLevel) {
       _state = 0;
 
     } else if (!activeLevel) {
-      _state = 2;       // step to state 2
-      _stopTime = now;  // remember stopping time
+      _state = 2;      // step to state 2
+      _stopTime = now; // remember stopping time
 
     } else if ((activeLevel) && ((uint64_t)(now - _startTime) > _pressTicks)) {
-      _stopTime = now;        // remember stopping time
-      _isLongPressed = true;  // Keep track of long press state
-      if (_pressFunc) _pressFunc();
-      if (_longPressStartFunc) _longPressStartFunc();
+      _stopTime = now;       // remember stopping time
+      _isLongPressed = true; // Keep track of long press state
+      if (_pressFunc)
+        _pressFunc();
+      if (_longPressStartFunc)
+        _longPressStartFunc();
       if (_paramLongPressStartFunc)
         _paramLongPressStartFunc(_longPressStartFuncParam);
-      if (_duringLongPressFunc) _duringLongPressFunc();
+      if (_duringLongPressFunc)
+        _duringLongPressFunc();
       if (_paramDuringLongPressFunc)
         _paramDuringLongPressFunc(_duringLongPressFuncParam);
-      _state = 6;  // step to state 6
+      _state = 6; // step to state 6
     } else {
       // Button was pressed down. wait. Stay in this state.
       // if a pressStart event is registered, call it:
-      if (_pressStartFunc) _pressStartFunc();
-    }  // if
+      if (_pressStartFunc)
+        _pressStartFunc();
+    } // if
 
   } else if (_state == 2) {
     // waiting for menu pin being pressed the second time or timeout.
-    if ((_doubleClickFunc == NULL && _paramDoubleClickFunc == NULL) ||
-        (uint64_t)(now - _startTime) > _clickTicks) {
+    if ((_doubleClickFunc == NULL && _paramDoubleClickFunc == NULL) || (uint64_t)(now - _startTime) > _clickTicks) {
       // this was only a single short click
-      if (_clickFunc) _clickFunc();
-      if (_paramClickFunc) _paramClickFunc(_clickFuncParam);
-      _state = 0;  // restart.
+      if (_clickFunc)
+        _clickFunc();
+      if (_paramClickFunc)
+        _paramClickFunc(_clickFuncParam);
+      _state = 0; // restart.
 
-    } else if ((activeLevel) &&
-               ((uint64_t)(now - _stopTime) > _debounceTicks)) {
-      _state = 3;        // step to state 3
-      _startTime = now;  // remember starting time
-    }                    // if
+    } else if ((activeLevel) && ((uint64_t)(now - _stopTime) > _debounceTicks)) {
+      _state = 3;       // step to state 3
+      _startTime = now; // remember starting time
+    }                   // if
 
-  } else if (_state == 3) {  // waiting for menu pin being released finally.
+  } else if (_state == 3) { // waiting for menu pin being released finally.
     // Stay here for at least _debounceTicks because else we might end up in
     // state 1 if the button bounces for too long.
     if ((!activeLevel) && ((uint64_t)(now - _startTime) > _debounceTicks)) {
-      _stopTime = now;  // remember stopping time
+      _stopTime = now; // remember stopping time
       // this was a 2 click sequence.
-      if (_doubleClickFunc) _doubleClickFunc();
-      if (_paramDoubleClickFunc) _paramDoubleClickFunc(_doubleClickFuncParam);
-      _state = 0;  // restart.
-    }              // if
+      if (_doubleClickFunc)
+        _doubleClickFunc();
+      if (_paramDoubleClickFunc)
+        _paramDoubleClickFunc(_doubleClickFuncParam);
+      _state = 0; // restart.
+    }             // if
 
   } else if (_state == 6) {
     // waiting for menu pin being release after long press.
     if (!activeLevel) {
-      _isLongPressed = false;  // Keep track of long press state
-      _stopTime = now;         // remember stopping time
-      if (_longPressStopFunc) _longPressStopFunc();
+      _isLongPressed = false; // Keep track of long press state
+      _stopTime = now;        // remember stopping time
+      if (_longPressStopFunc)
+        _longPressStopFunc();
       if (_paramLongPressStopFunc)
         _paramLongPressStopFunc(_longPressStopFuncParam);
-      _state = 0;  // restart.
+      _state = 0; // restart.
     } else {
       // button is being long pressed
-      _stopTime = now;        // remember stopping time
-      _isLongPressed = true;  // Keep track of long press state
-      if (_duringLongPressFunc) _duringLongPressFunc();
+      _stopTime = now;       // remember stopping time
+      _isLongPressed = true; // Keep track of long press state
+      if (_duringLongPressFunc)
+        _duringLongPressFunc();
       if (_paramDuringLongPressFunc)
         _paramDuringLongPressFunc(_duringLongPressFuncParam);
-    }  // if
-  }    // if
-}  // xOneButton.tick()
+    } // if
+  }   // if
+} // xOneButton.tick()
 
 // end.

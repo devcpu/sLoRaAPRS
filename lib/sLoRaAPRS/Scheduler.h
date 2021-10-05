@@ -4,7 +4,7 @@
  * File Created: 2021-09-15 1:16
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-04 0:53
+ * Last Modified: 2021-10-04 22:29
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -14,6 +14,9 @@
 #ifndef LIB_SLORAAPRS_SCHEDULER_H_
 #define LIB_SLORAAPRS_SCHEDULER_H_
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/timers.h>
+#include <esp_freertos_hooks.h>
 #include <APRSWebServer.h>
 #include <Arduino.h>
 #include <ButtonState.h>
@@ -21,10 +24,7 @@
 #include <LoRaAPRSConfig.h>
 #include <TinyGPS++.h>
 #include <TrackerDisplay.h>
-#include <esp_freertos_hooks.h>
 #include <xOneButton.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/timers.h"
 
 extern TinyGPSPlus gps;
 extern HardwareSerial ss;
@@ -97,5 +97,6 @@ void singleClick_CB(void);
 void doubleClick_CB(void);
 void longClick_CB(void);
 void kinoTimer_CB(TimerHandle_t xExpiredTimer);
+void tracker_display_CB(void *pvParameters);
 
-#endif  // LIB_SLORAAPRS_SCHEDULER_H_
+#endif // LIB_SLORAAPRS_SCHEDULER_H_

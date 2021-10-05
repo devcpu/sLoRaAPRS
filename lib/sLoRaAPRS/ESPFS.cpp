@@ -25,12 +25,12 @@ boolean ESPFSInit() {
   //   initok = SPIFFS.begin(true);
   // #elif defined(ESP8266)
   initok = SPIFFS.begin();
-  if (!(initok)) {  // Format SPIFS, of not formatted. - Try 1
+  if (!(initok)) { // Format SPIFS, of not formatted. - Try 1
     ESP_LOGI(TAG, "Format SPIFFS (try 1). Please wait ... ");
     SPIFFS.format();
     initok = SPIFFS.begin();
   }
-  if (!(initok)) {  // Format SPIFS, of not formatted. - Try 2
+  if (!(initok)) { // Format SPIFS, of not formatted. - Try 2
     ESP_LOGW(TAG, "Format SPIFFS (try 2). Please wait ... ");
     SPIFFS.format();
     initok = SPIFFS.begin();

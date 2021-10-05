@@ -28,13 +28,13 @@ extern TrackerDisplay td;
 String APRSWiFI_SSID = "";
 
 void WifiAPInit(void) {
-  WifiDisconnect();  // after flash it will not connect without it
+  WifiDisconnect(); // after flash it will not connect without it
   /* You can remove the password parameter if you want the AP to be open. */
   Serial.println("Configuring access point...");
 #ifdef ESP32
   // WiFi.softAP(cfg.APCredentials.auth_name.c_str(),
   // cfg.APCredentials.auth_tocken.c_str());
-  WiFi.softAP("sLoRaAPRS", "letmein42");  // FIXME from reg!
+  WiFi.softAP("sLoRaAPRS", "letmein42"); // FIXME from reg!
   Serial.println("WiFi.softAP");
 // @TODO sollte hier nicht nötig sein!
 #elif defined(ESP8266)
@@ -50,20 +50,16 @@ void WifiAPInit(void) {
     Serial.print("++++++++++   AP IP address: ");
     Serial.print(myIP);
     Serial.println("    ++++++++++");
-    Serial.println("++++++++++   SSID: " + cfg.APCredentials.auth_name +
-                   "               ++++++++++");
-    Serial.println("++++++++++   Password: " + cfg.APCredentials.auth_tocken +
-                   "         ++++++++++");
+    Serial.println("++++++++++   SSID: " + cfg.APCredentials.auth_name + "               ++++++++++");
+    Serial.println("++++++++++   Password: " + cfg.APCredentials.auth_tocken + "         ++++++++++");
     Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
-    td.write3Line(" WIFI AP", cfg.APCredentials.auth_name.c_str(),
-                  cfg.APCredentials.auth_tocken.c_str(), false,
+    td.write3Line(" WIFI AP", cfg.APCredentials.auth_name.c_str(), cfg.APCredentials.auth_tocken.c_str(), false,
                   DISPLAY_DELAY_LONG);
   } else {
     Serial.print("AP IP address: ");
     Serial.println(myIP);
     Serial.println("SSID: " + cfg.APCredentials.auth_name);
-    td.write3Line(" WIFI AP", "  SSID:", cfg.APCredentials.auth_name.c_str(),
-                  true, DISPLAY_DELAY_LONG);
+    td.write3Line(" WIFI AP", "  SSID:", cfg.APCredentials.auth_name.c_str(), true, DISPLAY_DELAY_LONG);
   }
   cfg.lan_status.SSID = WiFi.SSID();
   cfg.lan_status.IP = myIP.toString();
@@ -73,13 +69,12 @@ void WifiAPInit(void) {
 
 void WifiConnect(void) {
   // WiFi.onEvent(WiFiStationConnected, SYSTEM_EVENT_STA_CONNECTED);
-  WifiDisconnect();  // after flash it will not connect without it
+  WifiDisconnect(); // after flash it will not connect without it
 
   // WiFi.mode(WIFI_STA);
   delay(1000);
   Serial.println("Trying Connecting to WiFi ..");
-  WiFi.begin(cfg.WifiCrendentials[0].auth_name.c_str(),
-             cfg.WifiCrendentials[0].auth_tocken.c_str());
+  WiFi.begin(cfg.WifiCrendentials[0].auth_name.c_str(), cfg.WifiCrendentials[0].auth_tocken.c_str());
 
   // @TODO
   uint8_t count = 0;
@@ -94,8 +89,7 @@ void WifiConnect(void) {
   Serial.println(WiFi.localIP());
   IPAddress myIP = WiFi.localIP();
   cfg.SERVER_IP = myIP.toString();
-  td.write3Line("WiFiclient", APRSWiFI_SSID.c_str(), myIP.toString().c_str(),
-                true, DISPLAY_DELAY_LONG);
+  td.write3Line("WiFiclient", APRSWiFI_SSID.c_str(), myIP.toString().c_str(), true, DISPLAY_DELAY_LONG);
 
   cfg.lan_status.SSID = WiFi.SSID();
   cfg.lan_status.IP = myIP.toString();

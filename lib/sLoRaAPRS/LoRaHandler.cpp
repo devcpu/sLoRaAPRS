@@ -68,8 +68,7 @@ void sendMessage(char *outgoing, boolean toDigi) {
   char txmsgbuf[16] = {0};
   Serial.printf("sendMessage '%s'\n", outgoing);
   // 850 ms init plus header 35 / char both with spare
-  lora_control.msg_wait =
-      strlen(outgoing) * 35 + millis() + 850;  // time for ~ one char to send
+  lora_control.msg_wait = strlen(outgoing) * 35 + millis() + 850; // time for ~ one char to send
   lora_control.isSend = true;
   static uint64_t msgCount;
   if (toDigi) {
@@ -83,12 +82,12 @@ void sendMessage(char *outgoing, boolean toDigi) {
   }
   td.writeTX(txmsgbuf);
 
-  char destination = 0x3C;   // '<' it seems that we have to use it, but really?
-  char localAddress = 0xFF;  // in LoRa it stands for broadcat
-  LoRa.beginPacket();        // start packet
-  LoRa.write(destination);   // add destination address
-  LoRa.write(localAddress);  // add sender address
-  LoRa.write(0x01);          // head end?
+  char destination = 0x3C;  // '<' it seems that we have to use it, but really?
+  char localAddress = 0xFF; // in LoRa it stands for broadcat
+  LoRa.beginPacket();       // start packet
+  LoRa.write(destination);  // add destination address
+  LoRa.write(localAddress); // add sender address
+  LoRa.write(0x01);         // head end?
   // LoRa.write(msgCount);                 // add message ID
 
   /*
@@ -102,7 +101,7 @@ void sendMessage(char *outgoing, boolean toDigi) {
 
   // LoRa.write(strlen(out));        // add payload length
   // LoRa.print(out);                 // add payload
-  LoRa.endPacket(true);  // async mod
+  LoRa.endPacket(true); // async mod
   // LoRa.endPacket(false);                     // finish packet and send it
   // syncron blocking!
   msgCount++;
@@ -121,23 +120,22 @@ void processMessage(void) {
   // if (packetSize == 0) return;          // if there's no packet, return
 
   // read packet header bytes:
-  int recipient = LoRa.read();       // recipient address
-  byte sender = LoRa.read();         // sender address
-  byte incomingMsgId = LoRa.read();  // incoming msg ID
+  int recipient = LoRa.read();      // recipient address
+  byte sender = LoRa.read();        // sender address
+  byte incomingMsgId = LoRa.read(); // incoming msg ID
   // byte incomingLength = LoRa.read();    // incoming msg length
 
-  String incoming = "";  // payload of packet
+  String incoming = ""; // payload of packet
 
-  while (LoRa.available()) {  // can't use readString() in callback, so
-    incoming += static_cast<char>(LoRa.read());  // add bytes one by one
+  while (LoRa.available()) {                    // can't use readString() in callback, so
+    incoming += static_cast<char>(LoRa.read()); // add bytes one by one
   }
 
   // if (incomingLength != incoming.length()) {   // check length for error
   //   Serial.println("error: message length does not match length");
   //   return;                             // skip rest of function
   // }
-  Serial.println(
-      "/////////////////////////////////////////////////////////////////////");
+  Serial.println("/////////////////////////////////////////////////////////////////////");
   // Serial.printf("incomingLength=%d\n", incomingLength);
   Serial.printf("incoming.length():%d\n", incoming.length());
 
@@ -149,8 +147,7 @@ void processMessage(void) {
   Serial.println("Message: " + incoming);
   Serial.println("RSSI: " + String(LoRa.packetRssi()));
   Serial.println("Snr: " + String(LoRa.packetSnr()));
-  Serial.println(
-      "/////////////////////////////////////////////////////////////////////");
+  Serial.println("/////////////////////////////////////////////////////////////////////");
   Serial.println();
 }
 

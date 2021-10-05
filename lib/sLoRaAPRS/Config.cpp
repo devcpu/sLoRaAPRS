@@ -31,31 +31,25 @@ void ConfigInit(void) {
   //  Serial.printf("write boot_count: %d\n", cfg.boot_count);
   //  preferences.putULong64(PREFS_BOOT_COUNT, cfg.boot_count);
 
-  cfg.current_wifi_mode = static_cast<wifi_mode>(
-      preferences.getUInt(PREFS_CURRENT_WIFI_MODE, static_cast<int>(wifi_ap)));
-  cfg.current_run_mode = static_cast<run_mode>(preferences.getUInt(
-      PREFS_CURRENT_SYSTEM_MODE, static_cast<int>(mode_tracker)));
+  cfg.current_wifi_mode =
+      static_cast<wifi_mode>(preferences.getUInt(PREFS_CURRENT_WIFI_MODE, static_cast<int>(wifi_ap)));
+  cfg.current_run_mode =
+      static_cast<run_mode>(preferences.getUInt(PREFS_CURRENT_SYSTEM_MODE, static_cast<int>(mode_tracker)));
 
   cfg.call = preferences.getString(PREFS_CALL, CHANGE_ME);
   cfg.aprs_call_ext = preferences.getString(PREFS_APRS_CALL_EX, "3");
   cfg.wx_call_ext = preferences.getString(PREFS_WX_CALL_EX, "13");
   cfg.aprs_symbol = preferences.getString(PREFS_APRS_SYMBOL, "/[");
 
-  cfg.WebCredentials.auth_name =
-      preferences.getString(PREFS_WEB_ADMIN, "admin");
-  cfg.WebCredentials.auth_tocken =
-      preferences.getString(PREFS_WEB_PASS, DEFAULT_PASSWORD);
+  cfg.WebCredentials.auth_name = preferences.getString(PREFS_WEB_ADMIN, "admin");
+  cfg.WebCredentials.auth_tocken = preferences.getString(PREFS_WEB_PASS, DEFAULT_PASSWORD);
 
-  cfg.APCredentials.auth_name =
-      preferences.getString(PREFS_AP_SSID, "sLoRaAPRS");
-  cfg.APCredentials.auth_tocken =
-      preferences.getString(PREFS_AP_PASS, DEFAULT_PASSWORD);
+  cfg.APCredentials.auth_name = preferences.getString(PREFS_AP_SSID, "sLoRaAPRS");
+  cfg.APCredentials.auth_tocken = preferences.getString(PREFS_AP_PASS, DEFAULT_PASSWORD);
 
   cfg.APRSPassword = preferences.getString(PREFS_APRS_PASSWORD, "12345");
-  cfg.APRSServer[0] =
-      preferences.getString(PREFS_APRS_SERVER0, "192.168.168.192");
-  cfg.APRSServer[0] =
-      preferences.getString(PREFS_APRS_SERVER0, "192.168.168.192");
+  cfg.APRSServer[0] = preferences.getString(PREFS_APRS_SERVER0, "192.168.168.192");
+  cfg.APRSServer[0] = preferences.getString(PREFS_APRS_SERVER0, "192.168.168.192");
 
   cfg.posfix.latitude = preferences.getDouble(PREFS_POS_LAT_FIX, 0ULL);
   cfg.posfix.longitude = preferences.getDouble(PREFS_POS_LNG_FIX, 0ULL);
@@ -69,10 +63,8 @@ void ConfigInit(void) {
     snprintf(auth_name_buf, sizeof(auth_name_buf), "lan%d_auth", x);
     // Serial.printf("ssid_name_buf: %s\n", ssid_name_buf);
     // Serial.printf("auth_name_buf: %s\n", auth_name_buf);
-    cfg.WifiCrendentials[x].auth_name =
-        preferences.getString(ssid_name_buf, CHANGE_ME);
-    cfg.WifiCrendentials[x].auth_tocken =
-        preferences.getString(auth_name_buf, DEFAULT_PASSWORD);
+    cfg.WifiCrendentials[x].auth_name = preferences.getString(ssid_name_buf, CHANGE_ME);
+    cfg.WifiCrendentials[x].auth_tocken = preferences.getString(auth_name_buf, DEFAULT_PASSWORD);
     // Serial.printf("index: %d key: %s value: %s\n", x, ssid_name_buf,
     // cfg.WifiCrendentials[x].auth_name.c_str()); Serial.printf("index: %d key:
     // %s value: %s\n\n", x, auth_name_buf,
@@ -184,8 +176,7 @@ void setPrefsString(const char *key, String value) {
     Serial.printf("write %s\n", value.c_str());
     ESP_LOGD(TAG, "write %s", value);
     uint32_t rv = preferences.putString(key, value);
-    ESP_LOGD(TAG, "write of key=%s value=%s returns: %lu\n", key, value.c_str(),
-             rv);
+    ESP_LOGD(TAG, "write of key=%s value=%s returns: %lu\n", key, value.c_str(), rv);
     String new_var = preferences.getString(key);
     ESP_LOGD(TAG, "got var from NVS: %s\n", new_var.c_str());
   }
@@ -279,51 +270,51 @@ void ConfigToString(void) {
 
 String getWifiMode() {
   switch (cfg.current_wifi_mode) {
-    case wifi_off:
-      return String("WiFi OFF");
-      break;
+  case wifi_off:
+    return String("WiFi OFF");
+    break;
 
-    case wifi_ap:
-      return String("WiFi AP");
-      break;
+  case wifi_ap:
+    return String("WiFi AP");
+    break;
 
-    case wifi_client:
-      return String("WiFi Client");
-    default:
-      return String("ERROR no mode");
-      break;
+  case wifi_client:
+    return String("WiFi Client");
+  default:
+    return String("ERROR no mode");
+    break;
   }
 }
 
 String getRunMode() {
   switch (cfg.current_run_mode) {
-    case mode_tracker:
-      return String(" tracker");
-      break;
+  case mode_tracker:
+    return String(" tracker");
+    break;
 
-    case mode_wxtracker:
-      return String("WX tracker");
-      break;
+  case mode_wxtracker:
+    return String("WX tracker");
+    break;
 
-    case mode_wxfix:
-      return String("  WX FIX");
-      break;
+  case mode_wxfix:
+    return String("  WX FIX");
+    break;
 
-    case mode_digi:
-      return String(" repeater");
-      break;
+  case mode_digi:
+    return String(" repeater");
+    break;
 
-    case mode_gateway:
-      return String(" Gateway");
-      break;
+  case mode_gateway:
+    return String(" Gateway");
+    break;
 
-    case mode_digi_gateway:
-      return String(" RPT & GW");
-      break;
+  case mode_digi_gateway:
+    return String(" RPT & GW");
+    break;
 
-    default:
-      return String(" no mode");
-      break;
+  default:
+    return String(" no mode");
+    break;
   }
 }
 

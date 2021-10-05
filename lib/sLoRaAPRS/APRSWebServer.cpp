@@ -4,7 +4,7 @@
  * File Created: 2021-09-26 22:05
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-03 23:48
+ * Last Modified: 2021-10-05 1:38
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -12,18 +12,6 @@
  */
 
 #include <APRSWebServer.h>
-#include <APRSWiFi.h>
-#include <APRS_MSG.h>
-#include <ArduinoJson.h>
-#include <ArduinoOTA.h>
-#include <AsyncJson.h>
-#include <AsyncWebSocket.h>
-#include <Config.h>
-#include <Preferences.h>
-#include <SPIFFSEditor.h>
-#include <TinyGPS++.h>
-#include <apptypes.h>
-#include "freertos/FreeRTOS.h"
 
 TinyGPSPlus gps;
 
@@ -40,8 +28,7 @@ AsyncWebServer *WebServer;
 AsyncWebSocket *ws;
 AsyncWebSocketClient *globalClient = NULL;
 
-String mainmenue(
-    "<form action='.' method='get'><button>Main Menue</button></form><br />");
+String mainmenue("<form action='.' method='get'><button>Main Menue</button></form><br />");
 
 struct HTML_Error {
   String ErrorMsg;
@@ -112,14 +99,13 @@ void WebserverStart(void) {
 
   WebServer->on("/sloraaprs.js", HTTP_GET, [](AsyncWebServerRequest *request) {
     ESP_LOGD(TAG, "/sloraaprs.js");
-    request->send(SPIFFS, "/sloraaprs.js", "application/javascript", false,
-                  ProcessorJS);
+    request->send(SPIFFS, "/sloraaprs.js", "application/javascript", false, ProcessorJS);
   });
 
   WebServer->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     ESP_LOGD(TAG, "/");
     // first run wizard
-    if (cfg.call == "CHANGEME") {  // first run wizard
+    if (cfg.call == "CHANGEME") { // first run wizard
       request->redirect("/cc");
     }
     request->send(SPIFFS, "/main.html", "text/html", false, ProcessorDefault);
@@ -128,8 +114,7 @@ void WebserverStart(void) {
   // System Info
   WebServer->on("/si", HTTP_GET, [](AsyncWebServerRequest *request) {
     ESP_LOGD(TAG, "/si");
-    request->send(SPIFFS, "/main.html", "text/html", false,
-                  systemInfoProcessor);
+    request->send(SPIFFS, "/main.html", "text/html", false, systemInfoProcessor);
   });
 
   // Configure Call
@@ -139,13 +124,12 @@ void WebserverStart(void) {
     if (request->params() > 0) {
       ESP_LOGD(TAG, "/cc");
       handleRequestConfigCall(request);
-      if (cfg.APCredentials.auth_tocken == "letmein42") {  // first run wizard
+      if (cfg.APCredentials.auth_tocken == "letmein42") { // first run wizard
         request->redirect("/ca");
       }
       request->redirect("/");
     } else {
-      request->send(SPIFFS, "/main.html", "text/html", false,
-                    ProcessorConfigCall);
+      request->send(SPIFFS, "/main.html", "text/html", false, ProcessorConfigCall);
     }
   });
 
@@ -158,8 +142,7 @@ void WebserverStart(void) {
       request->redirect("/");
     }
 
-    request->send(SPIFFS, "/main.html", "text/html", false,
-                  ProcessorSendMessage);
+    request->send(SPIFFS, "/main.html", "text/html", false, ProcessorSendMessage);
   });
 
   // Change Mode
@@ -171,8 +154,7 @@ void WebserverStart(void) {
     if (request->params() == 2) {
       ESP_LOGD(TAG, "got 2 params");
       changed = handleRequestChangeMode(request);
-      ESP_LOGD(TAG, "new run_mode: %d / new_wifi_mode %d",
-               static_cast<uint8_t>(cfg.current_run_mode),
+      ESP_LOGD(TAG, "new run_mode: %d / new_wifi_mode %d", static_cast<uint8_t>(cfg.current_run_mode),
                static_cast<uint8_t>(cfg.current_wifi_mode));
       // @FIXME cast error? see debug console
       ESP_LOGD(TAG, "new run_mode: %d / new_wifi_mode %d\n",
@@ -182,8 +164,7 @@ void WebserverStart(void) {
     }
     if (changed) {
     } else {
-      request->send(SPIFFS, "/main.html", "text/html", false,
-                    ProcessorChangeMode);
+      request->send(SPIFFS, "/main.html", "text/html", false, ProcessorChangeMode);
     }
   });
 
@@ -214,8 +195,7 @@ void WebserverStart(void) {
       }
     }
 
-    request->send(SPIFFS, "/main.html", "text/html", false,
-                  ProcessorConfigWifiAP);
+    request->send(SPIFFS, "/main.html", "text/html", false, ProcessorConfigWifiAP);
   });
 
   // Config Gateway
@@ -226,8 +206,7 @@ void WebserverStart(void) {
       handleRequestConfigGateway(request);
       request->redirect("/");
     }
-    request->send(SPIFFS, "/main.html", "text/html", false,
-                  ProcessorConfigGateway);
+    request->send(SPIFFS, "/main.html", "text/html", false, ProcessorConfigGateway);
   });
 
   // reboot
@@ -248,8 +227,7 @@ void WebserverStart(void) {
         ESP_LOGD(TAG, "ERR: wrong request");
       }
     }
-    request->send(SPIFFS, "/main.html", "text/html", false,
-                  ProcessorConfigWLAN);
+    request->send(SPIFFS, "/main.html", "text/html", false, ProcessorConfigWLAN);
   });
 
   // Config Web Admin
@@ -276,8 +254,8 @@ void WebserverStart(void) {
   ESP_LOGD(TAG, "HTTP WebServer started");
 }
 
-void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
-               AwsEventType type, void *arg, uint8_t *data, size_t len) {
+void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data,
+               size_t len) {
   if (type == WS_EVT_CONNECT) {
     ESP_LOGD(TAG, "Websocket client connection received");
     globalClient = client;
@@ -346,9 +324,8 @@ String systemInfoProcessor(const String &var) {
 
 String getSystemInfoTable(void) {
 #ifdef ESP32
-  uint64_t chipid = chipid =
-      ESP.getEfuseMac();  // The chip ID is essentially its MAC address(length:
-                          // 6 bytes).
+  uint64_t chipid = chipid = ESP.getEfuseMac(); // The chip ID is essentially its MAC address(length:
+                                                // 6 bytes).
 #endif
 
   FlashMode_t ideMode = ESP.getFlashChipMode();
@@ -371,8 +348,7 @@ String getSystemInfoTable(void) {
       {"CycleCount: ", String(ESP.getCycleCount())},
       {"FlashChipMode: ", String(ESP.getFlashChipMode())},
       {"FlashChipSize: ", String(ESP.getFlashChipSize() / 1024 / 1024) + "MB"},
-      {"FlashChipSpeed: ",
-       String(ESP.getFlashChipSpeed() / 1024 / 1024) + "MHz"},
+      {"FlashChipSpeed: ", String(ESP.getFlashChipSpeed() / 1024 / 1024) + "MHz"},
       {"SketchSize: ", String(ESP.getSketchSize() / 1024) + "kB"},
       {"FreeSketchSpace: ", String(ESP.getFreeSketchSpace() / 1024) + "kB"},
       {"SketchMD5: ", String(ESP.getSketchMD5())},
@@ -392,16 +368,12 @@ String getSystemInfoTable(void) {
 #endif
       // size = 5
       {"Flash ide  size:", String(ESP.getFlashChipSize() / 1024) + "kB"},
-      {"Flash ide speed:",
-       String(ESP.getFlashChipSpeed() / 1000 / 1000) + "MHz"},
+      {"Flash ide speed:", String(ESP.getFlashChipSpeed() / 1000 / 1000) + "MHz"},
       {"Flash ide mode:",
-       String((ideMode == FM_QIO
-                   ? "QIO"
-                   : ideMode == FM_QOUT
-                         ? "QOUT"
-                         : ideMode == FM_DIO
-                               ? "DIO"
-                               : ideMode == FM_DOUT ? "DOUT" : "UNKNOWN"))},
+       String(
+           (ideMode == FM_QIO
+                ? "QIO"
+                : ideMode == FM_QOUT ? "QOUT" : ideMode == FM_DIO ? "DIO" : ideMode == FM_DOUT ? "DOUT" : "UNKNOWN"))},
       {"Sketch size:", String(ESP.getSketchSize() / 1024) + "kB"},
       // size = 10
       {"Free sketch size:", String(ESP.getFreeSketchSpace() / 1024) + "kB"},
@@ -422,61 +394,60 @@ String getSystemInfoTable(void) {
       {"BME280", String(cfg.hardware.BME280)},
   };
 
-  return table2DGenerator(systemdata, 33, true) +
-         table2DGenerator(hwdata, 4, true) + "<br /><br />" + mainmenue;
+  return table2DGenerator(systemdata, 33, true) + table2DGenerator(hwdata, 4, true) + "<br /><br />" + mainmenue;
 }
 
 #ifdef ESP32
 String getResetReason(RESET_REASON reason) {
   String retvar;
   switch (reason) {
-    case 1:
-      retvar = "POWERON_RESET";
-      break; /**<1, Vbat power on reset*/
-    case 3:
-      retvar = "SW_RESET";
-      break; /**<3, Software reset digital core*/
-    case 4:
-      retvar = "OWDT_RESET";
-      break; /**<4, Legacy watch dog reset digital core*/
-    case 5:
-      retvar = "DEEPSLEEP_RESET";
-      break; /**<5, Deep Sleep reset digital core*/
-    case 6:
-      retvar = "SDIO_RESET";
-      break; /**<6, Reset by SLC module, reset digital core*/
-    case 7:
-      retvar = "TG0WDT_SYS_RESET";
-      break; /**<7, Timer Group0 Watch dog reset digital core*/
-    case 8:
-      retvar = "TG1WDT_SYS_RESET";
-      break; /**<8, Timer Group1 Watch dog reset digital core*/
-    case 9:
-      retvar = "RTCWDT_SYS_RESET";
-      break; /**<9, RTC Watch dog Reset digital core*/
-    case 10:
-      retvar = "INTRUSION_RESET";
-      break; /**<10, Instrusion tested to reset CPU*/
-    case 11:
-      retvar = "TGWDT_CPU_RESET";
-      break; /**<11, Time Group reset CPU*/
-    case 12:
-      retvar = "SW_CPU_RESET";
-      break; /**<12, Software reset CPU*/
-    case 13:
-      retvar = "RTCWDT_CPU_RESET";
-      break; /**<13, RTC Watch dog Reset CPU*/
-    case 14:
-      retvar = "EXT_CPU_RESET";
-      break; /**<14, for APP CPU, reseted by PRO CPU*/
-    case 15:
-      retvar = "RTCWDT_BROWN_OUT_RESET";
-      break; /**<15, Reset when the vdd voltage is not stable*/
-    case 16:
-      retvar = "RTCWDT_RTC_RESET";
-      break; /**<16, RTC Watch dog reset digital core and rtc module*/
-    default:
-      retvar = "NO_MEAN";
+  case 1:
+    retvar = "POWERON_RESET";
+    break; /**<1, Vbat power on reset*/
+  case 3:
+    retvar = "SW_RESET";
+    break; /**<3, Software reset digital core*/
+  case 4:
+    retvar = "OWDT_RESET";
+    break; /**<4, Legacy watch dog reset digital core*/
+  case 5:
+    retvar = "DEEPSLEEP_RESET";
+    break; /**<5, Deep Sleep reset digital core*/
+  case 6:
+    retvar = "SDIO_RESET";
+    break; /**<6, Reset by SLC module, reset digital core*/
+  case 7:
+    retvar = "TG0WDT_SYS_RESET";
+    break; /**<7, Timer Group0 Watch dog reset digital core*/
+  case 8:
+    retvar = "TG1WDT_SYS_RESET";
+    break; /**<8, Timer Group1 Watch dog reset digital core*/
+  case 9:
+    retvar = "RTCWDT_SYS_RESET";
+    break; /**<9, RTC Watch dog Reset digital core*/
+  case 10:
+    retvar = "INTRUSION_RESET";
+    break; /**<10, Instrusion tested to reset CPU*/
+  case 11:
+    retvar = "TGWDT_CPU_RESET";
+    break; /**<11, Time Group reset CPU*/
+  case 12:
+    retvar = "SW_CPU_RESET";
+    break; /**<12, Software reset CPU*/
+  case 13:
+    retvar = "RTCWDT_CPU_RESET";
+    break; /**<13, RTC Watch dog Reset CPU*/
+  case 14:
+    retvar = "EXT_CPU_RESET";
+    break; /**<14, for APP CPU, reseted by PRO CPU*/
+  case 15:
+    retvar = "RTCWDT_BROWN_OUT_RESET";
+    break; /**<15, Reset when the vdd voltage is not stable*/
+  case 16:
+    retvar = "RTCWDT_RTC_RESET";
+    break; /**<16, RTC Watch dog reset digital core and rtc module*/
+  default:
+    retvar = "NO_MEAN";
   }
   return retvar;
 }
@@ -504,15 +475,11 @@ String ProcessorConfigCall(const String &var) {
 
   // remember! if you add or remove some items here, you ahve to change
   String aprs_symbol_options[][2] = {
-      {"Home", "/-"},           {"Campground", "/;"},   {"Motorcycle", "/<"},
-      {"Rail", "/="},           {"Canoe", "/C"},        {"Tractor", "/F"},
-      {"Baloon", "/B"},         {"Bus", "/U"},          {"Heli", "/X"},
-      {"Yacht", "/Y"},          {"Jogger", "/["},       {"WX Station", "/_"},
-      {"Ambulance", "/a"},      {"Fire Station", "/d"}, {"Fire Truck", "/f"},
-      {"Hospital", "/h"},       {"IOTO", "/i"},         {"Jeep", "/j"},
-      {"Truck", "/k"},          {"Power Boat", "/s"},   {"Van", "/v"},
-      {"Weater Station", "/w"}, {"Shelter", "/z"},      {"Horse", "/e"},
-      {"Bike", "/b"},
+      {"Home", "/-"},     {"Campground", "/;"},     {"Motorcycle", "/<"}, {"Rail", "/="},         {"Canoe", "/C"},
+      {"Tractor", "/F"},  {"Baloon", "/B"},         {"Bus", "/U"},        {"Heli", "/X"},         {"Yacht", "/Y"},
+      {"Jogger", "/["},   {"WX Station", "/_"},     {"Ambulance", "/a"},  {"Fire Station", "/d"}, {"Fire Truck", "/f"},
+      {"Hospital", "/h"}, {"IOTO", "/i"},           {"Jeep", "/j"},       {"Truck", "/k"},        {"Power Boat", "/s"},
+      {"Van", "/v"},      {"Weater Station", "/w"}, {"Shelter", "/z"},    {"Horse", "/e"},        {"Bike", "/b"},
   };
 
   // ESP_LOGW(TAG, "xxx aprs_options xxx");
@@ -558,16 +525,14 @@ String ProcessorConfigCall(const String &var) {
   }
 
   if (var == PREFS_APRS_SYMBOL) {
-    return optionsFeldGenerator(
-        cfg.aprs_symbol, PREFS_APRS_SYMBOL, aprs_symbol_options,
-        sizeof(aprs_symbol_options) / sizeof(aprs_symbol_options[0]));
+    return optionsFeldGenerator(cfg.aprs_symbol, PREFS_APRS_SYMBOL, aprs_symbol_options,
+                                sizeof(aprs_symbol_options) / sizeof(aprs_symbol_options[0]));
     // return String(cfg.aprs_symbol.symbol);
   }
 
   if (var == "aprs_ext_options") {
-    return optionsFeldGenerator(
-        cfg.aprs_call_ext, PREFS_APRS_CALL_EX, aprs_options,
-        sizeof(aprs_symbol_options) / sizeof(aprs_symbol_options[0]));
+    return optionsFeldGenerator(cfg.aprs_call_ext, PREFS_APRS_CALL_EX, aprs_options,
+                                sizeof(aprs_symbol_options) / sizeof(aprs_symbol_options[0]));
   }
 
   if (var == PREFS_APRS_CALL_EX) {
@@ -814,11 +779,9 @@ String ProcessorSendMessage(const String &var) {
   }
 
   if (var == MSG_FORM_WIDE) {
-    String options[][2] = {
-        {"local", "0"}, {"WIDE1-1", "1"}, {"WIDE2-2", "2"}, {"WIDE3-3", "3"}};
+    String options[][2] = {{"local", "0"}, {"WIDE1-1", "1"}, {"WIDE2-2", "2"}, {"WIDE3-3", "3"}};
 
-    return optionsFeldGenerator(send_msg_form_tmp.wide, MSG_FORM_WIDE, options,
-                                sizeof(options) / sizeof(options[0]));
+    return optionsFeldGenerator(send_msg_form_tmp.wide, MSG_FORM_WIDE, options, sizeof(options) / sizeof(options[0]));
   }
 
   if (var == MSG_FORM_MSG) {
@@ -967,19 +930,16 @@ String ProcessorChangeMode(const String &var) {
 
     // @TODO change cfg.current_run_mode to String to elimate
     // optionsFeldGenerator()
-    return optionsFeldGenerator(String(cfg.current_run_mode),
-                                PREFS_CURRENT_SYSTEM_MODE, options,
+    return optionsFeldGenerator(String(cfg.current_run_mode), PREFS_CURRENT_SYSTEM_MODE, options,
                                 sizeof(options) / sizeof(options[0]));
   }
 
   // enum wifi_mode {wifi_off, wifi_ap, wifi_client};
   if (var == PREFS_CURRENT_WIFI_MODE) {
-    String options[][2] = {
-        {"Wifi OFF", "0"}, {"Wifi AP", "1"}, {"WLAN Connect", "2"}};
+    String options[][2] = {{"Wifi OFF", "0"}, {"Wifi AP", "1"}, {"WLAN Connect", "2"}};
     // @TODO change cfg.current_wifi_mode to String to elimate
     // optionsFeldGenerator()
-    return optionsFeldGenerator(String(cfg.current_wifi_mode),
-                                PREFS_CURRENT_WIFI_MODE, options,
+    return optionsFeldGenerator(String(cfg.current_wifi_mode), PREFS_CURRENT_WIFI_MODE, options,
                                 sizeof(options) / sizeof(options[0]));
   }
 
@@ -995,8 +955,7 @@ bool handleRequestChangeMode(AsyncWebServerRequest *request) {
   ESP_LOGD(TAG, "handleRequestChangeMode");
   if (request->hasParam(PREFS_CURRENT_SYSTEM_MODE)) {
     String new_run_mode = getWebParam(request, PREFS_CURRENT_SYSTEM_MODE);
-    rv = setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE,
-                      static_cast<int>(new_run_mode.toInt()));
+    rv = setPrefsUInt(PREFS_CURRENT_SYSTEM_MODE, static_cast<int>(new_run_mode.toInt()));
     cfg.current_run_mode = (run_mode) static_cast<int>(new_run_mode.toInt());
   }
 
@@ -1015,31 +974,30 @@ bool handleRequestChangeMode(AsyncWebServerRequest *request) {
  */
 String GetBuildDateAndTime(void) {
   // "2017-03-07T11:08:02" - ISO8601:2004
-  char bdt[21];  // Flawfinder: ignore
+  char bdt[21]; // Flawfinder: ignore
   char *p;
-  char mdate[] = __DATE__;  // "Mar  7 2017"
+  char mdate[] = __DATE__; // "Mar  7 2017"
   char *smonth = mdate;
   int day = 0;
   int year = 0;
 
   uint8_t i = 0;
-  for (char *str = strtok_r(mdate, " ", &p); str && i < 3;
-       str = strtok_r(nullptr, " ", &p)) {
+  for (char *str = strtok_r(mdate, " ", &p); str && i < 3; str = strtok_r(nullptr, " ", &p)) {
     switch (i++) {
-      case 0:  // Month
-        smonth = str;
-        break;
-      case 1:             // Day
-        day = atoi(str);  // Flawfinder: ignore
-        break;
-      case 2:              // Year
-        year = atoi(str);  // Flawfinder: ignore
+    case 0: // Month
+      smonth = str;
+      break;
+    case 1:            // Day
+      day = atoi(str); // Flawfinder: ignore
+      break;
+    case 2:             // Year
+      year = atoi(str); // Flawfinder: ignore
     }
   }
 
   int month = (strstr(kMonthNamesEnglish, smonth) - kMonthNamesEnglish) / 3 + 1;
   snprintf_P(bdt, sizeof(bdt), "%04d-%02d-%02d %s", year, month, day, __TIME__);
-  return String(bdt);  // 2017-03-07T11:08:02
+  return String(bdt); // 2017-03-07T11:08:02
 }
 
 /**
@@ -1090,16 +1048,16 @@ String table2DGenerator(String data[][2], uint8_t size, boolean bold) {
 }
 
 String readSPIFFS2String(const char *path) {
-  char buf[64] = {0};  // Flawfinder: ignore
+  char buf[64] = {0}; // Flawfinder: ignore
   if (!SPIFFS.exists(path)) {
     snprintf(buf, sizeof(buf), "ERROR, %s do not exists.", path);
     ESP_LOGD(TAG, "%s", buf);
     return String(buf);
   }
-  File f = SPIFFS.open(path, "r");  // Flawfinder: ignore
+  File f = SPIFFS.open(path, "r"); // Flawfinder: ignore
   String retvar;
   while (f.available()) {
-    retvar += static_cast<char>(f.read());  // Flawfinder: ignore
+    retvar += static_cast<char>(f.read()); // Flawfinder: ignore
   }
   return retvar;
 }
@@ -1113,13 +1071,12 @@ String readSPIFFS2String(const char *path) {
  * @param size count elements
  * @return String
  */
-String optionsFeldGenerator(String selected, const char *name, String data[][2],
-                            uint8_t size) {
+String optionsFeldGenerator(String selected, const char *name, String data[][2], uint8_t size) {
   ESP_LOGD(TAG, "%s", name);
   ESP_LOGD(TAG, "%s", selected);
-  char buf[1200] = {0};     // Flawfinder: ignore
-  char zbuf[1200] = {0};    // Flawfinder: ignore
-  char selectxt[32] = {0};  // Flawfinder: ignore
+  char buf[1200] = {0};    // Flawfinder: ignore
+  char zbuf[1200] = {0};   // Flawfinder: ignore
+  char selectxt[32] = {0}; // Flawfinder: ignore
   snprintf(zbuf, sizeof(zbuf), "\n\n<select name='%s'>\n", name);
   strncat(buf, zbuf, sizeof(buf) - 1);
   for (uint8_t i = 0; i < size; i++) {
@@ -1128,10 +1085,10 @@ String optionsFeldGenerator(String selected, const char *name, String data[][2],
     } else {
       strncpy(selectxt, "", sizeof(selectxt) - 1);
     }
-    snprintf(zbuf, sizeof(zbuf), "<option value=\"%s\"%s>%s</option>\n",
-             data[i][1].c_str(), selectxt, data[i][0].c_str());
+    snprintf(zbuf, sizeof(zbuf), "<option value=\"%s\"%s>%s</option>\n", data[i][1].c_str(), selectxt,
+             data[i][0].c_str());
     strncat(buf, zbuf, sizeof(buf) - 1);
-  }  // END for
+  } // END for
 
   strncat(buf, "</select>\n\n", sizeof(buf) - 1);
 
@@ -1157,8 +1114,7 @@ void showRequest(AsyncWebServerRequest *request) {
     ESP_LOGD(TAG, "OPTIONS");
   else
     ESP_LOGD(TAG, "UNKNOWN");
-  ESP_LOGD(TAG, " http://%s%s\n", request->host().c_str(),
-           request->url().c_str());
+  ESP_LOGD(TAG, " http://%s%s\n", request->host().c_str(), request->url().c_str());
 
   if (request->contentLength()) {
     ESP_LOGD(TAG, "_CONTENT_TYPE: %s\n", request->contentType().c_str());
@@ -1177,8 +1133,7 @@ void showRequest(AsyncWebServerRequest *request) {
   for (i = 0; i < params; i++) {
     AsyncWebParameter *p = request->getParam(i);
     if (p->isFile()) {
-      ESP_LOGD(TAG, "_FILE[%s]: %s, size: %u\n", p->name().c_str(),
-               p->value().c_str(), p->size());
+      ESP_LOGD(TAG, "_FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
     } else if (p->isPost()) {
       ESP_LOGD(TAG, "_POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
     } else {
@@ -1207,18 +1162,16 @@ void sendGPSDataJson(void) {
   // AsyncJsonResponse * response = new AsyncJsonResponse();
   // JsonVariant& root = response->getRoot();
   globalClient->server()->cleanupClients();
-  char tmpbuf[32] = {0};  // Flawfinder: ignore
+  char tmpbuf[32] = {0}; // Flawfinder: ignore
   StaticJsonDocument<1024> root;
   root["isValidTime"] = gps.time.isValid();
   root["isValidGPS"] = gps.date.isValid();
 
-  snprintf(tmpbuf, sizeof(tmpbuf), "%02d:%02d:%02d", cfg.gps_time.hour,
-           cfg.gps_time.minute, cfg.gps_time.second);
+  snprintf(tmpbuf, sizeof(tmpbuf), "%02d:%02d:%02d", cfg.gps_time.hour, cfg.gps_time.minute, cfg.gps_time.second);
   root["time"] = tmpbuf;
   // ESP_LOGD(TAG, "%s", tmpbuf);
 
-  snprintf(tmpbuf, sizeof(tmpbuf), "%4d-%02d-%02d", cfg.gps_time.year,
-           cfg.gps_time.month, cfg.gps_time.day);
+  snprintf(tmpbuf, sizeof(tmpbuf), "%4d-%02d-%02d", cfg.gps_time.year, cfg.gps_time.month, cfg.gps_time.day);
   root["date"] = tmpbuf;
   // ESP_LOGD(TAG, "%s", tmpbuf);
 
@@ -1235,15 +1188,13 @@ void sendGPSDataJson(void) {
   root["sat"] = cfg.gps_meta.sat;
   root["hdop"] = cfg.gps_meta.hdop;
   uint16_t len = measureJson(root);
-  ESP_LOGD(TAG, "%d", len);  // @FIXME remove
+  // ESP_LOGD(TAG, "%d", len); // @FIXME remove
   // serializeJson(root, Serial);
 
-  AsyncWebSocketMessageBuffer *buffer = globalClient->server()->makeBuffer(
-      len);  //  creates a buffer (len + 1) for you.
+  AsyncWebSocketMessageBuffer *buffer = globalClient->server()->makeBuffer(len); //  creates a buffer (len + 1) for you.
   if (buffer) {
     serializeJson(root, reinterpret_cast<char *>(buffer->get()), len + 1);
-    if (!globalClient->queueIsFull() &&
-        globalClient->status() == WS_CONNECTED) {  // paranoia?
+    if (!globalClient->queueIsFull() && globalClient->status() == WS_CONNECTED) { // paranoia?
       globalClient->server()->textAll(buffer);
     } else {
       ESP_LOGE(TAG, "can't send to websocket");
@@ -1253,30 +1204,26 @@ void sendGPSDataJson(void) {
   // serializeJsonPretty(root, Serial);
 }
 
-String getWebParam(AsyncWebServerRequest *request, const char *key,
-                   String *prefsvar) {
+String getWebParam(AsyncWebServerRequest *request, const char *key, String *prefsvar) {
   String new_var = "";
   if (request->hasParam(key)) {
     new_var = request->getParam(key)->value();
     if (new_var.length() > 0 && new_var.length() < 32) {
       *prefsvar = new_var;
-      ESP_LOGD(TAG, "set new var to cfg key=%s value=%s\n", key,
-               new_var.c_str());
+      ESP_LOGD(TAG, "set new var to cfg key=%s value=%s\n", key, new_var.c_str());
       setPrefsString(key, new_var);
     }
     return new_var;
   } else {
-    char buf[32] = {0};  // Flawfinder: ignore
-    snprintf(buf, sizeof(buf),
-             "ERR> key %s not found in request,  no value written", key);
+    char buf[32] = {0}; // Flawfinder: ignore
+    snprintf(buf, sizeof(buf), "ERR> key %s not found in request,  no value written", key);
     ESP_LOGD(TAG, "%s", buf);
     return String("");
   }
   return new_var;
 }
 
-String getWebParam(AsyncWebServerRequest *request, const char *key,
-                   double *prefsvar) {
+String getWebParam(AsyncWebServerRequest *request, const char *key, double *prefsvar) {
   String new_var = "";
   if (request->hasParam(key)) {
     new_var = request->getParam(key)->value();
@@ -1285,9 +1232,8 @@ String getWebParam(AsyncWebServerRequest *request, const char *key,
     setPrefsDouble(key, new_var.toDouble());
     return new_var;
   } else {
-    char buf[32] = {0};  // Flawfinder: ignore
-    snprintf(buf, sizeof(buf), "key %s not found in request, no value written",
-             key);
+    char buf[32] = {0}; // Flawfinder: ignore
+    snprintf(buf, sizeof(buf), "key %s not found in request, no value written", key);
     ESP_LOGD(TAG, "%s", buf);
     return String("");
   }
@@ -1302,9 +1248,8 @@ String getWebParam(AsyncWebServerRequest *request, const char *key) {
       return new_var;
     }
   } else {
-    char buf[32] = {0};  // Flawfinder: ignore
-    snprintf(buf, sizeof(buf), "key %s not found in request, no value written",
-             key);
+    char buf[32] = {0}; // Flawfinder: ignore
+    snprintf(buf, sizeof(buf), "key %s not found in request, no value written", key);
     ESP_LOGD(TAG, "%s", buf);
     return String("");
   }

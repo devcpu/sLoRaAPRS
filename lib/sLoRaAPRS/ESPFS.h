@@ -18,4 +18,4 @@
 
 boolean ESPFSInit(void);
 
-#endif  // LIB_SLORAAPRS_ESPFS_H_
+#endif // LIB_SLORAAPRS_ESPFS_H_
