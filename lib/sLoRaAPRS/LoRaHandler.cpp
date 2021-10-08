@@ -18,7 +18,7 @@ LoRaRXControl lora_control;
 
 extern TrackerDisplay td;
 
-bool LoRa_init() {
+bool LORaHandler::begin() {
   LoRa.setPins(LoRaCsPin, LoRaResetPin, LoRaIRQPin);
   if (!LoRa.begin(LoRaRXFREQ)) {
     ESP_LOGE(TAG, "Starting LoRa failed!");
@@ -37,39 +37,38 @@ bool LoRa_init() {
   return true;
 }
 
-/**
- * @brief
- *
- */
-void LoRa_tick(void) {
-  if (lora_control.isMessage > 0) {
+
+void LoRaHandler::tick(void) {
+  if (isMessage > 0) {
     processMessage();
-    lora_control.isMessage = 0;
+    isMessage = 0;
   }
-  if (!lora_control.isSend) {
+  if (!isSend) {
     return;
   }
-  if (lora_control.msg_wait > millis()) {
+  if (msg_wait > millis()) {
     return;
   }
   reciveMessages();
 }
 
-void reciveMessages() {
+
+void LoRaHandler::setReciveMode() {
   ESP_LOGD(TAG, "set LoRa device to recive");
   LoRa.setFrequency(LoRaRXFREQ);
   LoRa.enableInvertIQ();
   LoRa.receive();
-  lora_control.isSend = false;
+  isSend = false;
   td.writeUTC();
 }
 
-void sendMessage(char *outgoing, boolean toDigi) {
+
+void LoRaHandler::sendMessage(char *outgoing, boolean toDigi) {
   char txmsgbuf[16] = {0};
   Serial.printf("sendMessage '%s'\n", outgoing);
   // 850 ms init plus header 35 / char both with spare
-  lora_control.msg_wait = strlen(outgoing) * 35 + millis() + 850; // time for ~ one char to send
-  lora_control.isSend = true;
+  msg_wait = strlen(outgoing) * 35 + millis() + 850; // time for ~ one char to send
+  isSend = true;
   static uint64_t msgCount;
   if (toDigi) {
     LoRa.setFrequency(LoRaTXFREQ);
@@ -109,14 +108,15 @@ void sendMessage(char *outgoing, boolean toDigi) {
   // LoRa.receive();
 }
 
-void onReceive(int packetSize) {
-  lora_control.isMessage = packetSize;
-  ESP_LOGD(TAG, "fire spi");
+
+void LoRaHandler::onReceive(int packetSize) {
+  isMessage = packetSize;
+  ESP_LOGD(TAG, "fire onReceive");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-void processMessage(void) {
+void LoRaHandler::processMessage(void) {
   // if (packetSize == 0) return;          // if there's no packet, return
 
   // read packet header bytes:

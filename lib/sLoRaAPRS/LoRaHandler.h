@@ -71,19 +71,30 @@
 #define LoRaIRQPin 26
 #endif
 
-struct LoRaRXControl {
-  volatile uint64_t msg_wait = 0;
-  volatile boolean isSend = false;
-  volatile int isMessage = 0;
+class LoRaHandler {
+  public:
+  
+  bool begin(void);
+  void sendMessage(char *outgoing, boolean toDigi);
+  void tick(void);
+  void processMessage(void);
+
+
+  void setRreciveMode(void);
+  void onReceive(int packetSize);
+
+  
+  volatile uint64_t msg_wait = 0; // time in millis() for wait until msg is send
+
+  volatile boolean isSend = false; // true if LoRa is still sendig
+  
+  volatile int isMessage = 0; // > 0 if there is a message arrived
 };
 
-extern LoRaRXControl lora_control;
 
-bool LoRa_init(void);
-void sendMessage(char *outgoing, boolean toDigi);
-void onReceive(int packetSize);
-void LoRa_tick(void);
-void processMessage(void);
-void reciveMessages(void);
+
+
+
+
 
 #endif // LIB_SLORAAPRS_LORAHANDLER_H_
