@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-04 23:22
+ * Last Modified: 2021-10-10 23:51
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -28,8 +28,7 @@
 #include <Scheduler.h>
 #include <TrackerDisplay.h>
 #include <xOneButton.h>
-
-void f(char *s);
+#include <GPSSensor.h>
 
 // static void watchdog(void);
 #endif // SRC_MAIN_H_

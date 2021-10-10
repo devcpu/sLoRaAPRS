@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-04 22:12
+ * Last Modified: 2021-10-10 23:49
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -30,7 +30,7 @@
 #include <Config.h>
 #include <Preferences.h>
 #include <SPIFFSEditor.h>
-#include <TinyGPS++.h>
+#include <GPSSensor.h>
 
 void WebserverStart(void);
 

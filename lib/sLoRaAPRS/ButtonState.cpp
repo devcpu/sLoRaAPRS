@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-03 22:00
+ * Last Modified: 2021-10-10 23:38
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -21,7 +21,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
 
-extern TrackerDisplay td;
 
 char wifi_mode_txt[3][16] = {"OFF", "AP", "STA"};
 char run_mode_txt[6][16] = {"Tracker", "WXTracker", "WX Fix", "Digi", "Gateway", "GW-Digi"};

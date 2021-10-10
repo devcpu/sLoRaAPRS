@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-05 23:11
+ * Last Modified: 2021-10-10 23:39
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -14,11 +14,9 @@
 #include <LoRaHandler.h>
 #include <TrackerDisplay.h>
 
-LoRaRXControl lora_control;
+extern LoRaHandler lora_handler;
 
-extern TrackerDisplay td;
-
-bool LORaHandler::begin() {
+bool LoRaHandler::begin() {
   LoRa.setPins(LoRaCsPin, LoRaResetPin, LoRaIRQPin);
   if (!LoRa.begin(LoRaRXFREQ)) {
     ESP_LOGE(TAG, "Starting LoRa failed!");
@@ -33,7 +31,7 @@ bool LORaHandler::begin() {
   LoRa.setTxPower(LoRaTXdbmW);
   LoRa.enableInvertIQ();
   LoRa.onReceive(onReceive);
-  reciveMessages();
+  setReciveMode();
   return true;
 }
 
@@ -49,7 +47,7 @@ void LoRaHandler::tick(void) {
   if (msg_wait > millis()) {
     return;
   }
-  reciveMessages();
+  setReciveMode();
 }
 
 
@@ -109,8 +107,8 @@ void LoRaHandler::sendMessage(char *outgoing, boolean toDigi) {
 }
 
 
-void LoRaHandler::onReceive(int packetSize) {
-  isMessage = packetSize;
+void onReceive(int packetSize) {
+  lora_handler.isMessage = packetSize;
   ESP_LOGD(TAG, "fire onReceive");
 }
 

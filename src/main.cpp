@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-05 1:21
+ * Last Modified: 2021-10-10 23:50
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -16,6 +16,10 @@
 xOneButton xob(BUTTON, true);
 Scheduler taskScheduler;
 TrackerDisplay td;
+LoRaHandler lora_handler;
+TinyGPSPlus gps;
+
+
 
 // TTGO has HW serial to GPS // 1 = first UART
 HardwareSerial ss(1);
@@ -53,7 +57,7 @@ void setup() {
   /****   Init I2C End   ****/
 
   // keine Ahnung, aber muss als Letztes gemacht werden.
-  if (!LoRa_init()) {
+  if (!lora_handler.begin()) {
     ESP_LOGE(TAG, "ERROR init LoRa TRX");
   }
 

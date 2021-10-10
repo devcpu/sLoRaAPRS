@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 19:53
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-03 22:04
+ * Last Modified: 2021-10-10 23:40
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -14,7 +14,6 @@
 #include "I2CScanner.h"
 #include "AXP20xDevice.h"
 
-extern TrackerDisplay td;
 
 /**
  * @brief scans  all I2C-addresses (0-127) and print founds

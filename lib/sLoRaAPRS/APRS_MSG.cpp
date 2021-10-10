@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-26 22:21
+ * Last Modified: 2021-10-10 23:44
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -16,7 +16,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern TinyGPSPlus gps;
 
 // ".../...g...t...r...p...P...h..b...."
 

@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-05 22:42
+ * Last Modified: 2021-10-10 21:35
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -80,9 +80,7 @@ class LoRaHandler {
   void processMessage(void);
 
 
-  void setRreciveMode(void);
-  void onReceive(int packetSize);
-
+  void setReciveMode(void);
   
   volatile uint64_t msg_wait = 0; // time in millis() for wait until msg is send
 
@@ -90,6 +88,8 @@ class LoRaHandler {
   
   volatile int isMessage = 0; // > 0 if there is a message arrived
 };
+
+void onReceive(int packetSize);
 
 
 

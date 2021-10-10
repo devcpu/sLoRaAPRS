@@ -4,7 +4,7 @@
  * File Created: 2021-09-15 1:16
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-04 22:29
+ * Last Modified: 2021-10-11 0:03
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -26,8 +26,7 @@
 #include <TrackerDisplay.h>
 #include <xOneButton.h>
 
-extern TinyGPSPlus gps;
-extern HardwareSerial ss;
+
 
 class AbstracButtonState;
 
@@ -50,7 +49,16 @@ class Scheduler {
   boolean display_change = true;
   boolean display_update = true;
   uint64_t next_display_time = 0;
+
+  QueueHandle_t cfg_mailbox;
+
+  volatile Config cfg;
+
+  Config getConfig(Config *xcfg);
+  void setConfig(Config xcfg);
   void nextDisplayMode(void);
+
+
 
   void singleClick();
   void doubleClick();
@@ -98,5 +106,8 @@ void doubleClick_CB(void);
 void longClick_CB(void);
 void kinoTimer_CB(TimerHandle_t xExpiredTimer);
 void tracker_display_CB(void *pvParameters);
+
+extern Scheduler taskScheduler;
+extern HardwareSerial ss;
 
 #endif // LIB_SLORAAPRS_SCHEDULER_H_

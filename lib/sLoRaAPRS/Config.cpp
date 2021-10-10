@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-26 3:13
+ * Last Modified: 2021-10-11 0:05
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -16,9 +16,10 @@
 #include <Preferences.h>
 #include <apptypes.h>
 
-Config cfg;
-
 void ConfigInit(void) {
+
+  Config cfg;
+  cfg = taskScheduler.getConfig(cfg);
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
 
@@ -78,10 +79,13 @@ void ConfigInit(void) {
     cfg.current_run_mode = mode_tracker;
     ConfigWriteInit();
   }
+
+  taskScheduler.setConfig(cfg);  
 #ifdef MODDEBUG
   // ConfigToString();
 #endif
   Serial.println("Config init ready\n");
+
 }
 
 void ConfigWriteInit(void) {

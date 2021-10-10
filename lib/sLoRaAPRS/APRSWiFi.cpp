@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-03 21:57
+ * Last Modified: 2021-10-10 23:39
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -19,7 +19,6 @@
 #include <apptypes.h>
 
 extern Config cfg;
-extern TrackerDisplay td;
 
 #ifdef ESP32
 #elif defined(ESP8266)

@@ -4,7 +4,7 @@
  * File Created: 2021-09-15 1:16
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-05 2:13
+ * Last Modified: 2021-10-11 0:04
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -14,9 +14,8 @@
 #include <Scheduler.h>
 
 extern xOneButton xob;
-extern Scheduler taskScheduler;
+
 extern Config cfg;
-extern TrackerDisplay td;
 
 /**
  * @brief Handler to stop/start etc button task
@@ -71,7 +70,27 @@ void Scheduler::init(void) {
   //   ESP_LOGD(TAG, "DisplayTimer started");
   // }
 
+  /***************** Queues *******************/
+
+  
+  
+
+
+  cfg_mailbox = xQueueCreate(1, sizeof(Config));
+
+
   esp_register_freertos_idle_hook(GPSReadIdleHookCB);
+}
+
+Config Scheduler::getConfig(Config *xcfg) {
+  BaseType_t tcfg;
+  xQueuePeek(cfg_mailbox, xcfg, portMAX_DELAY);
+  return xcfg;
+}
+
+
+void Scheduler::setConfig(Config xcfg) {
+  xQueueOverwrite(cfg_mailbox, &xcfg);
 }
 
 void Scheduler::ResumeForOLD(void) {
