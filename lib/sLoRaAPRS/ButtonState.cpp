@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 10:22
+ * Last Modified: 2021-10-15 23:58
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -16,11 +16,7 @@
 #include <Config.h>
 #include <TrackerDisplay.h>
 #include <apptypes.h>
-#include <xOneButton.h>
-
-#include "freertos/FreeRTOS.h"
-#include "freertos/timers.h"
-
+#include <OneButton.h>
 
 char wifi_mode_txt[3][16] = {"OFF", "AP", "STA"};
 char run_mode_txt[6][16] = {"Tracker", "WXTracker", "WX Fix", "Digi", "Gateway", "GW-Digi"};
@@ -30,54 +26,54 @@ extern Config cfg;
 
 AbstracButtonState::~AbstracButtonState() { ESP_LOGD(TAG, "AbstracButtonState::~AbstracButtonState"); }
 
-void AbstracButtonState::setState(Scheduler &taskScheduler, AbstracButtonState *state) {
-  AbstracButtonState *aux = taskScheduler.button_state;
-  taskScheduler.button_state = state;
+void AbstracButtonState::setState(ButtonHandler &button_handler, AbstracButtonState *state) {
+  AbstracButtonState *aux = button_handler.button_state;
+  button_handler.button_state = state;
   delete aux;
 }
 
 void AbstracButtonState::kino(void) {}
 
-void AbstracButtonState::longClick(Scheduler &taskScheduler) {
-  taskScheduler.display_change = true;
-  taskScheduler.display_update = true;
-  setState(taskScheduler, new StateDefault());
+void AbstracButtonState::longClick(ButtonHandler &button_handler) {
+  button_handler.display_change = true;
+  button_handler.display_update = true;
+  setState(button_handler, new StateDefault());
 }
 
 /* -------------------------------------------------------------------------- */
 /*   Display Mode   */
 /* -------------------------------------------------------------------------- */
 
-void StateDisplayMode::singleClick(Scheduler &taskScheduler) {
+void StateDisplayMode::singleClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "StateDisplayMode.singleClick");
-  taskScheduler.nextDisplayMode();
-  taskScheduler.next_display_time = 0;
+  button_handler.nextDisplayMode();
+  button_handler.next_display_time = 0;
 }
-void StateDisplayMode::doubleClick(Scheduler &taskScheduler) {
+void StateDisplayMode::doubleClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "StateDisplayMode.doubleClick");
-  taskScheduler.display_change = true;
-  taskScheduler.nextDisplayMode();
-  taskScheduler.next_display_time = 0;
-  setState(taskScheduler, new StateDefault());
+  button_handler.display_change = true;
+  button_handler.nextDisplayMode();
+  button_handler.next_display_time = 0;
+  setState(button_handler, new StateDefault());
 }
 
 /* -------------------------------------------------------------------------- */
 /*   Default   */
 /* -------------------------------------------------------------------------- */
 
-void StateDefault::singleClick(Scheduler &taskScheduler) {
+void StateDefault::singleClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "StateDefault.singleClick");
-  taskScheduler.display_change = false;
-  setState(taskScheduler, new StateDisplayMode());
+  button_handler.display_change = false;
+  setState(button_handler, new StateDisplayMode());
 }
 
-void StateDefault::doubleClick(Scheduler &taskScheduler) { ESP_LOGD(TAG, "StateDefault.doubleClick"); }
+void StateDefault::doubleClick(ButtonHandler &button_handler) { ESP_LOGD(TAG, "StateDefault.doubleClick"); }
 
-void StateDefault::longClick(Scheduler &taskScheduler) {
+void StateDefault::longClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "StateDefault.longClick()");
-  taskScheduler.display_change = false;
-  taskScheduler.display_update = false;
-  setState(taskScheduler, new StateConfigMenue());
+  button_handler.display_change = false;
+  button_handler.display_update = false;
+  setState(button_handler, new StateConfigMenue());
 }
 
 /* -------------------------------------------------------------------------- */
@@ -90,7 +86,7 @@ StateConfigMenue::StateConfigMenue(void) {
   td.write3Line("Cnfg Mode", "1clck nxt, 2clck ", "long click exit", false, 0);
 }
 
-void StateConfigMenue::singleClick(Scheduler &taskScheduler) {
+void StateConfigMenue::singleClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "StateConfigMenue.singleClick");
   uint8_t max_items = 3; // count menue items
   if (button_config_mode < max_items - 1) {
@@ -110,13 +106,13 @@ void StateConfigMenue::singleClick(Scheduler &taskScheduler) {
     break;
   default:
     td.write3Line("ERROR", "something wars going wrong", "please try again", false, 2000);
-    setState(taskScheduler, new StateConfigMenue());
+    setState(button_handler, new StateConfigMenue());
     break;
   }
   ESP_LOGD(TAG, "got %d config", button_config_mode);
 }
 
-void StateConfigMenue::doubleClick(Scheduler &taskScheduler) {
+void StateConfigMenue::doubleClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "StateConfigMenue.doubleClick");
   const char select_list_call[40] = {' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
                                      'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
@@ -124,19 +120,19 @@ void StateConfigMenue::doubleClick(Scheduler &taskScheduler) {
 
   switch (button_config_mode) {
   case 0:
-    setState(taskScheduler, new ConfigStringSelector("Cfg Call", select_list_call));
+    setState(button_handler, new ConfigStringSelector("Cfg Call", select_list_call));
     break;
   case 1:
-    // setState(taskScheduler, new StateConfigWiFi("Cfg WiFi"));
+    // setState(button_handler, new StateConfigWiFi("Cfg WiFi"));
     break;
 
   case 2:
-    // setState(taskScheduler, new StateConfigRun("Cfg Run"));
+    // setState(button_handler, new StateConfigRun("Cfg Run"));
     break;
 
   default:
     td.write3Line("ERROR", "something wars going wrong", "please try again", false, 2000);
-    // setState(taskScheduler, new StateConfigMenue());
+    // setState(button_handler, new StateConfigMenue());
     break;
   }
 }
@@ -166,13 +162,13 @@ ConfigStringSelector::ConfigStringSelector(const char *head, const char *select_
   // }
 
   // if (xTimerStart(call_config_timer, 0) == pdPASS) {
-  //   Serial.printf("timer started, start vTaskStartScheduler\n");
+  //   Serial.printf("timer started, start vTaskStartButtonHandler\n");
   // } else {
   //   Serial.printf("Problem Timer start\n");
   // }
 }
 
-void ConfigStringSelector::singleClick(Scheduler &taskScheduler) {
+void ConfigStringSelector::singleClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "ConfigStringSelector.singleClick");
   _pos++;
   if (_pos > 7) {
@@ -217,12 +213,12 @@ void ConfigStringSelector::kino(void) {
   _count = true;
 }
 
-void ConfigStringSelector::doubleClick(Scheduler &taskScheduler) {
+void ConfigStringSelector::doubleClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "ConfigStringSelector.doubleClick");
   xTimerStop(call_config_timer, 0);
   _tmp.trim();
   cfg.call = _tmp;
-  setState(taskScheduler, new StateConfigMenue());
+  setState(button_handler, new StateConfigMenue());
   Serial.printf("new call: %s\n", cfg.call.c_str());
   setPrefsString(PREFS_CALL, cfg.call);
 }
@@ -231,11 +227,11 @@ void ConfigStringSelector::_showText(const char *line0, const char *line1) {
   td.write2Display("hallo", "Welt", "alles", "schick", "oder");
 }
 
-void ConfigStringSelector::longClick(Scheduler &taskScheduler) {
+void ConfigStringSelector::longClick(ButtonHandler &button_handler) {
   xTimerStop(call_config_timer, 0);
-  taskScheduler.display_change = true;
-  taskScheduler.display_update = true;
-  setState(taskScheduler, new StateDefault());
+  button_handler.display_change = true;
+  button_handler.display_update = true;
+  setState(button_handler, new StateDefault());
 }
 
 /* -------------------------------------------------------------------------- */
@@ -248,7 +244,7 @@ StateConfigWiFi::StateConfigWiFi(const char *head) {
   _show();
 }
 
-void StateConfigWiFi::singleClick(Scheduler &taskScheduler) {
+void StateConfigWiFi::singleClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "StateConfigWiFi.singleClick");
   ESP_LOGD(TAG, "%s", cfg.current_wifi_mode);
   if (cfg.current_wifi_mode > 1) {
@@ -261,9 +257,9 @@ void StateConfigWiFi::singleClick(Scheduler &taskScheduler) {
   _show();
 }
 
-void StateConfigWiFi::doubleClick(Scheduler &taskScheduler) {
+void StateConfigWiFi::doubleClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "StateConfigWiFi.doubleClick");
-  setState(taskScheduler, new StateConfigMenue());
+  setState(button_handler, new StateConfigMenue());
   ESP.restart();
 }
 
@@ -283,7 +279,7 @@ StateConfigRun::StateConfigRun(const char *head) {
   _show();
 }
 
-void StateConfigRun::singleClick(Scheduler &taskScheduler) {
+void StateConfigRun::singleClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "StateConfigRun.singleClick");
   ESP_LOGD(TAG, "%s", cfg.current_run_mode);
   if (cfg.current_run_mode > 4) {
@@ -296,9 +292,9 @@ void StateConfigRun::singleClick(Scheduler &taskScheduler) {
   _show();
 }
 
-void StateConfigRun::doubleClick(Scheduler &taskScheduler) {
+void StateConfigRun::doubleClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "StateConfigRun.doubleClick");
-  setState(taskScheduler, new StateConfigMenue());
+  setState(button_handler, new StateConfigMenue());
   ESP.restart();
 }
 
@@ -310,21 +306,21 @@ void StateConfigRun::_show(void) {
 
 /***************************************************************************/
 
-// void StateConfigMenue::singleClick(Scheduler& taskScheduler) {
+// void StateConfigMenue::singleClick(ButtonHandler& button_handler) {
 //   ESP_LOGD(TAG, "StateConfigMenue.singleClick");
 // }
 
-// void StateConfigMenue::doubleClick(Scheduler& taskScheduler) {
+// void StateConfigMenue::doubleClick(ButtonHandler& button_handler) {
 //   ESP_LOGD(TAG, "StateConfigMenue.doubleClick");
 // }
 
 /***************************************************************************/
 
-// void StateConfigMenue::singleClick(Scheduler& taskScheduler) {
+// void StateConfigMenue::singleClick(ButtonHandler& button_handler) {
 //   ESP_LOGD(TAG, "StateConfigMenue.singleClick");
 // }
 
-// void StateConfigMenue::doubleClick(Scheduler& taskScheduler) {
+// void StateConfigMenue::doubleClick(ButtonHandler& button_handler) {
 //   ESP_LOGD(TAG, "StateConfigMenue.doubleClick");
 // }
 

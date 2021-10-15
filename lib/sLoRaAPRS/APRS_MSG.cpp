@@ -16,7 +16,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // ".../...g...t...r...p...P...h..b...."
 
 char *APRS_MSG::computeWXField(char *rv) {

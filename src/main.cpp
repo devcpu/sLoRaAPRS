@@ -4,46 +4,77 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 10:22
+ * Last Modified: 2021-10-16 0:27
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
+// ==== Debug and Test options ==================
+#define _DEBUG_
+// #define _TEST_
+
+//===== Debugging macros ========================
+#ifdef _DEBUG_
+#define SerialD Serial
+#define _PM(a)                                                                                                         \
+  SerialD.print(millis());                                                                                             \
+  SerialD.print(": ");                                                                                                 \
+  SerialD.println(a)
+#define _PP(a) SerialD.print(a)
+#define _PL(a) SerialD.println(a)
+#define _PX(a) SerialD.println(a, HEX)
+#else
+#define _PM(a)
+#define _PP(a)
+#define _PL(a)
+#define _PX(a)
+#endif
+
+// ==== INCLUDES ==================================================================================
+
 #include <main.h>
 
-xOneButton xob(BUTTON, true);
-Scheduler taskScheduler;
+// ==== Uncomment desired compile options =================================
+// #define _TASK_SLEEP_ON_IDLE_RUN  // Enable 1 ms SLEEP_IDLE powerdowns between tasks if no callback methods were
+// invoked during the pass
+#define _TASK_TIMECRITICAL // Enable monitoring scheduling overruns
+// #define _TASK_STATUS_REQUEST     // Compile with support for StatusRequest functionality - triggering tasks on status
+// change events in addition to time only #define _TASK_WDT_IDS            // Compile with support for wdt control
+// points and task ids #define _TASK_LTS_POINTER        // Compile with support for local task storage pointer #define
+// _TASK_PRIORITY           // Support for layered scheduling priority #define _TASK_MICRO_RES          // Support for
+// microsecond resolution #define _TASK_STD_FUNCTION       // Support for std::function (ESP8266 and ESP32 ONLY) #define
+// _TASK_DEBUG              // Make all methods and variables public for debug purposes #define _TASK_INLINE // Make all
+// methods "inline" - needed to support some multi-tab, multi-file implementations #define _TASK_TIMEOUT            //
+// Support for overall task timeout #define _TASK_OO_CALLBACKS       // Support for dynamic callback method binding
+// #define _TASK_DEFINE_MILLIS      // Force forward declaration of millis() and micros() "C" style
+// #define _TASK_EXPOSE_CHAIN       // Methods to access tasks in the task chain
+// #define _TASK_SCHEDULING_OPTIONS // Support for multiple scheduling options
+
+#include <TaskScheduler.h>
+
+// ==== GLOBALS ===================================================================================
+
+ButtonHandler button_handler;
+OneButton one_button(BUTTON, true);
 TrackerDisplay td;
 LoRaHandler lora_handler;
 TinyGPSPlus gps;
 Config cfg;
-QueueHandle_t cfg_q;
 
+// ==== Scheduler ==============================
+Scheduler ts;
 
-
-
-// TTGO has HW serial to GPS // 1 = first UART
+// TTGO has HW serial to GPS // 1 = first free UART
 HardwareSerial ss(1);
 
 void setup() {
   /*****   Init misc device BEGIN   *****/
-  vTaskDelay(500 / portTICK_PERIOD_MS);
+  delay(500);
   Serial.begin(115200);
 
-  cfg_q = xQueueCreate(1, sizeof(Config));
-  assert(cfg_q);
-  
-  if (xQueueOverwrite(cfg_q, &cfg) != pdPASS) {
-    ESP_LOGE(TAG, "Can't create cfg_q");
-  }
-
-
-
   ConfigInit();
-
-  xQueuePeek(cfg_q, &cfg,0);
 
   Serial.println("\n--------------------------");
   Serial.printf("Version: %s\n", cfg.Version.c_str());
@@ -78,9 +109,9 @@ void setup() {
 
   pinMode(TXLED, OUTPUT);
 
-  xob.attachClick(singleClick_CB);
-  xob.attachDoubleClick(doubleClick_CB);
-  xob.attachLongPressStop(longClick_CB);
+  one_button.attachClick(singleClick_CB);
+  one_button.attachDoubleClick(doubleClick_CB);
+  one_button.attachLongPressStop(longClick_CB);
 
   switch (cfg.current_run_mode) {
   case mode_tracker:
@@ -135,9 +166,7 @@ void setup() {
   td.write3Line("Hello", cfg.call.c_str(), "nice to be back", true, DISPLAY_DELAY_MEDIUM);
   td.write3Line("Enjoy", "the", "day", true, DISPLAY_DELAY_MEDIUM);
 
-  taskScheduler.button_state = new StateDefault();
-
-  taskScheduler.init();
+  button_handler.button_state = new StateDefault();
 }
 
 void loop() {

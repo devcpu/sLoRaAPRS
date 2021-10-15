@@ -72,29 +72,21 @@
 #endif
 
 class LoRaHandler {
-  public:
-  
+ public:
   bool begin(void);
   void sendMessage(char *outgoing, boolean toDigi);
   void tick(void);
   void processMessage(void);
 
-
   void setReciveMode(void);
-  
+
   volatile uint64_t msg_wait = 0; // time in millis() for wait until msg is send
 
   volatile boolean isSend = false; // true if LoRa is still sendig
-  
+
   volatile int isMessage = 0; // > 0 if there is a message arrived
 };
 
 void onReceive(int packetSize);
-
-
-
-
-
-
 
 #endif // LIB_SLORAAPRS_LORAHANDLER_H_

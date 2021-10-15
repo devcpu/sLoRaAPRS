@@ -35,7 +35,6 @@ bool LoRaHandler::begin() {
   return true;
 }
 
-
 void LoRaHandler::tick(void) {
   if (isMessage > 0) {
     processMessage();
@@ -50,7 +49,6 @@ void LoRaHandler::tick(void) {
   setReciveMode();
 }
 
-
 void LoRaHandler::setReciveMode() {
   ESP_LOGD(TAG, "set LoRa device to recive");
   LoRa.setFrequency(LoRaRXFREQ);
@@ -59,7 +57,6 @@ void LoRaHandler::setReciveMode() {
   isSend = false;
   td.writeUTC();
 }
-
 
 void LoRaHandler::sendMessage(char *outgoing, boolean toDigi) {
   char txmsgbuf[16] = {0};
@@ -105,7 +102,6 @@ void LoRaHandler::sendMessage(char *outgoing, boolean toDigi) {
   // increment message ID
   // LoRa.receive();
 }
-
 
 void onReceive(int packetSize) {
   lora_handler.isMessage = packetSize;

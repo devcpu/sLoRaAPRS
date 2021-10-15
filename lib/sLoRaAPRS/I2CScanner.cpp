@@ -14,7 +14,6 @@
 #include "I2CScanner.h"
 #include "AXP20xDevice.h"
 
-
 /**
  * @brief scans  all I2C-addresses (0-127) and print founds
  *

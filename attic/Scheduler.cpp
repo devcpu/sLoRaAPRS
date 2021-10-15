@@ -72,8 +72,8 @@ void Scheduler::init(void) {
 
   /***************** Queues *******************/
 
-  
-  
+
+
 
 
   // cfg_mailbox = xQueueCreate(1, sizeof(Config));
