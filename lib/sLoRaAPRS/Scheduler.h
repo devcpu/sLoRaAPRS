@@ -4,7 +4,7 @@
  * File Created: 2021-09-15 1:16
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-11 0:03
+ * Last Modified: 2021-10-15 0:25
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -52,10 +52,9 @@ class Scheduler {
 
   QueueHandle_t cfg_mailbox;
 
-  volatile Config cfg;
-
-  Config getConfig(Config *xcfg);
-  void setConfig(Config xcfg);
+  // volatile Config cfg;
+  // Config getConfig(Config xcfg);
+  // void setConfig(Config& xcfg);
   void nextDisplayMode(void);
 
 

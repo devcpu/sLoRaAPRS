@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-10 23:50
+ * Last Modified: 2021-10-15 10:22
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -18,6 +18,9 @@ Scheduler taskScheduler;
 TrackerDisplay td;
 LoRaHandler lora_handler;
 TinyGPSPlus gps;
+Config cfg;
+QueueHandle_t cfg_q;
+
 
 
 
@@ -29,7 +32,19 @@ void setup() {
   vTaskDelay(500 / portTICK_PERIOD_MS);
   Serial.begin(115200);
 
+  cfg_q = xQueueCreate(1, sizeof(Config));
+  assert(cfg_q);
+  
+  if (xQueueOverwrite(cfg_q, &cfg) != pdPASS) {
+    ESP_LOGE(TAG, "Can't create cfg_q");
+  }
+
+
+
   ConfigInit();
+
+  xQueuePeek(cfg_q, &cfg,0);
+
   Serial.println("\n--------------------------");
   Serial.printf("Version: %s\n", cfg.Version.c_str());
   Serial.printf("Release: %s\n", cfg.Release.c_str());

@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-11 0:05
+ * Last Modified: 2021-10-15 0:57
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -16,10 +16,17 @@
 #include <Preferences.h>
 #include <apptypes.h>
 
+extern QueueHandle_t cfg_q;
+
 void ConfigInit(void) {
 
+  
   Config cfg;
-  cfg = taskScheduler.getConfig(cfg);
+
+  xQueuePeek(cfg_q, &cfg,0);
+
+
+
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
 
@@ -80,10 +87,12 @@ void ConfigInit(void) {
     ConfigWriteInit();
   }
 
-  taskScheduler.setConfig(cfg);  
+  // taskScheduler.setConfig(cfg);  
 #ifdef MODDEBUG
   // ConfigToString();
 #endif
+
+  xQueueOverwrite(cfg_q, &cfg);
   Serial.println("Config init ready\n");
 
 }

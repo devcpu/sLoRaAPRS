@@ -4,7 +4,7 @@
  * File Created: 2021-09-15 1:16
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-11 0:04
+ * Last Modified: 2021-10-15 10:22
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -76,22 +76,21 @@ void Scheduler::init(void) {
   
 
 
-  cfg_mailbox = xQueueCreate(1, sizeof(Config));
+  // cfg_mailbox = xQueueCreate(1, sizeof(Config));
 
 
   esp_register_freertos_idle_hook(GPSReadIdleHookCB);
 }
 
-Config Scheduler::getConfig(Config *xcfg) {
-  BaseType_t tcfg;
-  xQueuePeek(cfg_mailbox, xcfg, portMAX_DELAY);
-  return xcfg;
-}
+// Config Scheduler::getConfig(Config *xcfg) {
+//   xQueuePeek(cfg_mailbox, &xcfg, 0);
+//   return <Config>xcfg;
+// }
 
 
-void Scheduler::setConfig(Config xcfg) {
-  xQueueOverwrite(cfg_mailbox, &xcfg);
-}
+// void Scheduler::setConfig(Config& xcfg) {
+//   xQueueOverwrite(cfg_mailbox, xcfg);
+// }
 
 void Scheduler::ResumeForOLD(void) {
   vTaskResume(ButtonHandle);
