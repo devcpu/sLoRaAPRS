@@ -4,7 +4,7 @@
  * File Created: 2020-09-26 21:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-05 22:51
+ * Last Modified: 2021-10-16 0:39
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -17,17 +17,17 @@
 #include <Arduino.h>
 
 // @FIXME set to 1000
-#define DISPLAY_DELAY_SHORT 3000
+#define DISPLAY_DELAY_SHORT 300
 // @FIXME set to 3000
-#define DISPLAY_DELAY_MEDIUM 3000
+#define DISPLAY_DELAY_MEDIUM 300
 // @FIXME set to 5000
-#define DISPLAY_DELAY_LONG 3000
+#define DISPLAY_DELAY_LONG 300
 
 /**
  * @brief how long ervery info is shown in display change mode
  *
  */
-#define DISPLAY_KINO_TIME 5000
+#define DISPLAY_CHANGE_TIME 5000
 
 // use this for newer Boards AKA Rev1 (second board release)
 #define T_BEAM_V1_0

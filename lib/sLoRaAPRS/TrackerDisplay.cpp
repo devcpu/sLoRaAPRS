@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 10:22
+ * Last Modified: 2021-10-16 4:14
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -12,11 +12,6 @@
  */
 
 #include <TrackerDisplay.h>
-
-extern Config cfg;
-
-// interrupt lock?
-// portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED; // DHTesp.h
 
 Adafruit_SSD1306 display(128, 64, &Wire, OLED_RESET);
 
@@ -26,9 +21,7 @@ Adafruit_SSD1306 display(128, 64, &Wire, OLED_RESET);
  */
 bool displayChange = true;
 
-TrackerDisplay::TrackerDisplay() {
-  // vPortCPUInitializeMutex(&my_mutex);
-}
+TrackerDisplay::TrackerDisplay() {}
 
 bool TrackerDisplay::begin() {
   TrackerDisplay::begin(60); // 60  == 0x3C"
@@ -145,10 +138,6 @@ void TrackerDisplay::writeGPS() {
     snprintf(speed_course, sizeof(speed_course), "kmh: %4.1f  dir: %3.1f*", cfg.gps_move.speed, cfg.gps_move.course);
     snprintf(alt_hdop, sizeof(alt_hdop), "alt: %5.1fm sat: %d", cfg.gps_location.altitude, cfg.gps_meta.sat);
 
-    // portENTER_CRITICAL(&my_mutex);
-    // rtc_wdt_feed();
-    // rtc_wdt_feed();
-    // portEXIT_CRITICAL(&my_mutex);
     display.setTextSize(1);
     display.setCursor(0, 20);
     display.print(lat);
@@ -327,4 +316,9 @@ char *TrackerDisplay::_center_line(char *rv, const char *s) {
   snprintf(rv, 24, "%*s%*s", x + strlen(s) / 2, s, x - strlen(s) / 2, ""); // NOLINT(runtime/printf)
   // ESP_LOGD(TAG, "---%s---", rv);
   return rv;
+}
+
+void tracker_display_CB() {
+  td.nextDisplayMode();
+  td.showDisplayMode();
 }

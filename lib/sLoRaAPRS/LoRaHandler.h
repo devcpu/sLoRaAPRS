@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-10 21:35
+ * Last Modified: 2021-10-16 4:09
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -88,5 +88,9 @@ class LoRaHandler {
 };
 
 void onReceive(int packetSize);
+
+void lorahandler_tickCB(void);
+
+extern LoRaHandler lora_handler;
 
 #endif // LIB_SLORAAPRS_LORAHANDLER_H_

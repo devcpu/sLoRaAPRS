@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 23:46
+ * Last Modified: 2021-10-16 3:12
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -90,8 +90,8 @@ void ConfigWriteInit(void) {
   Preferences preferences;
   preferences.begin(NVS_APP_NAME_SPACE, false);
 
-  preferences.putString(PREFS_VERSION, "0.0.1 preAlpha");
-  preferences.putString(PREFS_RELASE, "Gehasi");
+  preferences.putString(PREFS_VERSION, sloraaprs_version); //
+  preferences.putString(PREFS_RELASE, sloraaprs_codename); //
 
   preferences.putUInt(PREFS_CURRENT_WIFI_MODE, (uint8_t)cfg.current_wifi_mode);
   preferences.putUInt(PREFS_CURRENT_SYSTEM_MODE, cfg.current_run_mode);
@@ -107,8 +107,8 @@ void ConfigWriteInit(void) {
   preferences.putString(PREFS_AP_SSID, cfg.APCredentials.auth_name);
   preferences.putString(PREFS_AP_PASS, cfg.APCredentials.auth_tocken);
 
-  preferences.putString(PREFS_LAN0_SSID, cfg.WifiCrendentials[0].auth_name);
-  preferences.putString(PREFS_LAN0_AUTH, cfg.WifiCrendentials[0].auth_tocken);
+  preferences.putString(PREFS_LAN0_SSID, cfg.WifiCrendentials[0].auth_name);   //
+  preferences.putString(PREFS_LAN0_AUTH, cfg.WifiCrendentials[0].auth_tocken); //
   preferences.putString(PREFS_LAN1_SSID, cfg.WifiCrendentials[1].auth_name);
   preferences.putString(PREFS_LAN1_AUTH, cfg.WifiCrendentials[1].auth_tocken);
   preferences.putString(PREFS_LAN2_SSID, cfg.WifiCrendentials[2].auth_name);

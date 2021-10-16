@@ -4,7 +4,7 @@
  * File Created: 2020-09-26 21:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-03-27 23:52
+ * Last Modified: 2021-10-16 1:55
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -14,6 +14,7 @@
 #ifndef LIB_CONFIG_SLORAAPRS_VERSION_H_
 #define LIB_CONFIG_SLORAAPRS_VERSION_H_
 
-// @FIXME
+#define sloraaprs_version "0.2.0"
+#define sloraaprs_codename "August"
 
 #endif // LIB_CONFIG_SLORAAPRS_VERSION_H_

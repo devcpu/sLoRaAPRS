@@ -4,7 +4,7 @@
  * File Created: 2021-09-26 22:05
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 10:21
+ * Last Modified: 2021-10-16 4:21
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -13,14 +13,7 @@
 
 #include <APRSWebServer.h>
 
-extern Preferences preferences;
-// extern QueueHandle_t LoRaTXQueue;
-
-// #include "CallBackList.h"
-
 // @TODO remove together with restart()
-
-extern Config cfg;
 
 AsyncWebServer *WebServer;
 AsyncWebSocket *ws;
@@ -1253,3 +1246,5 @@ String getWebParam(AsyncWebServerRequest *request, const char *key) {
   }
   return new_var;
 }
+
+void websocket_tickCB() { APRSWebServerTick(); }

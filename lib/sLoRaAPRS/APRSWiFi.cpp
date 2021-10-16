@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 10:22
+ * Last Modified: 2021-10-16 4:22
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -17,8 +17,6 @@
 #include <LoRaAPRSConfig.h>
 #include <TrackerDisplay.h>
 #include <apptypes.h>
-
-extern Config cfg;
 
 #ifdef ESP32
 #elif defined(ESP8266)

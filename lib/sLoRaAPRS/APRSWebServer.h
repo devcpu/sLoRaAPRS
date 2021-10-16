@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-10 23:49
+ * Last Modified: 2021-10-16 4:20
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -19,7 +19,6 @@
 #ifdef ESP32
 #include <rom/rtc.h>
 #endif
-#include <freertos/FreeRTOS.h>
 #include <apptypes.h>
 #include <APRSWiFi.h>
 #include <APRS_MSG.h>
@@ -91,5 +90,7 @@ String getResetReason(RESET_REASON reason);
 String getWebParam(AsyncWebServerRequest *request, const char *key, String *prefsvar);
 String getWebParam(AsyncWebServerRequest *request, const char *key, double *prefsvar);
 String getWebParam(AsyncWebServerRequest *request, const char *key);
+
+void websocket_tickCB();
 
 #endif // LIB_SLORAAPRS_APRSWEBSERVER_H_

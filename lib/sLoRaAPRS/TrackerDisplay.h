@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 23:49
+ * Last Modified: 2021-10-16 3:59
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -189,6 +189,8 @@ class TrackerDisplay {
 
   void _center_line(const char *in);
 };
+
+void tracker_display_CB();
 
 extern TrackerDisplay td;
 

@@ -4,7 +4,7 @@
  * File Created: 2021-10-15 23:12
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-16 0:12
+ * Last Modified: 2021-10-16 4:22
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -12,27 +12,6 @@
  */
 
 #include <ButtonHandler.h>
-
-extern OneButton one_button;
-extern Config cfg;
-
-void xbutton_tick() { one_button.tick(); }
-
-void xws_tick() {
-  while (1) {
-    APRSWebServerTick();
-  }
-}
-
-bool GPSReadIdleHookCB() {
-  if (ss.available() > 0) { // @TODO is this nessesery?
-    if (gps.encode(ss.read())) {
-      setGPSData();
-    }
-    // vTaskDelay(50 / portTICK_PERIOD_MS);
-  }
-  return true;
-}
 
 ButtonHandler::ButtonHandler() { ESP_LOGD(TAG, "call ButtonHandler::ButtonHandler"); }
 
@@ -68,10 +47,4 @@ void longClick_CB(void) {
   button_handler.longClick();
 }
 
-void tracker_display_CB(void *pvParameters) {
-  while (1) {
-    td.nextDisplayMode();
-    td.showDisplayMode();
-    vTaskDelay(5000 / portTICK_PERIOD_MS);
-  }
-}
+void onebutton_tickCB() { one_button.tick(); }

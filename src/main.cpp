@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-16 0:27
+ * Last Modified: 2021-10-16 4:12
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -12,25 +12,21 @@
  */
 
 // ==== Debug and Test options ==================
-#define _DEBUG_
+// #define _DEBUG_
 // #define _TEST_
 
 //===== Debugging macros ========================
-#ifdef _DEBUG_
-#define SerialD Serial
-#define _PM(a)                                                                                                         \
-  SerialD.print(millis());                                                                                             \
-  SerialD.print(": ");                                                                                                 \
-  SerialD.println(a)
-#define _PP(a) SerialD.print(a)
-#define _PL(a) SerialD.println(a)
-#define _PX(a) SerialD.println(a, HEX)
-#else
-#define _PM(a)
-#define _PP(a)
-#define _PL(a)
-#define _PX(a)
-#endif
+// #ifdef _DEBUG_
+// #define SerialD Serial SerialD.println(a)
+// #define _PP(a) SerialD.print(a)
+// #define _PL(a) SerialD.println(a)
+// #define _PX(a) SerialD.println(a, HEX)
+// #else
+// #define _PM(a)
+// #define _PP(a)
+// #define _PL(a)
+// #define _PX(a)
+// #endif
 
 // ==== INCLUDES ==================================================================================
 
@@ -64,7 +60,15 @@ TinyGPSPlus gps;
 Config cfg;
 
 // ==== Scheduler ==============================
+
 Scheduler ts;
+
+// Tasks
+Task DisplayChanger(DISPLAY_CHANGE_TIME, TASK_FOREVER, &tracker_display_CB, &ts, true);
+Task GPSReader(0, TASK_FOREVER, &GPSReadIdleHookCB, &ts, true);
+Task WebSocketTick(333, TASK_FOREVER, &websocket_tickCB, &ts, true);
+Task ButtonTick(100, TASK_FOREVER, &onebutton_tickCB, &ts, true);
+Task LoRaTick(1000, TASK_FOREVER, &lorahandler_tickCB, &ts, true);
 
 // TTGO has HW serial to GPS // 1 = first free UART
 HardwareSerial ss(1);
@@ -166,60 +170,9 @@ void setup() {
   td.write3Line("Hello", cfg.call.c_str(), "nice to be back", true, DISPLAY_DELAY_MEDIUM);
   td.write3Line("Enjoy", "the", "day", true, DISPLAY_DELAY_MEDIUM);
 
+  lora_handler.begin();
   button_handler.button_state = new StateDefault();
+  ts.startNow();
 }
 
-void loop() {
-  vTaskDelay(portMAX_DELAY); // don't remove it!
-  ESP_LOGE(TAG, "xxxxxxxxxx   ERROR xxx IN xxx LOOP   xxxxxxxxxx");
-}
-
-// void button_tick(void *pvParameters) {
-//   (void)pvParameters;
-//   int btn_old = 0;
-//   int btn_now = 0;
-//   int bstate = LOW;
-//   uint32_t btn_long_press_old = 0;
-//   // Flag marking if btn press a long press to preventing long press trigger
-//   a
-//   // short btn press event at the same time.
-//   int longPressFlag = false;
-
-//   while (1) {
-//     // ESP_LOGE(TAG, "check button ...");
-//     bstate = digitalRead(BUTTON);
-//     if (bstate == LOW) {
-//       btn_now = 1;
-//     } else {
-//       btn_now = 0;
-//     }
-//     if (btn_now != btn_old) {
-//       if (btn_now == 1) {  // btn pressed down
-//         // ESP_LOGE(TAG, "BTN get pressed down.");
-//         btn_long_press_old = xTaskGetTickCount();
-//         longPressFlag = false;
-//       } else {  // btn released
-//         // ESP_LOGE(TAG, "BTN get released.");
-//         if (abs(xTaskGetTickCount() - btn_long_press_old) <
-//                 1000 / portTICK_PERIOD_MS &&
-//             !longPressFlag) {
-//           ESP_LOGE(TAG, "short press");
-//         }
-//       }
-//       btn_old = btn_now;
-//       btn_long_press_old = xTaskGetTickCount();
-//     } else if (btn_now == 1) {  // Check if this is a long press btn event
-//       if (abs(xTaskGetTickCount() - btn_long_press_old) >
-//           1000 / portTICK_PERIOD_MS) {
-//         ESP_LOGE(TAG, "long btn press get triggered");
-//         btn_long_press_old =
-//             xTaskGetTickCount();  // Update timer preparing trigger the next
-//                                   // long btn press event
-//         longPressFlag = true;
-//       }
-//     } else {
-//       // ESP_LOGE(TAG, "Button stays unpressed.");
-//     }
-//     vTaskDelay(100 / portTICK_PERIOD_MS);
-//   }
-// }
+void loop() { ts.execute(); }

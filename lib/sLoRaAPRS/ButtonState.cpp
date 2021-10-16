@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 23:58
+ * Last Modified: 2021-10-16 4:20
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -20,9 +20,6 @@
 
 char wifi_mode_txt[3][16] = {"OFF", "AP", "STA"};
 char run_mode_txt[6][16] = {"Tracker", "WXTracker", "WX Fix", "Digi", "Gateway", "GW-Digi"};
-
-TimerHandle_t call_config_timer;
-extern Config cfg;
 
 AbstracButtonState::~AbstracButtonState() { ESP_LOGD(TAG, "AbstracButtonState::~AbstracButtonState"); }
 
@@ -215,7 +212,6 @@ void ConfigStringSelector::kino(void) {
 
 void ConfigStringSelector::doubleClick(ButtonHandler &button_handler) {
   ESP_LOGD(TAG, "ConfigStringSelector.doubleClick");
-  xTimerStop(call_config_timer, 0);
   _tmp.trim();
   cfg.call = _tmp;
   setState(button_handler, new StateConfigMenue());
@@ -228,7 +224,6 @@ void ConfigStringSelector::_showText(const char *line0, const char *line1) {
 }
 
 void ConfigStringSelector::longClick(ButtonHandler &button_handler) {
-  xTimerStop(call_config_timer, 0);
   button_handler.display_change = true;
   button_handler.display_update = true;
   setState(button_handler, new StateDefault());

@@ -4,7 +4,7 @@
  * File Created: 2021-10-15 23:12
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-16 0:06
+ * Last Modified: 2021-10-16 4:11
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -54,41 +54,14 @@ class ButtonHandler {
  private:
 };
 
-/**
- * @brief xTask callback function for default button tick
- *
- * @param pvParameters optional
- */
-void xbutton_tick(void *pvParameters);
-
-/**
- * @brief xTask callback function for webserver tick to start/stop etc.
- *
- * @param pvParameters optional
- */
-void xws_tick(void *pvParameters);
-
-/**
- * @brief call back function for OLED display show
- *
- * @param pxTimer
- */
-void DisplayTimerCB(TimerHandle_t pxTimer);
-
-/**
- * @brief Idle task call back, read from GPS-Sensor
- *
- * @return true ever
- * @return false never
- */
-bool GPSReadIdleHookCB();
-
 void singleClick_CB(void);
 void doubleClick_CB(void);
 void longClick_CB(void);
-void tracker_display_CB(void *pvParameters);
 
-extern HardwareSerial ss;
+void onebutton_tickCB();
+
 extern ButtonHandler button_handler;
+
+extern OneButton one_button;
 
 #endif // LIB_SLORAAPRS_BUTTONHANDLER_H_

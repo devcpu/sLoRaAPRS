@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 23:45
+ * Last Modified: 2021-10-16 1:51
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -16,6 +16,7 @@
 
 #include <Arduino.h>
 #include <apptypes.h>
+#include <sloraaprs_version.h>
 
 void ConfigInit(void);
 

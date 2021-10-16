@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-10 23:49
+ * Last Modified: 2021-10-16 3:56
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -15,8 +15,11 @@
 #define LIB_SLORAAPRS_GPSSENSOR_H_
 
 #include <TinyGPS++.h>
+#include <Config.h>
 
+extern HardwareSerial ss;
 extern TinyGPSPlus gps;
 void setGPSData();
+void GPSReadIdleHookCB();
 
 #endif // LIB_SLORAAPRS_GPSSENSOR_H_

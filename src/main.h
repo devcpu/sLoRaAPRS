@@ -1,10 +1,10 @@
 /*
  * File: main.h
- * Project: src
+ * Project: sLoRaAPRS
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 23:34
+ * Last Modified: 2021-10-16 4:11
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt

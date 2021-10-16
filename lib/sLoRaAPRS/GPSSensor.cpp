@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 10:22
+ * Last Modified: 2021-10-16 4:16
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -18,7 +18,18 @@
 #include <TinyGPS++.h>
 // #include "maidenhead.h"
 
-extern Config cfg;
+void GPSReadIdleHookCB() {
+  static uint8_t c = 0;
+  if (ss.available() > 0) {
+    if (gps.encode(ss.read())) {
+      c++;
+      if (c >= 10) {
+        setGPSData();
+        c = 0;
+      }
+    }
+  }
+}
 
 void setGPSData() {
   static double lat = 0;
