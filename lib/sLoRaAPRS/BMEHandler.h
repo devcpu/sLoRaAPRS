@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-15 3:03
+ * Last Modified: 2021-10-17 18:17
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -14,6 +14,7 @@
 #ifndef LIB_SLORAAPRS_BMEHANDLER_H_
 #define LIB_SLORAAPRS_BMEHANDLER_H_
 
+#include <Arduino.h>
 #include <Adafruit_BME280.h>
 #include <Adafruit_Sensor.h>
 

@@ -4,15 +4,19 @@
  * File Created: 2021-03-07 19:53
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-10 23:40
+ * Last Modified: 2021-10-17 18:49
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
-#include "I2CScanner.h"
-#include "AXP20xDevice.h"
+#include <I2CScanner.h>
+#include <Wire.h>
+#include <Config.h>
+#include <AXP20xDevice.h>
+#include <LoRaAPRSConfig.h>
+#include <TrackerDisplay.h>
 
 /**
  * @brief scans  all I2C-addresses (0-127) and print founds

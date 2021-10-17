@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 19:53
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-10 0:13
+ * Last Modified: 2021-10-17 18:49
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -15,9 +15,6 @@
 #define LIB_SLORAAPRS_I2CSCANNER_H_
 
 #include <Arduino.h>
-#include <LoRaAPRSConfig.h>
-#include <TrackerDisplay.h>
-#include <Wire.h>
 
 #include <vector>
 

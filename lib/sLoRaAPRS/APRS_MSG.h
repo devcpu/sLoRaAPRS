@@ -4,23 +4,17 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 10:22
+ * Last Modified: 2021-10-17 18:07
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
+#include <Arduino.h>
+
 #ifndef LIB_SLORAAPRS_APRS_MSG_H_
 #define LIB_SLORAAPRS_APRS_MSG_H_
-
-#include <Arduino.h>
-#include <Config.h>
-#include <LoRaAPRSConfig.h>
-#include <TinyGPS++.h>
-#include <apptypes.h>
-
-extern Config cfg;
 
 #define CONVERT_FEED_METER 3.28084
 #define WX_DEVICE_STR_LENGHT 12

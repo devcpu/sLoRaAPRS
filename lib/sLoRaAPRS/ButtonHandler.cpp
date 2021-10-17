@@ -4,7 +4,7 @@
  * File Created: 2021-10-15 23:12
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-16 4:22
+ * Last Modified: 2021-10-17 18:21
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -12,6 +12,10 @@
  */
 
 #include <ButtonHandler.h>
+#include <Config.h>
+#include <GPSSensor.h>
+#include <APRSWebServer.h>
+#include <TrackerDisplay.h>
 
 ButtonHandler::ButtonHandler() { ESP_LOGD(TAG, "call ButtonHandler::ButtonHandler"); }
 

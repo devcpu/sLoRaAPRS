@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-16 4:09
+ * Last Modified: 2021-10-17 18:39
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -29,7 +29,6 @@
 #define LIB_SLORAAPRS_LORAHANDLER_H_
 
 #include <LoRa.h>
-#include <LoRaAPRSConfig.h>
 
 #ifndef LoRaRXFREQ
 #define LoRaRXFREQ 433900000L

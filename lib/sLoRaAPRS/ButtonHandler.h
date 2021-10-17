@@ -4,7 +4,7 @@
  * File Created: 2021-10-15 23:12
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-16 4:11
+ * Last Modified: 2021-10-17 18:21
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -14,12 +14,8 @@
 #ifndef LIB_SLORAAPRS_BUTTONHANDLER_H_
 #define LIB_SLORAAPRS_BUTTONHANDLER_H_
 
-#include <Config.h>
 #include <OneButton.h>
-#include <GPSSensor.h>
 #include <ButtonState.h>
-#include <APRSWebServer.h>
-#include <TrackerDisplay.h>
 
 class AbstracButtonState;
 

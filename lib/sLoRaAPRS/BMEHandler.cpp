@@ -4,17 +4,16 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-15 23:44
+ * Last Modified: 2021-10-17 18:17
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
  * License: MIT License  http://www.opensource.org/licenses/MIT
  */
 
-#include <Arduino.h>
 #include <BMEHandler.h>
-#include <Config.h>
 #include <LoRaAPRSConfig.h>
+#include <Config.h>
 
 // 1013.25 ^= -50.96m
 // 1100.00 ^= 634.93m

@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-16 3:59
+ * Last Modified: 2021-10-17 18:47
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -14,18 +14,14 @@
 #ifndef LIB_SLORAAPRS_TRACKERDISPLAY_H_
 #define LIB_SLORAAPRS_TRACKERDISPLAY_H_
 
-#include <soc/rtc_wdt.h>
-#include <APRS_MSG.h>
+#include <Arduino.h>
+
 #include <Adafruit_GFX.h>
 #include <Adafruit_SPITFT.h>
 #include <Adafruit_SPITFT_Macros.h>
 #include <Adafruit_SSD1306.h>
 #include <gfxfont.h>
 #include <splash.h>
-#include <Arduino.h>
-#include <Config.h>
-// #include <TinyGPS++.h>
-#include <GPSSensor.h>
 
 #define OLED_RESET 4
 

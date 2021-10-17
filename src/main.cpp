@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-16 4:12
+ * Last Modified: 2021-10-17 22:15
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -31,6 +31,20 @@
 // ==== INCLUDES ==================================================================================
 
 #include <main.h>
+#include <APRSWebServer.h>
+#include <APRSWiFi.h>
+#include <ESPFS.h>
+#include <GPSSensor.h>
+#include <I2CScanner.h>
+#include <LoRaAPRSConfig.h>
+#include <LoRaHandler.h>
+#include <SPI.h>
+#include <ButtonHandler.h>
+#include <ButtonState.h>
+#include <TrackerDisplay.h>
+#include <OneButton.h>
+#include <GPSSensor.h>
+#include <Config.h>
 
 // ==== Uncomment desired compile options =================================
 // #define _TASK_SLEEP_ON_IDLE_RUN  // Enable 1 ms SLEEP_IDLE powerdowns between tasks if no callback methods were

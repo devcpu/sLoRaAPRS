@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-16 4:20
+ * Last Modified: 2021-10-17 18:11
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -19,17 +19,6 @@
 #ifdef ESP32
 #include <rom/rtc.h>
 #endif
-#include <apptypes.h>
-#include <APRSWiFi.h>
-#include <APRS_MSG.h>
-#include <ArduinoJson.h>
-#include <ArduinoOTA.h>
-#include <AsyncJson.h>
-#include <AsyncWebSocket.h>
-#include <Config.h>
-#include <Preferences.h>
-#include <SPIFFSEditor.h>
-#include <GPSSensor.h>
 
 void WebserverStart(void);
 

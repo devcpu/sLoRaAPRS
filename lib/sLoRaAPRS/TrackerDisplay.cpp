@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-16 4:14
+ * Last Modified: 2021-10-17 18:48
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -12,6 +12,10 @@
  */
 
 #include <TrackerDisplay.h>
+#include <Config.h>
+#include <APRS_MSG.h>
+#include <soc/rtc_wdt.h>
+#include <GPSSensor.h>
 
 Adafruit_SSD1306 display(128, 64, &Wire, OLED_RESET);
 
