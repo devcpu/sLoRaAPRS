@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-17 18:39
+ * Last Modified: 2021-10-17 23:40
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -70,10 +70,18 @@
 #define LoRaIRQPin 26
 #endif
 
+typedef struct {
+  String to = "";
+  String wide = "0";
+  String msg = "";
+  String path = "";
+  String gateway = "";
+} SendMsgForm;
+
 class LoRaHandler {
  public:
   bool begin(void);
-  void sendMessage(char *outgoing, boolean toDigi);
+  void sendMessage(const char *outgoing, boolean toDigi);
   void tick(void);
   void processMessage(void);
 
@@ -90,6 +98,14 @@ void onReceive(int packetSize);
 
 void lorahandler_tickCB(void);
 
+void lora_send_tickCB(void);
+
+void tasks_disable_all(void);
+
+void tasks_enable_all(void);
+
 extern LoRaHandler lora_handler;
+
+extern SendMsgForm sform;
 
 #endif // LIB_SLORAAPRS_LORAHANDLER_H_

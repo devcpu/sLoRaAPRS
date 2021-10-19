@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-09-28 0:32
+ * Last Modified: 2021-10-19 0:19
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -57,7 +57,7 @@ enum wifi_mode { wifi_off, wifi_ap, wifi_client };
 
 enum run_mode { mode_tracker, mode_wxtracker, mode_wxfix, mode_digi, mode_gateway, mode_digi_gateway };
 
-struct APRSMessage {
+struct APRSMessage_s {
   String msg;
   String wide;
   String to;
@@ -156,8 +156,8 @@ struct Config {
   GPSMeta gps_meta;
   Location posfix;
   String SERVER_IP;
-  APRSMessage TxMsg;
-  APRSMessage RxMsg;
+  APRSMessage_s TxMsg;
+  APRSMessage_s RxMsg;
   WXData WXdata;
 };
 

@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:14
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-17 18:07
+ * Last Modified: 2021-10-19 5:03
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -61,11 +61,22 @@ char *APRS_MSG::calcHumidity(char *rv, float humidity) {
  * @return char*
  */
 char *APRS_MSG::computeAPRSPos(char *rv) {
-  char buf_lat[16] = {0};
-  char buf_lng[16] = {0};
+  char buf_lat[16] = "";
+  char buf_lng[16] = "";
   snprintf(rv, sizeof(rv), "%s%c%s%c", dc2gms(buf_lat, cfg.gps_location.latitude, false), cfg.aprs_symbol.charAt(0),
            dc2gms(buf_lng, cfg.gps_location.longitude, true), cfg.aprs_symbol.charAt(1));
   return rv;
+}
+String APRS_MSG::computeAPRSPos() {
+  char rv[64] = {0};
+  char buf_lat[16] = {0};
+  char buf_lng[16] = {0};
+  ESP_LOGD(TAG, "%d", sizeof(buf_lng));
+  ESP_LOGD(TAG, "%d", sizeof(&buf_lng));
+
+  snprintf(rv, sizeof(rv), "%s%c%s%c", dc2gms(buf_lat, cfg.gps_location.latitude, false), cfg.aprs_symbol.charAt(0),
+           dc2gms(buf_lng, cfg.gps_location.longitude, true), cfg.aprs_symbol.charAt(1));
+  return String(rv);
 }
 
 char *APRS_MSG::computeTrackInfo(char *rv) {
@@ -74,10 +85,34 @@ char *APRS_MSG::computeTrackInfo(char *rv) {
   return rv;
 }
 
+String APRS_MSG::computeTrackInfo() {
+  // ESP_LOGD(TAG, "speed: %l", cfg.gps_move.speed);
+  // ESP_LOGD(TAG, "course: %l", cfg.gps_move.course );
+  // ESP_LOGD(TAG, "altitude: %l",  cfg.gps_location.altitude);
+  char rv[32] = {0};
+  snprintf(rv, sizeof(rv) - 1, "%03.0f/%03.0f/A=%06.0f", cfg.gps_move.speed, cfg.gps_move.course,
+           cfg.gps_location.altitude);
+  return String(rv);
+}
+
 char *APRS_MSG::computeTimestamp(char *rv) {
   // day/hour/minute
-  snprintf(rv, sizeof(rv), "@%02d%02d%02dz", cfg.gps_time.day, cfg.gps_time.hour, cfg.gps_time.minute);
+  snprintf(rv, sizeof(rv), "%02d%02d%02dz", cfg.gps_time.day, cfg.gps_time.hour, cfg.gps_time.minute);
   return rv;
+}
+
+String APRS_MSG::computeTimestamp() {
+  char rv[16] = {0};
+  snprintf(rv, sizeof(rv) - 1, "%02d%02d%02dz", cfg.gps_time.day, cfg.gps_time.hour, cfg.gps_time.minute);
+  return String(rv);
+}
+
+String APRS_MSG::computeMSG(String to, String msg) {
+  ESP_LOGD(TAG, "timestamp: %s", computeTimestamp().c_str());
+  ESP_LOGD(TAG, "pos: %s", computeAPRSPos().c_str());
+  ESP_LOGD(TAG, "track: %s", computeTrackInfo().c_str());
+  return cfg.call + String("-") + cfg.aprs_call_ext + String(">APRS:@") + computeTimestamp() + computeAPRSPos() +
+         computeTrackInfo() + String(" ") + msg;
 }
 
 // char* APRS_MSG::getAPRSTxPos(char* retvar) {
@@ -135,13 +170,15 @@ char *APRS_MSG::dc2gms(char *rv, double gpsdata, boolean lng) {
   tmp = tmp * 60;
   uint8_t minute = tmp;
   tmp = tmp - minute;
-  uint8_t secunde = tmp * 60;
+  uint8_t second = tmp * 60;
+
   if (lng) {
     strncpy(fstr, "%03d%02d.%02d%c", sizeof(fstr) - 1);
   } else {
     strncpy(fstr, "%02d%02d.%02d%c", sizeof(fstr) - 1);
   }
-  snprintf(rv, sizeof(rv), // Flawfinder: ignore
-           fstr, grad, minute, secunde, ew);
+  snprintf(rv, 15, // Flawfinder: ignore // NOLINT
+           fstr, grad, minute, second, ew);
+
   return rv;
 }

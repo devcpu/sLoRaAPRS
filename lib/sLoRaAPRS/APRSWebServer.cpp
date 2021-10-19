@@ -4,7 +4,7 @@
  * File Created: 2021-09-26 22:05
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-17 18:11
+ * Last Modified: 2021-10-17 22:42
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2021 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -23,6 +23,7 @@
 #include <Preferences.h>
 #include <SPIFFSEditor.h>
 #include <GPSSensor.h>
+#include <LoRaHandler.h>
 
 // @TODO remove together with restart()
 
@@ -52,14 +53,6 @@ struct HTML_Error {
 };
 
 HTML_Error html_error;
-
-struct SendMsgForm {
-  String to = "";
-  String wide = "0";
-  String msg = "";
-  String path = "";
-  String gateway = "";
-};
 
 SendMsgForm send_msg_form_tmp;
 
@@ -802,9 +795,7 @@ void handleRequestSendMessage(AsyncWebServerRequest *request) {
   String to = getWebParam(request, MSG_FORM_TO);
   String wide = getWebParam(request, MSG_FORM_WIDE);
 
-  SendMsgForm sform;
-
-  if (msg.length() > 0 && msg.length() < 256 && to.length() > 4) {
+  if (msg.length() > 0 && msg.length() < 256 && to.length() > 3) {
     sform.msg = msg;
     sform.to = to;
   } else {
@@ -813,13 +804,6 @@ void handleRequestSendMessage(AsyncWebServerRequest *request) {
   if (wide.length() > 0) {
     sform.wide = wide;
   }
-
-  // @FIXME
-  //  if (xQueueSend(LoRaTXQueue, reinterpret_cast<SendMsgForm *>(&sform),
-  //                 (TickType_t)100) != pdPASS) {
-  //    ESP_LOGD(TAG, "ERROR: Can't put APRS msg to LoRaTXQueue\n to:%s msg:%s",
-  //                  sform.to.c_str(), sform.msg.c_str());
-  //  }
   cfg.TxMsg.to = to;
 }
 

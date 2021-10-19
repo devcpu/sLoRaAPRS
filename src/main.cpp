@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-17 22:15
+ * Last Modified: 2021-10-19 4:34
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -72,6 +72,7 @@ TrackerDisplay td;
 LoRaHandler lora_handler;
 TinyGPSPlus gps;
 Config cfg;
+SendMsgForm sform;
 
 // ==== Scheduler ==============================
 
@@ -83,6 +84,23 @@ Task GPSReader(0, TASK_FOREVER, &GPSReadIdleHookCB, &ts, true);
 Task WebSocketTick(333, TASK_FOREVER, &websocket_tickCB, &ts, true);
 Task ButtonTick(100, TASK_FOREVER, &onebutton_tickCB, &ts, true);
 Task LoRaTick(1000, TASK_FOREVER, &lorahandler_tickCB, &ts, true);
+Task SendMSG(1050, TASK_FOREVER, &lora_send_tickCB, &ts, true);
+
+void tasks_disable_all(void) {
+  ESP_LOGD(TAG, "disable all tasks");
+  // delay(3000);
+  ts.disableAll();
+  // delay(3000);
+  ESP_LOGD(TAG, "all tasks disabled");
+}
+
+void tasks_enable_all(void) {
+  ESP_LOGD(TAG, "enabel all tasks");
+  // delay(3000);
+  ts.enableAll();
+  // delay(3000);
+  ESP_LOGD(TAG, "all tasks enabled");
+}
 
 // TTGO has HW serial to GPS // 1 = first free UART
 HardwareSerial ss(1);

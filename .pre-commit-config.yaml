@@ -44,7 +44,7 @@ repos:
   - id: compile
     name: test compile
     description: check if sources can compiled
-    entry: platformio run --environment esp32-v2z
+    entry: platformio run --environment release
     pass_filenames: false
     language: system
 #  - id: TODO

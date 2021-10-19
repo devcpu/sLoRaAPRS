@@ -4,7 +4,7 @@
  * File Created: 2021-03-07 20:08
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-17 22:15
+ * Last Modified: 2021-10-19 0:03
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -15,6 +15,6 @@
 #define SRC_MAIN_H_
 
 #include <Arduino.h>
-
+#include <APRSMessage.h>
 // static void watchdog(void);
 #endif // SRC_MAIN_H_

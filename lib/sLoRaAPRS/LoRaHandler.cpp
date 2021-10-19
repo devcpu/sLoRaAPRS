@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-17 18:39
+ * Last Modified: 2021-10-19 4:17
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -14,6 +14,7 @@
 #include <LoRaHandler.h>
 #include <TrackerDisplay.h>
 #include <LoRaAPRSConfig.h>
+#include <APRS_MSG.h>
 
 bool LoRaHandler::begin() {
   LoRa.setPins(LoRaCsPin, LoRaResetPin, LoRaIRQPin);
@@ -57,9 +58,10 @@ void LoRaHandler::setReciveMode() {
   td.writeUTC();
 }
 
-void LoRaHandler::sendMessage(char *outgoing, boolean toDigi) {
+void LoRaHandler::sendMessage(const char *outgoing, boolean toDigi) {
+  tasks_disable_all();
   char txmsgbuf[16] = {0};
-  Serial.printf("sendMessage '%s'\n", outgoing);
+  ESP_LOGD(TAG, "sendMessage '%s'\n", outgoing);
   // 850 ms init plus header 35 / char both with spare
   msg_wait = strlen(outgoing) * 35 + millis() + 850; // time for ~ one char to send
   isSend = true;
@@ -71,9 +73,11 @@ void LoRaHandler::sendMessage(char *outgoing, boolean toDigi) {
   } else {
     LoRa.setFrequency(LoRaRXFREQ);
     LoRa.enableInvertIQ();
+    // LoRa.disableInvertIQ(); // ???
     strncpy(txmsgbuf, " 2tracker", sizeof(txmsgbuf) - 1);
   }
   td.writeTX(txmsgbuf);
+  ESP_LOGD(TAG, "target-system %s", txmsgbuf);
 
   char destination = 0x3C;  // '<' it seems that we have to use it, but really?
   char localAddress = 0xFF; // in LoRa it stands for broadcat
@@ -99,7 +103,8 @@ void LoRaHandler::sendMessage(char *outgoing, boolean toDigi) {
   // syncron blocking!
   msgCount++;
   // increment message ID
-  // LoRa.receive();
+  lora_handler.setReciveMode();
+  tasks_enable_all();
 }
 
 void onReceive(int packetSize) {
@@ -162,3 +167,18 @@ void lorahandler_tickCB(void) { lora_handler.tick(); }
 // Serial.println("Message length: " + String(incomingLength));
 // Serial.println("Message: " + incoming);
 // Serial.println("RSSI: " + String(LoRa.packetRssi()));
+
+void lora_send_tickCB(void) {
+  if (sform.msg.length() > 0) {
+    ESP_LOGD(TAG, "%s", sform.msg.c_str());
+
+    APRS_MSG amsg;
+
+    lora_handler.sendMessage(amsg.computeMSG(sform.to, sform.msg).c_str(), false);
+
+    sform.msg = "";
+    sform.gateway = "", sform.path = "";
+    sform.to = "";
+    sform.wide = "";
+  }
+}

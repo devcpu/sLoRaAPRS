@@ -4,7 +4,7 @@
  * File Created: 2020-11-11 20:13
  * Author: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de)
  * -----
- * Last Modified: 2021-10-17 18:07
+ * Last Modified: 2021-10-19 3:34
  * Modified By: (DL7UXA) Johannes G.  Arlt (dl7uxa@arltus.de>)
  * -----
  * Copyright © 2019 - 2021 (DL7UXA) Johannes G.  Arlt
@@ -20,8 +20,16 @@
 #define WX_DEVICE_STR_LENGHT 12
 #define CALL_LENGHT 12 // @TODO needs check if it is in APRS OK
 
+/*
+ APRS Message Format
+ Message:
+ [sender-call]>[dest-call or software],[WIDE],
+*/
+
 class APRS_MSG {
  public:
+  // symboltabellenzeichen steht zwischen lat und lng
+  // symbol steht nach dem
   // enum aprs_symbol_table_e { primary = '/', alternate = '\\' };
 
   static char *computeAPRSPos(char *aprs_buf);
@@ -101,10 +109,14 @@ class APRS_MSG {
   static double_t feed2meter(double_t feed);
   static double_t meter2feed(double_t meter);
 
- private:
-  void computeWXField(void);
+  String computeTimestamp();
+  String computeTrackInfo();
+  String computeAPRSPos();
+  String computeMSG(String to, String msg);
 
-  void computeTrackInfo(void);
+ private:
+  // void computeWXField(void);
+  // void computeTrackInfo(void);
 };
 
 #endif // LIB_SLORAAPRS_APRS_MSG_H_
